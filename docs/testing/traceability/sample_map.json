@@ -1,0 +1,28 @@
+{
+  "domain": "frontend",
+  "entries": [
+    {
+      "tc_id": "TC-FRONTEND-001-001",
+      "title": "FilterBar ボタン押下で applyFilter が呼び出されること",
+      "description": "FilterBar コンポーネントにおいて、別のフィルタをクリックすると applyFilter がトリガされることを検証するユニットテスト",
+      "automation": {
+        "command": "npm run test:unit",
+        "last_run": null
+      },
+      "traces_to": [
+        "FR-FRONTEND-004",
+        "UC-FRONTEND-001"
+      ],
+      "code_refs": [
+        "tests/frontend/unit/dashboard/filter-bar.test.tsx:1"
+      ],
+      "steps": [
+        "初期状態で active が 'today' になっているフィルタを用意",
+        "'This Week' ボタンをクリック",
+        "applyFilter が 'week' を引数に呼び出されることを検証"
+      ],
+      "expected_result": "applyFilter に 'week' が渡され、不要な API 呼出が発生しない",
+      "notes": "docdd-starters/tests/frontend/unit/dashboard/filter-bar.test.tsx を参照"
+    }
+  ]
+}

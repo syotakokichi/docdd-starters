@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./apps/backend
+    ports:
+      - "8000:8000"
+    environment:
+      APP_NAME: DocDD Starter API
+      ENVIRONMENT: local
+      DATABASE_URL: sqlite+aiosqlite:///./app.db
+    volumes:
+      - ./apps/backend/app:/workspace/app:ro
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

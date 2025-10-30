@@ -1,0 +1,53 @@
+openapi: 3.1.0
+info:
+  title: TODO API
+  version: 0.1.0
+  description: >
+    TODO: API の概要説明。
+  x-metadata:
+    api_id: API-XXX-001            # TODO: 7-axis 用 ID
+    domain: TODO
+    status: draft
+    traces_to: []                  # 例: [TC-XXX-001-001, EXT-SYSTEM-001]
+    traces_from: []                # 例: [FR-XXX-001]
+servers:
+  - url: https://api.example.com
+    description: TODO: 本番環境
+paths:
+  /todo:
+    get:
+      summary: TODO エンドポイント
+      description: TODO: エンドポイントの説明
+      tags:
+        - todo
+      parameters:
+        - in: query
+          name: sample
+          required: false
+          schema:
+            type: string
+          description: TODO: パラメータ説明
+      responses:
+        "200":
+          description: 正常レスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        "400":
+          description: バリデーションエラー
+        "500":
+          description: サーバエラー
+components:
+  schemas:
+    Todo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          enum: [pending, done]

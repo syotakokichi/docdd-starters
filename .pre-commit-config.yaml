@@ -1,0 +1,32 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        language_version: python3
+        files: ^docdd-starters/apps/backend/app/
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        files: ^docdd-starters/apps/backend/app/
+        args: ["--fix"]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-json
+      - id: check-yaml
+  - repo: local
+    hooks:
+      - id: biome-frontend-starter
+        name: Biome (frontend starter)
+        entry: bash -c 'cd docdd-starters/apps/frontend && npx biome lint app src'
+        language: system
+        pass_filenames: false
+      - id: private-folder-structure
+        name: Private Folder Structure Check
+        entry: bash -c 'cd docdd-starters/apps/frontend && node scripts/check-private-folders.mjs'
+        language: system
+        pass_filenames: false

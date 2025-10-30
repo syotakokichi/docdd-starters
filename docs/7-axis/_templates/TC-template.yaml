@@ -1,0 +1,58 @@
+test_case_id: TC-XXX-001-001
+title: TODO: テストケース名  # 例: "FilterBar ボタン押下で applyFilter が呼び出されること"
+domain: TODO
+type: unit                 # unit|integration|e2e|monitoring|other
+status: draft
+priority: high             # critical|high|medium|low
+category:
+  function: TODO           # 例: charge_creation
+  perspective: TODO        # 例: business_logic
+  scenario: normal         # normal|abnormal|boundary|security|performance
+owners:
+  - TODO
+related_requirements:
+  traces_to:
+    - FR-XXX-001
+    - NFR-XXX-001
+  traces_from: []
+  ext_dependencies:
+    - EXT-SYSTEM-001
+  api_targets:
+    - GET /api/v1/example
+preconditions:
+  - TODO: 事前条件
+test_data:
+  fixtures:
+    - name: TODO: フィクスチャ名
+      description: TODO
+  mocks:
+    - target: TODO
+      behavior: TODO
+steps:
+  - order: 1
+    action: TODO: テスト手順
+    expected: TODO: 期待結果
+    validation:
+      - TODO: 検証観点（期待する検証を明記）
+  - order: 2
+    action: TODO
+    expected: TODO
+postconditions:
+  - TODO: 後処理
+evidence:
+  - type: log
+    description: TODO
+automation:
+  level: manual            # manual|semi_automated|automated
+  framework: TODO (pytest / playwright / locust 等)
+  command: "TODO: 実行コマンド"
+  job: TODO: CI ジョブ名
+  schedule: TODO: cron 式など
+result_tracking:
+  last_run: null
+  status: not_run          # not_run|passed|failed|skipped
+  artifacts:
+    - type: report
+      path: TODO: レポートリンク
+notes:
+  - TODO
