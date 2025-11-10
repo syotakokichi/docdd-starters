@@ -1,92 +1,56 @@
-# Google Sheetsテスト同期
+# Google Sheets テスト同期
 
-## 🚀 自動実行コマンド（推奨）
+DocDD Starters では `scripts/test/auto_sync_test_sheets.sh` が環境チェック → 依存解決 → `enhanced_sheets_sync.py` 実行までを自動化します。{PROJECT} でテストを書いたら以下の手順で Google Sheets を更新してください。
 
+## 🚀 推奨コマンド
 ```bash
-# プロジェクトルートから実行
 scripts/test/auto_sync_test_sheets.sh
 ```
+- `TEST_SHEETS_SECRET_ARN` に AWS Secrets Manager の ARN を設定（`<<set-your-secret-arn>>` を置き換え）
+- Secret に `credentials`（サービスアカウント JSON）と `spreadsheet_id` を格納するか、`TEST_SPREADSHEET_ID` で外だし
+- `PROJECT_NAME` を指定するとログ/ダッシュボードに {PROJECT} 名が出力されます
 
-このコマンドは以下を自動で実行します：
-- 環境チェック
-- 依存関係の自動解決
-- 認証情報の検証
-- Google Sheets同期の実行
-- 結果の表示
-
-## 🔧 セットアップオプション
-
+## 🔧 オプション
 ```bash
-# 初回実行時または依存関係に問題がある場合
-scripts/test/auto_sync_test_sheets.sh --force-install
-
-# セットアップのみ実行（同期は行わない）
-scripts/test/auto_sync_test_sheets.sh --setup-only
-
-# 環境チェックのみ実行
-scripts/test/auto_sync_test_sheets.sh --check-only
-
-# ドライランモード（実際の同期は行わない）
-scripts/test/auto_sync_test_sheets.sh --dry-run
-
-# 詳細ログ出力
-scripts/test/auto_sync_test_sheets.sh --verbose
+scripts/test/auto_sync_test_sheets.sh --force-install   # 依存を再インストール
+scripts/test/auto_sync_test_sheets.sh --setup-only      # セットアップだけ実行
+scripts/test/auto_sync_test_sheets.sh --check-only      # 環境チェックのみ
+scripts/test/auto_sync_test_sheets.sh --dry-run         # Sheets を更新せず差分確認
+scripts/test/auto_sync_test_sheets.sh --verbose         # 詳細ログ
+scripts/test/auto_sync_test_sheets.sh --secret-arn arn:aws:...     # 環境変数を上書き
+scripts/test/auto_sync_test_sheets.sh --spreadsheet-id 1Abc...     # Secret にない場合に指定
 ```
 
-## 🔄 従来のコマンド（手動）
-
+## 🧰 手動コマンド
 ```bash
-# 手動実行する場合（非推奨）
-apps/backend/venv/bin/python3 scripts/test/enhanced_sheets_sync.py --secret-arn="clubpay-stg-test-sheets"
+apps/backend/venv/bin/python3 scripts/test/enhanced_sheets_sync.py \
+  --secret-arn "$TEST_SHEETS_SECRET_ARN" \
+  --spreadsheet-id "$TEST_SPREADSHEET_ID" \
+  --dry-run
 ```
+> Secret ではなくローカル JSON を使う場合は `--credentials /path/to/credentials.json --spreadsheet-id <id>` を指定してください。
+>
+> `.env.example` から `.env` を作成して値をセットしておくと、`scripts/test/auto_sync_test_sheets.sh` が自動読み込みします。
 
 ## 📋 前提条件
+- Python 3.8+ / AWS CLI / Google Sheets API 有効化済み
+- `scripts/test/requirements.txt` をインストール（google-api-python-client, google-auth, gspread, boto3, PyYAML, pandas）
+- 7-axis TS (`docs/7-axis/7_TC/TS-SAMPLE-001.md`) とマップ (`docs/testing/traceability/<domain>_map.json`) が最新
+- `python scripts/test/validate_traceability_map.py --map ...` が成功していること
 
-自動実行コマンドが以下を自動でチェック・セットアップします：
-- Python 3.8以上
-- AWS認証情報（`aws sts get-caller-identity`で確認）
-- 必要な依存関係（google-api-python-client, google-auth, boto3等）
-- Google Sheets API認証情報（AWS Secret Manager経由）
+## ⚠️ 注意ポイント
+- Secrets Manager / Spreadsheet ID はテンプレート値のままだと失敗します。README と `docs/testing/test-sheets-integration-guide.md` を参照し、自分のプロジェクト用に登録してください。
+- Dry run で確認 → 本番同期の順序を徹底し、Google Sheets 側でもタブ追加やダッシュボード更新を確認します。
 
-## 🎯 実行結果
-
-- 935件のテストケースをGoogle Sheetsに同期
-- カテゴリ別シート（認証システム、決済システム、ポイント管理、店舗管理、サポーター管理、管理機能、インフラ・共通）
-- 📊 テスト管理ダッシュボード
-- リアルタイム進捗追跡とビジュアルチャート
-
-## 🔍 確認方法
-
-実行後に表示されるGoogle SheetsのURLを開いて同期結果を確認してください。
-
-## 🛠️ トラブルシューティング
-
-### 依存関係のエラー
-```bash
-scripts/test/auto_sync_test_sheets.sh --force-install
-```
-
-### AWS認証エラー
-```bash
-aws configure
-# または
-aws sts get-caller-identity
-```
-
-### Google Sheets接続エラー
-```bash
-# 環境チェックで詳細な診断
-scripts/test/auto_sync_test_sheets.sh --check-only
-```
-
-### 詳細な診断
-```bash
-# 詳細ログで実行
-scripts/test/auto_sync_test_sheets.sh --verbose
-```
+## 🔍 トラブルシューティング
+| 症状 | 解決策 |
+| --- | --- |
+| `Secret ARN がプレースホルダ` | `export TEST_SHEETS_SECRET_ARN=...` または `--secret-arn` で指定 |
+| `googleapiclient import error` | `pip install -r scripts/test/requirements.txt` |
+| `403: The caller does not have permission` | サービスアカウントを対象シートに共有 |
+| `Spreadsheet ID not found` | Secret に `spreadsheet_id` を追加 or `--spreadsheet-id` を付与 |
 
 ## 📖 関連ドキュメント
-
-- [テスト管理システム統合ガイド](../../docs/test-sheets-integration-guide.md)
-- [セットアップスクリプト](../test/setup_test_environment.py)
-- [設定ファイル](../test/config/test_environment.json)
+- `docs/testing/test-sheets-integration-guide.md`
+- `docs/7-axis/README.md`
+- `docs/testing/README.md`

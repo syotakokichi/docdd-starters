@@ -16,3 +16,4 @@ tests/
 - `frontend` は Vitest / Playwright など任意のツールで差し替え可能な README を配置しています。
 - CI では `pytest tests/backend` や `pnpm test:unit` などコマンドを揃え、TC `automation.command` と一致させてください。
 - 詳細なバックエンドのテストガイドは `docdd-starters/docs/backend/TESTING_GUIDE.md` を参照してください。
+- DocDD トレースのサンプル: `tests/backend/unit/test_balance_projection.py` と `tests/frontend/unit/sample/balance-status.test.ts` が `TS-SAMPLE-001` に対応する自動テストの雛形です。

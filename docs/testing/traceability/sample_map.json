@@ -1,28 +1,139 @@
 {
-  "domain": "frontend",
-  "entries": [
-    {
-      "tc_id": "TC-FRONTEND-001-001",
-      "title": "FilterBar ボタン押下で applyFilter が呼び出されること",
-      "description": "FilterBar コンポーネントにおいて、別のフィルタをクリックすると applyFilter がトリガされることを検証するユニットテスト",
-      "automation": {
-        "command": "npm run test:unit",
-        "last_run": null
-      },
-      "traces_to": [
-        "FR-FRONTEND-004",
-        "UC-FRONTEND-001"
+  "domain": "sample",
+  "description": "DocDD Starters 用のトレーサビリティマップ雛形。ClubPay で利用している mappings + document_references 構造をトレースできるようにしています。",
+  "phase": "template",
+  "issue": "{ISSUE}",
+  "created": "2024-01-20",
+  "updated": "2024-01-20",
+  "mappings": {
+    "TC-SAMPLE-001-001": {
+      "br": [
+        "BR-SAMPLE-001"
       ],
-      "code_refs": [
-        "tests/frontend/unit/dashboard/filter-bar.test.tsx:1"
+      "uc": [
+        "UC-SAMPLE-001"
       ],
-      "steps": [
-        "初期状態で active が 'today' になっているフィルタを用意",
-        "'This Week' ボタンをクリック",
-        "applyFilter が 'week' を引数に呼び出されることを検証"
+      "dm": [
+        "DM-SAMPLE-001"
       ],
-      "expected_result": "applyFilter に 'week' が渡され、不要な API 呼出が発生しない",
-      "notes": "docdd-starters/tests/frontend/unit/dashboard/filter-bar.test.tsx を参照"
+      "sr": [
+        "FR-SAMPLE-001"
+      ],
+      "nsr": [
+        "NFR-SAMPLE-001"
+      ],
+      "ext": [
+        "EXT-SAMPLE-001"
+      ],
+      "api": [
+        "POST /api/sample/transactions",
+        "GET /api/sample/supporters/{supporterId}/balance"
+      ],
+      "pytest_id": "test_sample_balance_instant_update",
+      "description": "決済完了直後に projected balance を表示し、最終残高で上書きする"
+    },
+    "TC-SAMPLE-001-002": {
+      "br": [
+        "BR-SAMPLE-001"
+      ],
+      "uc": [
+        "UC-SAMPLE-001"
+      ],
+      "dm": [
+        "DM-SAMPLE-001"
+      ],
+      "sr": [
+        "FR-SAMPLE-001"
+      ],
+      "nsr": [
+        "NFR-SAMPLE-001"
+      ],
+      "ext": [
+        "EXT-SAMPLE-001"
+      ],
+      "api": [
+        "GET /api/sample/supporters/{supporterId}/balance"
+      ],
+      "pytest_id": "test_sample_balance_fallback_banner",
+      "description": "同期遅延時に Pending バナーを表示し、監視メトリクスを更新する"
     }
-  ]
+  },
+  "document_references": {
+    "BR-SAMPLE-001": {
+      "path": "docs/7-axis/1_BR/BR-SAMPLE-001.md",
+      "title": "リアルタイム残高可視化による信頼性向上",
+      "traces_to": [
+        "UC-SAMPLE-001"
+      ]
+    },
+    "UC-SAMPLE-001": {
+      "path": "docs/7-axis/2_UC/UC-SAMPLE-001.md",
+      "title": "ユーザーが残高変化を即時確認する",
+      "traces_from": [
+        "BR-SAMPLE-001"
+      ],
+      "traces_to": [
+        "DM-SAMPLE-001",
+        "FR-SAMPLE-001",
+        "NFR-SAMPLE-001"
+      ]
+    },
+    "DM-SAMPLE-001": {
+      "path": "docs/7-axis/3_DM/DM-SAMPLE-001.md",
+      "title": "SampleTransactionProjection",
+      "traces_from": [
+        "UC-SAMPLE-001"
+      ],
+      "traces_to": [
+        "FR-SAMPLE-001"
+      ]
+    },
+    "FR-SAMPLE-001": {
+      "path": "docs/7-axis/4_SR/FR-SAMPLE-001.md",
+      "title": "即時残高更新 API",
+      "traces_from": [
+        "UC-SAMPLE-001",
+        "DM-SAMPLE-001"
+      ],
+      "traces_to": [
+        "TS-SAMPLE-001"
+      ]
+    },
+    "NFR-SAMPLE-001": {
+      "path": "docs/7-axis/4_NSR/NFR-SAMPLE-001.md",
+      "title": "トランザクション同期の耐久性",
+      "traces_from": [
+        "UC-SAMPLE-001"
+      ],
+      "traces_to": [
+        "TS-SAMPLE-001"
+      ]
+    },
+    "EXT-SAMPLE-001": {
+      "path": "docs/7-axis/5_EXT/EXT-SAMPLE-001.md",
+      "title": "決済ゲートウェイ Webhook",
+      "traces_from": [
+        "FR-SAMPLE-001"
+      ],
+      "traces_to": [
+        "TS-SAMPLE-001"
+      ]
+    },
+    "TS-SAMPLE-001": {
+      "path": "docs/7-axis/7_TC/TS-SAMPLE-001.md",
+      "title": "リアルタイム残高同期テスト設計",
+      "traces_from": [
+        "BR-SAMPLE-001",
+        "UC-SAMPLE-001",
+        "DM-SAMPLE-001",
+        "FR-SAMPLE-001",
+        "NFR-SAMPLE-001",
+        "EXT-SAMPLE-001"
+      ],
+      "test_cases": [
+        "TC-SAMPLE-001-001",
+        "TC-SAMPLE-001-002"
+      ]
+    }
+  }
 }

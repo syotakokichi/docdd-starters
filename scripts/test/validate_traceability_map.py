@@ -231,12 +231,12 @@ class TraceabilityValidator:
 
         # 軸ごとのディレクトリマッピング
         axis_to_path = {
-            "br": "7-axis/1_BR",
-            "uc": "7-axis/2_UC",
-            "dm": "7-axis/3_DM",
-            "sr": "7-axis/4_SR",
-            "nsr": "7-axis/4_NSR",
-            "ext": "7-axis/5_EXT",
+            "br": "docs/7-axis/1_BR",
+            "uc": "docs/7-axis/2_UC",
+            "dm": "docs/7-axis/3_DM",
+            "sr": "docs/7-axis/4_SR",
+            "nsr": "docs/7-axis/4_NSR",
+            "ext": "docs/7-axis/5_EXT",
         }
 
         if axis not in axis_to_path:
@@ -290,7 +290,7 @@ class TraceabilityValidator:
             domain = parts[1]  # MON, AUTH, PAY, etc.
 
             # ドメインごとのディレクトリマッピング（英語名）
-            # 7-axis 構造: 7-axis/4_SR/{domain}/FR-XXX-YYY.md
+            # 7-axis 構造: docs/7-axis/4_SR/{domain}/FR-XXX-YYY.md
             domain_dirs = {
                 "MON": "monitoring",
                 "AUTH": "auth",
@@ -354,6 +354,13 @@ class TraceabilityValidator:
                     for ext in [".md", ".yaml", ".yml"]:
                         if (base_path / f"{ext_id}{ext}").exists():
                             return True
+
+        # フォールバック: rglob で再帰検索（テンプレート用のサンプルID対応）
+        file_patterns = [f"{ext_id}.md", f"{ext_id}.yaml", f"{ext_id}.yml"]
+        for pattern in file_patterns:
+            matches = list(base_path.rglob(pattern))
+            if matches:
+                return True
 
         return False
 

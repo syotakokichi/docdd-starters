@@ -1,0 +1,44 @@
+{
+  "dependencies": {
+    "python_packages": [
+      "google-api-python-client>=2.147.0",
+      "google-auth>=2.40.0",
+      "gspread>=6.2.0",
+      "boto3>=1.35.0",
+      "pandas>=2.0.0",
+      "pytest>=7.4.0",
+      "pytest-cov>=4.1.0",
+      "PyYAML>=6.0.0"
+    ]
+  },
+  "authentication": {
+    "aws_secret_arn": "<<set-your-secret-arn>>",
+    "spreadsheet_id": "<<set-your-spreadsheet-id>>",
+    "fallback_env_vars": [
+      "GOOGLE_SHEETS_CREDENTIALS_PATH",
+      "TEST_SPREADSHEET_ID"
+    ]
+  },
+  "python_version": "3.8",
+  "virtual_environment": {
+    "path": "apps/backend/venv",
+    "auto_create": true
+  },
+  "sync_settings": {
+    "test_directory": "apps/backend/app/tests",
+    "default_secret_arn": "<<set-your-secret-arn>>",
+    "domains": [
+      "auth",
+      "payment",
+      "ux",
+      "monitoring"
+    ],
+    "retry_count": 3,
+    "timeout_seconds": 300
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "logs/test_sync.log"
+  }
+}
