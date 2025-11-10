@@ -29,3 +29,10 @@ expected_result: applyFilter が "week" を引数に呼ばれる
 - `docdd-starters/scripts/test/validate_traceability_map.py` を実行して整合性を確認
 
 詳細はテンプレートやサンプル (`docs/testing/traceability/sample_map.json`) を参照してください。
+
+## DocDD + Sheets フロー（テンプレ）
+1. `TS-SAMPLE-001.md` をコピーして {PROJECT} 用の TS を作成
+2. `docs/testing/traceability/<domain>_map.json` に `mappings` / `document_references` を更新
+3. `python scripts/test/validate_traceability_map.py --map docs/testing/traceability/<domain>_map.json`
+4. `scripts/test/auto_sync_test_sheets.sh --dry-run` で差分を確認
+5. `scripts/test/auto_sync_test_sheets.sh` を実行して Google Sheets に反映（Secret ARN と Spreadsheet ID は README を参照）

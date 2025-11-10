@@ -1,0 +1,13 @@
+# Google Sheets 連携に必要なパッケージ
+google-api-python-client>=2.147.0
+google-auth>=2.40.0
+gspread>=6.2.0
+pandas>=2.0.0
+PyYAML>=6.0.0
+
+# AWS Secrets Manager 連携
+boto3>=1.35.0
+
+# テスト関連
+pytest>=7.4.0
+pytest-cov>=4.1.0
