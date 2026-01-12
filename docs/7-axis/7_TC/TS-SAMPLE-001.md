@@ -52,4 +52,4 @@ DocDD Starters のサンプル TS です。残高が即時に同期されるシ�
 
 ## 期待する出力
 - pytest 実装時は `pytest_id` をマップに追加
-- Google Sheets 連携時は `scripts/test/auto_sync_test_sheets.sh --dry-run` で差分を確認
+- `python scripts/test/validate_traceability_map.py --map docs/testing/traceability/sample_map.json` で整合性をチェック

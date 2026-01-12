@@ -3,7 +3,7 @@
 DocDD テストケース収集クラス
 
 TS-*.md と traceability map (*.json) からテストケース定義を抽出し、
-Google Sheets 同期処理で扱いやすいメタデータ形式に変換する。
+トレーサビリティ検証やテスト管理で扱いやすいメタデータ形式に変換する。
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ try:
 except ImportError as exc:
     raise ImportError(
         "PyYAML is required to parse DocDD frontmatter. "
-        "Install it via `pip install pyyaml` or run scripts/test/auto_sync_test_sheets.sh --force-install."
+        "Install it via `pip install pyyaml` or `pip install -r scripts/test/requirements.txt`."
     ) from exc
 
 

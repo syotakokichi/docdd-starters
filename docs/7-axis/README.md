@@ -28,11 +28,3 @@
 4. トレーサビリティマップと記載内容の整合性を常に保つ。
 
 正式な運用方法は、プロジェクト固有のガイドラインや運用規約を参照して調整してください。
-
-## Google Sheets 連携
-
-DocDD Starters には ClubPay で使っているテスト同期スクリプトが含まれています。TS/TC を更新したら以下を参考にしてください。
-
-1. `docs/testing/traceability/<domain>_map.json` を更新し、`python scripts/test/validate_traceability_map.py --map ...` を実行
-2. Secret・Spreadsheet ID を README / `docs/testing/test-sheets-integration-guide.md` に従って設定
-3. `scripts/test/auto_sync_test_sheets.sh --dry-run` → `scripts/test/auto_sync_test_sheets.sh`

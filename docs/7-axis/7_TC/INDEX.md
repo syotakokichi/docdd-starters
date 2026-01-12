@@ -10,6 +10,5 @@
 - 自動テストや監視ジョブが存在する場合は `automation.command` などに実行コマンドを残し、`traces_from` に結果参照を書き残す。
 
 ## サンプルと検証フロー
-- `TS-SAMPLE-001.md` と `docs/testing/traceability/sample_map.json` で ClubPay 版と同じ frontmatter / mappings 構造を確認できます。
+- `TS-SAMPLE-001.md` と `docs/testing/traceability/sample_map.json` で frontmatter / mappings 構造を確認できます。
 - TS を追加したら該当ドメインのトレーサビリティマップ（`docs/testing/traceability/<domain>_map.json`）に TC を追記し、`python scripts/test/validate_traceability_map.py --map <path>` で整合性をチェックします。
-- Google Sheets との同期は `scripts/test/auto_sync_test_sheets.sh --dry-run` → `scripts/test/auto_sync_test_sheets.sh` の順に実行してください（Secret ARN と Spreadsheet ID は README の手順に従って設定）。

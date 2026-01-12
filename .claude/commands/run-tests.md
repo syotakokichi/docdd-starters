@@ -31,23 +31,7 @@ npx vitest run ../../tests/frontend/unit/sample/balance-status.test.ts --runInBa
 ```bash
 # pytest 側のテストメタデータ
 python scripts/test/collect_test_metadata.py --output-dir scripts/test/output
-
-# DocDD (TS) 側のメタデータ（auto_sync 内部からも実行されます）
-python scripts/test/enhanced_sheets_sync.py --dry-run --secret-arn $TEST_SHEETS_SECRET_ARN
 ```
-
-## Google Sheets 連携
-```bash
-export TEST_SHEETS_SECRET_ARN="arn:aws:secretsmanager:ap-northeast-1:123456789012:secret/your-secret"
-export TEST_SPREADSHEET_ID="your-spreadsheet-id"  # Secret に含めるなら省略可
-
-# Dry run
-scripts/test/auto_sync_test_sheets.sh --dry-run --verbose
-
-# 本番同期
-scripts/test/auto_sync_test_sheets.sh
-```
-> 依存インストールはスクリプト内で自動チェックされます。詳細は `docs/testing/test-sheets-integration-guide.md` を参照。
 
 ## 環境セットアップ
 ```bash
@@ -71,8 +55,6 @@ PYTHONPATH=apps/backend pytest tests/backend -n auto
 ```
 
 ## トラブルシューティング
-- `ImportError: googleapiclient` → `pip install -r scripts/test/requirements.txt`
-- `SecretNotFoundException` → `TEST_SHEETS_SECRET_ARN` の値とリージョンを確認
 - `pytest: No module named 'apps'` → `PYTHONPATH=apps/backend` を付与
 - `npm run check:segments` 失敗 → `apps/frontend/README.md` の Private Folder ガイドに従って修正
 

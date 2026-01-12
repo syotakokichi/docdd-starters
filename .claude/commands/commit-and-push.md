@@ -3,8 +3,8 @@ Please commit changes and push to the remote repository.
 Follow these steps:
 
 1. **Check working directory**
-   - First change to project root: `cd /Users/yamanakashouta/Desktop/creation/clubpay`
-   - Run `pwd` to confirm current directory
+   - Confirm you are in the project root: `pwd`
+   - If not, change to project root: `cd $(git rev-parse --show-toplevel)`
 
 2. **Review changes**
    - Run `git status` to check current changes
