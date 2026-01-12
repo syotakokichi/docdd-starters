@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="password"], input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .btn-primary {
+      background-color: #4285f4;
+      color: white;
+    }
+    .btn-secondary {
+      background-color: #ccc;
+      color: #333;
+    }
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-top: 3px;
+    }
+    .buttons {
+      margin-top: 20px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <form id="configForm">
+    <div class="form-group">
+      <label for="token">GitHub Token</label>
+      <input type="password" id="token" name="GITHUB_TOKEN" placeholder="ghp_xxxxx">
+      <div class="help-text">repo スコープが必要です</div>
+    </div>
+
+    <div class="form-group">
+      <label for="owner">リポジトリオーナー</label>
+      <input type="text" id="owner" name="REPO_OWNER" placeholder="your-org">
+    </div>
+
+    <div class="form-group">
+      <label for="repo">リポジトリ名</label>
+      <input type="text" id="repo" name="REPO_NAME" placeholder="your-repo">
+    </div>
+
+    <div class="form-group">
+      <label for="sheet">シート名</label>
+      <input type="text" id="sheet" name="SHEET_NAME" placeholder="タスク一覧">
+    </div>
+
+    <div class="form-group">
+      <label for="headerRow">ヘッダー行</label>
+      <input type="number" id="headerRow" name="HEADER_ROW" placeholder="1" min="1">
+    </div>
+
+    <div class="form-group">
+      <label for="dataRow">データ開始行</label>
+      <input type="number" id="dataRow" name="DATA_START_ROW" placeholder="2" min="1">
+    </div>
+
+    <div class="buttons">
+      <button type="button" class="btn btn-secondary" onclick="google.script.host.close()">キャンセル</button>
+      <button type="submit" class="btn btn-primary">保存</button>
+    </div>
+  </form>
+
+  <script>
+    // 現在の設定を読み込み
+    google.script.run
+      .withSuccessHandler(function(config) {
+        if (config.GITHUB_TOKEN) document.getElementById('token').value = config.GITHUB_TOKEN;
+        if (config.REPO_OWNER) document.getElementById('owner').value = config.REPO_OWNER;
+        if (config.REPO_NAME) document.getElementById('repo').value = config.REPO_NAME;
+        if (config.SHEET_NAME) document.getElementById('sheet').value = config.SHEET_NAME;
+        if (config.HEADER_ROW) document.getElementById('headerRow').value = config.HEADER_ROW;
+        if (config.DATA_START_ROW) document.getElementById('dataRow').value = config.DATA_START_ROW;
+      })
+      .getConfig();
+
+    // フォーム送信
+    document.getElementById('configForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      var config = {
+        GITHUB_TOKEN: document.getElementById('token').value,
+        REPO_OWNER: document.getElementById('owner').value,
+        REPO_NAME: document.getElementById('repo').value,
+        SHEET_NAME: document.getElementById('sheet').value,
+        HEADER_ROW: document.getElementById('headerRow').value,
+        DATA_START_ROW: document.getElementById('dataRow').value
+      };
+
+      google.script.run
+        .withSuccessHandler(function() {
+          alert('設定を保存しました');
+          google.script.host.close();
+        })
+        .withFailureHandler(function(error) {
+          alert('エラー: ' + error.message);
+        })
+        .setConfig(config);
+    });
+  </script>
+</body>
+</html>

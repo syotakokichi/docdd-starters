@@ -1,6 +1,6 @@
 {
   "domain": "sample",
-  "description": "DocDD Starters 用のトレーサビリティマップ雛形。ClubPay で利用している mappings + document_references 構造をトレースできるようにしています。",
+  "description": "DocDD Starters 用のトレーサビリティマップ雛形。mappings + document_references 構造でドキュメント間のトレースを管理します。",
   "phase": "template",
   "issue": "{ISSUE}",
   "created": "2024-01-20",

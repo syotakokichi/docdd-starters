@@ -6,7 +6,7 @@
 - `backend/`: FastAPI モジュラーモノリス構成の詳細
 - `frontend/`: Next.js スターターのガイド
 - `testing/`: テスト運用と Traceability 連携のベースライン
-- `.claude/commands`: clubpay のワークフローコマンド集をコピーしたもの（必要に応じて参照）
+- `.claude/commands/`: Claude Code カスタムコマンド（Issue駆動開発ワークフロー）
 - `scripts/test/validate_traceability_map.py`: Traceability 整合性検証スクリプト
 
 必要に応じて testing / infra などのサブディレクトリを追加し、スターター運用ノウハウを蓄積してください。

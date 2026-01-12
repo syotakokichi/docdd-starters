@@ -17,6 +17,9 @@ coverage/
 .env
 .env.*
 
+# GAS
+.clasp.json
+
 # OS
 .DS_Store
 Thumbs.db
