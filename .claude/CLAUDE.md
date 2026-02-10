@@ -41,9 +41,7 @@ docdd-starters/
 │   └── testing/           # テスト管理・トレーサビリティmap
 ├── scripts/
 │   ├── test/              # トレーサビリティ検証スクリプト
-│   ├── frontend/          # フロントエンド用スクリプト
-│   └── gas/
-│       └── progress-sync/ # Sheets↔GitHub同期GAS
+│   └── frontend/          # フロントエンド用スクリプト
 ├── .claude/
 │   ├── commands/          # カスタムスラッシュコマンド
 │   ├── skills/            # AI実行知識（ドメイン・パターン）
@@ -142,12 +140,5 @@ make traceability
 - `docs/7-axis/` にテンプレートとサンプルを格納
 - `docs/testing/traceability/` にマッピングファイルを配置
 
----
 
-## Progress Sync（Google Sheets × GitHub）
 
-計画表（Google Sheets）とGitHub Issuesの双方向同期機能。
-
-- **Sheets → GitHub**: タスク追加/編集時にIssue作成/更新
-- **GitHub → Sheets**: Issue/PRイベントでステータス更新
-- **設定**: `scripts/gas/progress-sync/README.md` を参照
