@@ -27,7 +27,12 @@ class ModuleLoader:
 
     allowed_modules: set[str]
 
-    def __init__(self, modules_path: str = "app.modules", *, allowed_modules: Iterable[str] | None = None) -> None:
+    def __init__(
+        self,
+        modules_path: str = "app.modules",
+        *,
+        allowed_modules: Iterable[str] | None = None,
+    ) -> None:
         self.modules_path = modules_path
         self.allowed_modules = set(allowed_modules or {"example"})
 

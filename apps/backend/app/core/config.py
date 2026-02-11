@@ -12,7 +12,9 @@ class AppSettings(BaseSettings):
 
     app_name: str = Field(default="DocDD Starter API", alias="APP_NAME")
     environment: str = Field(default="local", alias="ENVIRONMENT")
-    database_url: str = Field(default="sqlite+aiosqlite:///./app.db", alias="DATABASE_URL")
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///./app.db", alias="DATABASE_URL"
+    )
 
     class Config:
         env_file = ".env"

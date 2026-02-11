@@ -1,6 +1,6 @@
 # Frontmatter 仕様
 
-すべての 7-axis ドキュメントは先頭に YAML frontmatter を定義します。  
+すべての 7-axis ドキュメントは先頭に YAML frontmatter を定義します。
 以下は共通で推奨されるフィールドです。プロジェクトに合わせて追加・削除してください。
 
 ```yaml

@@ -1,6 +1,6 @@
 # フロントエンドスターター ガイド（準備中）
 
-Next.js をベースにしたスターター構成とベストプラクティスをここにまとめています。  
+Next.js をベースにしたスターター構成とベストプラクティスをここにまとめています。
 まずは Private Folder アーキテクチャの導入ガイドを確認し、Segment ごとの責務分離と akfm-knowledge の原則に沿って実装を進めてください。
 
 - [Private Folder 実装ガイド](PRIVATE_FOLDER_GUIDE.md)
