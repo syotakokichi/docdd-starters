@@ -37,7 +37,7 @@ graph LR
 ## Features
 
 - **7-axis Traceability** - Full traceability from requirements to test cases
-- **FastAPI + Modular Monolith** - Async-first Python backend with auto-generated docs and strong AI/data science library support
+- **FastAPI + Modular Monolith** - Async-first Python backend with auto-generated API docs and strong AI/data science library support
 - **Next.js App Router** - Server Components / Server Actions with shadcn/ui and Biome ecosystem
 - **Claude Code Integration** - Issue-driven development automated via slash commands (`/1`–`/7`)
 - **Marp Slide Generation** - Turn development outcomes and designs into presentations with `/slide`
