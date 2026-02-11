@@ -1,4 +1,5 @@
 """Utility helpers that mirror TS-SAMPLE-001 test steps."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -25,7 +26,9 @@ def compute_sync_status(
 
     is_stale = True
     if last_synced_at:
-        freshness_cutoff = datetime.now(timezone.utc) - timedelta(seconds=SYNC_STALENESS_SECONDS)
+        freshness_cutoff = datetime.now(timezone.utc) - timedelta(
+            seconds=SYNC_STALENESS_SECONDS
+        )
         is_stale = last_synced_at < freshness_cutoff
 
     banner = "残高同期を確認しています..." if is_stale else "取引を確定中..."
