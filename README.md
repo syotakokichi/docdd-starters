@@ -8,7 +8,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-000000.svg?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![Terraform](https://img.shields.io/badge/Terraform-7B42BC.svg?logo=terraform&logoColor=white)](https://www.terraform.io/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
-[![AWS](https://img.shields.io/badge/AWS-232F3E.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
+[![AWS](https://custom-icon-badges.demolab.com/badge/AWS-ff9900.svg?logo=aws&logoColor=white)](https://aws.amazon.com/)
 
 > **English version**: [README.en.md](README.en.md)
 
@@ -43,6 +43,13 @@ graph LR
 - **Marp スライド生成** - 開発成果や設計を `/slide` コマンドで即プレゼン資料化
 - **CI/CD** - GitHub Actions によるテスト・リント・デプロイ自動化
 - **Terraform** - AWS ECS Fargate によるインフラ構成管理
+
+## こんなプロジェクトに向いています
+
+- 個人や少人数チームで Web アプリ（SaaS・社内ツール等）を立ち上げたい
+- 小さく始めて、モジュラーモノリスの構造で中規模まで段階的にスケールしたい
+- 「なぜその実装にしたか」を後から辿れるようにしておきたい
+- Claude Code を活用した AI アシスト開発で効率化したい
 
 ## Quick Start
 
