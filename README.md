@@ -6,9 +6,11 @@ Doc Driven Development (DocDD) と 7-axis Traceability を軸に、バックエ�
 
 - **DocDD**: 要件→設計→実装→テストの一貫したドキュメント管理
 - **7-axis Traceability**: 要件からテストまで追跡可能（BR→UC→DM→SR/NSR→EXT→API→TC）
-- **Claude Code統合**: Issue駆動開発フロー（/1〜/6）をテンプレート化
-- **Progress Sync**: Google Sheets × GitHub Issues の双方向同期
-- **CI/CD**: GitHub Actions + GAS自動デプロイ
+- **Claude Code統合**: Issue駆動開発フロー（/1〜/7）+ エージェントチーム
+- **GitHub Projects**: タスク管理・ステータス自動更新
+- **Pencil.dev連携**: UI設計→実装のシームレスなワークフロー
+- **CI/CD**: GitHub Actions（CI + ステージング/本番デプロイ）
+- **Terraform**: AWS ECS Fargate によるインフラ構成管理
 
 ## ディレクトリ構成
 
@@ -24,17 +26,21 @@ docs/
 scripts/
   test/                 # トレーサビリティ検証スクリプト
   frontend/             # フロントエンド用スクリプト
-  gas/progress-sync/    # Sheets × GitHub 同期 (GAS)
+  deploy/               # デプロイスクリプト（Terraform / ECS）
+terraform/
+  environments/         # 環境別設定（stg / prod）
+  modules/              # 再利用可能なインフラモジュール
 tests/
   backend/              # バックエンドテスト
   frontend/             # フロントエンドテスト
 .claude/
-  commands/             # Issue駆動開発コマンド (/1〜/6, /a〜/c)
+  commands/             # Issue駆動開発コマンド (/1〜/7, /a〜/c)
   rules/                # 命名・コミットメッセージ規約
   skills/               # AI実行知識（パターン・ドメイン）
 .github/workflows/
-  docdd-starters-ci.yml # CI/CDワークフロー
-  deploy-gas.yml        # GAS自動デプロイ
+  docdd-starters-ci.yml # CIワークフロー
+  deploy-stg.yml        # ステージングデプロイ
+  deploy-prod.yml       # 本番デプロイ
 ```
 
 ## リンク
@@ -45,7 +51,7 @@ tests/
 - [7-axis テンプレ](docs/7-axis)
 - [Traceability サンプル](docs/testing/traceability/sample_map.json)
 - [Claude Code ガイド](.claude/CLAUDE.md)
-- [Progress Sync ガイド](scripts/gas/progress-sync/README.md)
+- [Terraform ガイド](terraform/README.md)
 - [CI ワークフロー例](.github/workflows/docdd-starters-ci.yml)
   - 詳細説明: [docs/ci.md](docs/ci.md)
 
@@ -72,10 +78,10 @@ make traceability
 make test-backend
 
 # フロントエンドのテスト
-cd apps/frontend
-npm run lint:biome
-npm run check:segments
-npm run test:unit
+make test-frontend
+
+# 全テスト
+make test
 ```
 
 ## Claude Code 開発フロー
@@ -85,23 +91,72 @@ Issue駆動開発のスラッシュコマンド:
 | コマンド | 説明 |
 |---------|------|
 | `/1` | Issue作成 |
-| `/2` | 実装計画を立案してIssue本文に追記 |
+| `/2` | 実装計画を立案してIssue本文に追記（エージェントチーム活用可） |
 | `/3` | ブランチ作成とIssue紐付け |
 | `/4` | 実装フェーズ開始（進行中ラベル設定） |
-| `/5` | Pull Request作成 |
-| `/6` | マージ後のクリーンアップ |
+| `/5` | 実装検証（品質ゲート） |
+| `/6` | Pull Request作成 |
+| `/7` | マージ後のクリーンアップ |
 | `/a`,`/b`,`/c` | Worktree並列開発 |
+
+### エージェントチーム
+
+複雑なタスクではエージェントチーム機能を活用:
+- `/2` 計画立案: 並列リサーチ・設計壁打ち
+- `/5` 実装検証: バックエンド/フロントエンド並列検証
+- 詳細は [.claude/rules/agent-teams.md](.claude/rules/agent-teams.md) を参照
 
 詳細は [.claude/CLAUDE.md](.claude/CLAUDE.md) を参照。
 
-## Progress Sync（Sheets × GitHub）
+## GitHub Projects 進捗管理
 
-Google Sheets の計画表と GitHub Issues を双方向同期:
+GitHub Projects でタスクのステータスを管理:
 
-- **Sheets → GitHub**: タスク追加/編集時にIssue作成/更新
-- **GitHub → Sheets**: Issue/PRイベントでステータス更新
+| コマンド | Projects Status |
+|---------|-----------------|
+| `/1` Issue作成 | → Backlog |
+| `/2` 計画立案 | → Ready |
+| `/3` ブランチ作成 | → In Progress |
+| `/7` マージ完了 | → Done |
 
-セットアップ手順は [scripts/gas/progress-sync/README.md](scripts/gas/progress-sync/README.md) を参照。
+詳細は [.claude/rules/project-workflow.md](.claude/rules/project-workflow.md) を参照。
+
+## インフラ管理（Terraform）
+
+AWS ECS Fargate をベースとしたインフラ構成:
+
+```
+Internet → CloudFront → ALB → ECS Fargate (Frontend / Backend) → RDS (PostgreSQL)
+```
+
+### 主要コマンド
+
+```bash
+# Terraform
+make tf-init                    # 初期化
+make tf-plan                    # プラン確認
+make tf-apply                   # 適用
+make tf-plan ENV=prod           # 本番環境のプラン
+
+# デプロイ
+make deploy-stg                 # ステージングへデプロイ
+make deploy-backend-prod        # 本番バックエンドデプロイ
+
+# ECS運用
+make ecs-status                 # サービス状態確認
+make ecs-logs-backend           # バックエンドログ閲覧
+make ecs-sh                     # コンテナにシェル接続
+```
+
+詳細は [terraform/README.md](terraform/README.md) を参照。
+
+## CI/CD
+
+| ワークフロー | トリガー | 内容 |
+|-------------|---------|------|
+| CI | PR / push to main | テスト・リント・品質チェック |
+| Deploy Staging | push to main | ステージング自動デプロイ |
+| Deploy Production | タグ作成 (v*) | 本番デプロイ（手動承認） |
 
 ## 技術選定
 
