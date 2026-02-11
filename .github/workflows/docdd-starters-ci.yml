@@ -19,7 +19,7 @@ jobs:
           python-version: '3.11'
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - name: Install frontend dependencies
         run: npm install
         working-directory: apps/frontend
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: apps/frontend/package.json
       - name: Install dependencies
@@ -56,9 +56,6 @@ jobs:
         working-directory: apps/frontend
       - name: Biome lint
         run: npm run lint:biome
-        working-directory: apps/frontend
-      - name: Next.js lint
-        run: npm run lint
         working-directory: apps/frontend
       - name: Private folder check
         run: npm run check:segments

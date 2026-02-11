@@ -4,7 +4,7 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = resolve(fileURLToPath(new URL(".", import.meta.url)));
-const root = resolve(scriptDir, "..", "app");
+const root = resolve(scriptDir, "..", "..", "apps", "frontend", "app");
 
 function isSegmentDirectory(name) {
   return name.startsWith("(") && name.endsWith(")");

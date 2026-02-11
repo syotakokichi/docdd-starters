@@ -1,16 +1,87 @@
-# DocDD Starter Kit
+![DocDD Starter Kit](https://capsule-render.vercel.app/api?type=waving&color=0:667eea,100:764ba2&height=200&text=DocDD%20Starter%20Kit&fontSize=40&fontColor=ffffff&fontAlignY=35&desc=Doc%20Driven%20Development%20%2B%207-axis%20Traceability&descSize=16&descAlignY=55)
 
-Doc Driven Development (DocDD) と 7-axis Traceability を軸に、バックエンド (FastAPI) とフロントエンド (Next.js) のモジュラーモノリス構成を素早く立ち上げるためのテンプレートを提供します。
+[![CI](https://github.com/syotakokichi/docdd-starters/actions/workflows/docdd-starters-ci.yml/badge.svg)](https://github.com/syotakokichi/docdd-starters/actions/workflows/docdd-starters-ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776ab.svg)](https://www.python.org/)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20+-339933.svg)](https://nodejs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000.svg?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![Terraform](https://img.shields.io/badge/Terraform-7B42BC.svg?logo=terraform&logoColor=white)](https://www.terraform.io/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
+[![AWS](https://img.shields.io/badge/AWS-232F3E.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
+
+> **English version**: [README.en.md](README.en.md)
+
+Doc Driven Development (DocDD) と 7-axis Traceability を軸に、バックエンド (FastAPI) とフロントエンド (Next.js) のモジュラーモノリス構成を素早く立ち上げるためのテンプレートです。
+
+## DocDD とは
+
+DocDD（Doc Driven Development）は、要件定義からテストまでを **7 つの軸** で一貫して追跡可能にする開発手法です。ドキュメントを「書いて終わり」にせず、コードとテストに直結させることで、「なぜこの実装があるのか」を常に辿れる状態を維持します。
+
+```mermaid
+graph LR
+    BR["BR<br/>ビジネス要求"] --> UC["UC<br/>ユースケース"]
+    UC --> DM["DM<br/>ドメインモデル"]
+    DM --> SR["SR<br/>機能要件"]
+    DM --> NSR["NSR<br/>非機能要件"]
+    SR --> EXT["EXT<br/>外部連携"]
+    NSR --> EXT
+    EXT --> API["API<br/>エンドポイント"]
+    API --> TC["TC<br/>テストケース"]
+    style BR fill:#1e88e5,color:#fff
+    style TC fill:#43a047,color:#fff
+```
+
+> プロジェクトの規模や性質に応じて必要な軸を選択し、**変更の影響を辿れる状態を保つ**ことが目的です。
 
 ## 特徴
 
-- **DocDD**: 要件→設計→実装→テストの一貫したドキュメント管理
-- **7-axis Traceability**: 要件からテストまで追跡可能（BR→UC→DM→SR/NSR→EXT→API→TC）
-- **Claude Code統合**: Issue駆動開発フロー（/1〜/7）+ エージェントチーム
-- **GitHub Projects**: タスク管理・ステータス自動更新
-- **Pencil.dev連携**: UI設計→実装のシームレスなワークフロー
-- **CI/CD**: GitHub Actions（CI + ステージング/本番デプロイ）
-- **Terraform**: AWS ECS Fargate によるインフラ構成管理
+- **7-axis Traceability** - 要件からテストまで全工程を追跡可能
+- **FastAPI + モジュラーモノリス** - 非同期処理・自動ドキュメント生成・AI/データ分析ライブラリとの高い親和性
+- **Next.js App Router** - Server Components / Server Actions 対応。shadcn/ui・Biome 等のエコシステム活用
+- **Claude Code 統合** - Issue 駆動開発をスラッシュコマンド（`/1`〜`/7`）で自動化
+- **Marp スライド生成** - 開発成果や設計を `/slide` コマンドで即プレゼン資料化
+- **CI/CD** - GitHub Actions によるテスト・リント・デプロイ自動化
+- **Terraform** - AWS ECS Fargate によるインフラ構成管理
+
+## Quick Start
+
+### 前提条件
+
+| ツール | バージョン |
+|--------|-----------|
+| Python | 3.11+ |
+| Node.js | 20+ |
+| Docker & Docker Compose | 最新版推奨 |
+| Git | 2.5+（Worktree 利用時） |
+
+### セットアップ
+
+```bash
+# 1. リポジトリをクローン
+git clone https://github.com/syotakokichi/docdd-starters.git
+cd docdd-starters
+
+# 2. 環境変数を設定
+cp .env.example .env
+
+# 3. 依存関係をインストール
+npm --prefix apps/frontend install
+pip install -r apps/backend/requirements-dev.txt
+pip install -r scripts/test/requirements.txt
+
+# 4. バックエンドを起動
+make up        # 停止は make down
+```
+
+### テスト実行
+
+```bash
+make test              # 全テスト
+make test-backend      # バックエンドのみ
+make test-frontend     # フロントエンドのみ
+make traceability      # トレーサビリティマップ検証
+```
 
 ## ディレクトリ構成
 
@@ -20,156 +91,55 @@ apps/
   frontend/             # Next.js App Router
 docs/
   7-axis/               # DocDD 7軸トレーサビリティドキュメント
-  backend/              # バックエンド設計ガイド
-  frontend/             # フロントエンド設計ガイド
-  testing/              # テスト運用ガイド
-scripts/
-  test/                 # トレーサビリティ検証スクリプト
-  frontend/             # フロントエンド用スクリプト
-  deploy/               # デプロイスクリプト（Terraform / ECS）
-terraform/
-  environments/         # 環境別設定（stg / prod）
-  modules/              # 再利用可能なインフラモジュール
-tests/
-  backend/              # バックエンドテスト
-  frontend/             # フロントエンドテスト
-.claude/
-  commands/             # Issue駆動開発コマンド (/1〜/7, /a〜/c)
-  rules/                # 命名・コミットメッセージ規約
-  skills/               # AI実行知識（パターン・ドメイン）
-.github/workflows/
-  docdd-starters-ci.yml # CIワークフロー
-  deploy-stg.yml        # ステージングデプロイ
-  deploy-prod.yml       # 本番デプロイ
+  testing/              # テスト管理・トレーサビリティmap
+scripts/                # テスト検証・デプロイスクリプト
+terraform/              # AWS ECS Fargate インフラ構成
+tests/                  # バックエンド・フロントエンドテスト
+.claude/                # Claude Code コマンド・スキル・ルール
+.github/workflows/      # CI/CD ワークフロー
 ```
 
-## リンク
+## ドキュメント
 
-- [Backend ガイド](docs/backend/README.md)
-- [Frontend ガイド](docs/frontend/README.md)
-- [Testing ガイド](docs/testing/README.md)
-- [7-axis テンプレ](docs/7-axis)
-- [Traceability サンプル](docs/testing/traceability/sample_map.json)
-- [Claude Code ガイド](.claude/CLAUDE.md)
-- [Terraform ガイド](terraform/README.md)
-- [CI ワークフロー例](.github/workflows/docdd-starters-ci.yml)
-  - 詳細説明: [docs/ci.md](docs/ci.md)
-
-## 初期セットアップ
-
-1. `.env.example` をコピーし、`PROJECT_NAME` を設定
-2. 依存関係をインストールし、Docker でバックエンドを起動
-
-```bash
-cp .env.example .env
-npm --prefix apps/frontend install
-pip install -r apps/backend/requirements-dev.txt
-pip install -r scripts/test/requirements.txt
-make up        # 停止は make down
-```
-
-## テストの実行例
-
-```bash
-# Traceability map の整合性をチェック
-make traceability
-
-# バックエンドのテスト
-make test-backend
-
-# フロントエンドのテスト
-make test-frontend
-
-# 全テスト
-make test
-```
+| カテゴリ | リンク |
+|---------|--------|
+| 7-axis テンプレート | [docs/7-axis](docs/7-axis) |
+| バックエンドガイド | [docs/backend/README.md](docs/backend/README.md) |
+| フロントエンドガイド | [docs/frontend/README.md](docs/frontend/README.md) |
+| テストガイド | [docs/testing/README.md](docs/testing/README.md) |
+| Terraform ガイド | [terraform/README.md](terraform/README.md) |
+| CI ワークフロー | [docs/ci.md](docs/ci.md) |
+| Claude Code ガイド | [.claude/CLAUDE.md](.claude/CLAUDE.md) |
 
 ## Claude Code 開発フロー
 
-Issue駆動開発のスラッシュコマンド:
+Issue 作成から PR マージまでを `/1`〜`/7` のスラッシュコマンドで一気通貫。Worktree（`/a`〜`/c`）による複数 Issue の並列開発にも対応しています。
 
-| コマンド | 説明 |
-|---------|------|
-| `/1` | Issue作成 |
-| `/2` | 実装計画を立案してIssue本文に追記（エージェントチーム活用可） |
-| `/3` | ブランチ作成とIssue紐付け |
-| `/4` | 実装フェーズ開始（進行中ラベル設定） |
-| `/5` | 実装検証（品質ゲート） |
-| `/6` | Pull Request作成 |
-| `/7` | マージ後のクリーンアップ |
-| `/a`,`/b`,`/c` | Worktree並列開発 |
+`/slide` コマンドで Marp 形式のプレゼン資料を生成でき、開発成果や技術選定の共有にそのまま活用できます。
 
-### エージェントチーム
+詳細は [.claude/commands/README.md](.claude/commands/README.md) を参照。
 
-複雑なタスクではエージェントチーム機能を活用:
-- `/2` 計画立案: 並列リサーチ・設計壁打ち
-- `/5` 実装検証: バックエンド/フロントエンド並列検証
-- 詳細は [.claude/rules/agent-teams.md](.claude/rules/agent-teams.md) を参照
+## インフラ
 
-詳細は [.claude/CLAUDE.md](.claude/CLAUDE.md) を参照。
-
-## GitHub Projects 進捗管理
-
-GitHub Projects でタスクのステータスを管理:
-
-| コマンド | Projects Status |
-|---------|-----------------|
-| `/1` Issue作成 | → Backlog |
-| `/2` 計画立案 | → Ready |
-| `/3` ブランチ作成 | → In Progress |
-| `/7` マージ完了 | → Done |
-
-詳細は [.claude/rules/project-workflow.md](.claude/rules/project-workflow.md) を参照。
-
-## インフラ管理（Terraform）
-
-AWS ECS Fargate をベースとしたインフラ構成:
-
-```
-Internet → CloudFront → ALB → ECS Fargate (Frontend / Backend) → RDS (PostgreSQL)
+```mermaid
+graph LR
+    Internet["Internet"] --> CF["CloudFront"]
+    CF --> ALB["ALB"]
+    ALB --> ECS["ECS Fargate"]
+    ECS --> |Frontend| Next["Next.js"]
+    ECS --> |Backend| Fast["FastAPI"]
+    Fast --> RDS["RDS<br/>PostgreSQL"]
+    style Internet fill:#78909c,color:#fff
+    style ECS fill:#ff9900,color:#fff
+    style RDS fill:#3b48cc,color:#fff
 ```
 
-### 主要コマンド
+Terraform による IaC 管理。環境別設定（stg / prod）とデプロイスクリプトを同梱しています。詳細は [terraform/README.md](terraform/README.md) を参照。
 
-```bash
-# Terraform
-make tf-init                    # 初期化
-make tf-plan                    # プラン確認
-make tf-apply                   # 適用
-make tf-plan ENV=prod           # 本番環境のプラン
+## Contributing
 
-# デプロイ
-make deploy-stg                 # ステージングへデプロイ
-make deploy-backend-prod        # 本番バックエンドデプロイ
+Issue や Pull Request を歓迎します。開発フローについては [.claude/commands/README.md](.claude/commands/README.md) を参照してください。
 
-# ECS運用
-make ecs-status                 # サービス状態確認
-make ecs-logs-backend           # バックエンドログ閲覧
-make ecs-sh                     # コンテナにシェル接続
-```
+## License
 
-詳細は [terraform/README.md](terraform/README.md) を参照。
-
-## CI/CD
-
-| ワークフロー | トリガー | 内容 |
-|-------------|---------|------|
-| CI | PR / push to main | テスト・リント・品質チェック |
-| Deploy Staging | push to main | ステージング自動デプロイ |
-| Deploy Production | タグ作成 (v*) | 本番デプロイ（手動承認） |
-
-## 技術選定
-
-### Next.js 採用理由
-
-Next.js App Router は Server Components や Server Actions を含む最新アーキテクチャをサポートし、段階的な導入にも向いています。高速な SSR/ISR、ルーティングの柔軟性、TypeScript との親和性、豊富なエコシステム（shadcn/ui、Biome 等）が優位点です。
-
-### FastAPI 採用理由
-
-FastAPI は高性能な API サーバを短時間で構築できる Python フレームワークです。非同期処理・自動ドキュメント・依存性注入・セキュリティ機構が標準で備わっており、Python の豊富なライブラリ（特に AI / データ分析系）と組み合わせることで、汎用性と拡張性に優れたバックエンド基盤を構築できます。
-
----
-
-DocDD サンプル TS (`docs/7-axis/7_TC/TS-SAMPLE-001.md`) と連動するテストは `tests/backend/unit/test_balance_projection.py`（pytest）と `tests/frontend/unit/sample/balance-status.test.ts`（Vitest）を参照してください。
-
-このスターターを基に、プロジェクト固有のモジュールやドキュメントを追加して運用してください。
+MIT License - 詳細は [LICENSE](LICENSE) を参照。

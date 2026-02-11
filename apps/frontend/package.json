@@ -5,27 +5,26 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "lint:biome": "biome lint app src",
     "format": "biome format app src",
-    "test:unit": "vitest run ../../tests/frontend/unit --runInBand",
+    "test:unit": "vitest run ../../tests/frontend/unit",
     "test:watch": "vitest --watch",
     "check:segments": "node ../../scripts/frontend/check-private-folders.mjs"
   },
   "dependencies": {
-    "next": "15.0.0-canary.63",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "next": "16.1.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.0",
     "@testing-library/jest-dom": "6.4.2",
-    "@testing-library/react": "14.2.1",
+    "@testing-library/react": "^14.2.1",
     "@testing-library/user-event": "14.5.2",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
+    "@types/react": "19.2.13",
+    "@types/react-dom": "19.2.3",
     "jsdom": "24.0.0",
     "typescript": "5.4.5",
-    "vitest": "1.6.0"
+    "vitest": "2.1.9"
   }
 }
