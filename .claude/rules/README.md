@@ -13,6 +13,8 @@ Claude Code が従うべきコーディング規約と命名規則を定義し�
 | [docdd-frontmatter.md](./docdd-frontmatter.md) | DocDD frontmatter検証ルール |
 | [issue-workflow.md](./issue-workflow.md) | Issue駆動開発のフロー |
 | [test-fixtures.md](./test-fixtures.md) | DBフィクスチャのCI対応ルール |
+| [agent-teams.md](./agent-teams.md) | エージェントチーム運用ルール |
+| [project-workflow.md](./project-workflow.md) | GitHub Projects 連携ルール |
 
 ## 基本原則
 
