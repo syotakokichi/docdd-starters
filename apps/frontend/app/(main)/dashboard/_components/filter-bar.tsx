@@ -1,8 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import type { DashboardFilters } from "../../_types";
-import { applyFilter } from "../../_actions";
+import type { DashboardFilters } from "../_types";
+import { applyFilter } from "../_actions";
 
 interface Props {
   filters: DashboardFilters;
