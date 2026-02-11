@@ -1,6 +1,6 @@
 # テストケース（軸7）
 
-`../_templates/TC-template.yaml` をベースに、テストタイプや実行方法に応じてカスタマイズしてください。  
+`../_templates/TC-template.yaml` をベースに、テストタイプや実行方法に応じてカスタマイズしてください。
 テスト設計書を併用する場合は `../_templates/TS-template.md` をコピーし、`tc_defines` で TC を束ねます。
 
 ## 作成チェックリスト
