@@ -8,7 +8,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-000000.svg?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![Terraform](https://img.shields.io/badge/Terraform-7B42BC.svg?logo=terraform&logoColor=white)](https://www.terraform.io/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
-[![AWS](https://img.shields.io/badge/AWS-232F3E.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
+[![AWS](https://custom-icon-badges.demolab.com/badge/AWS-ff9900.svg?logo=aws&logoColor=white)](https://aws.amazon.com/)
 
 > **Japanese version**: [README.md](README.md)
 
@@ -43,6 +43,13 @@ graph LR
 - **Marp Slide Generation** - Turn development outcomes and designs into presentations with `/slide`
 - **CI/CD** - GitHub Actions for testing, linting, and deployment
 - **Terraform** - Infrastructure as Code for AWS ECS Fargate
+
+## Who Is This For?
+
+- Solo developers or small teams building web apps (SaaS, internal tools, etc.)
+- Projects that start small and scale gradually with a modular monolith architecture
+- Teams that want to trace back "why was this built this way?" at any point
+- Developers leveraging Claude Code for AI-assisted development workflows
 
 ## Quick Start
 

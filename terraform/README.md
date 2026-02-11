@@ -72,6 +72,14 @@ terraform apply
 | `PROJECT_NAME` | プロジェクト名 | GitHub Variables |
 | `db_password` | DBパスワード | terraform.tfvars (gitignore) |
 
+## 使用バージョン
+
+| ツール | バージョン |
+|--------|-----------|
+| Terraform | >= 1.9 |
+
+> 異なるバージョンをお使いの場合は、プロバイダの互換性を確認のうえ適宜読み替えてください。
+
 ## 注意事項
 
 - `terraform.tfvars` は `.gitignore` に含め、シークレット情報をコミットしない
