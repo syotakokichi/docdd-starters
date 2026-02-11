@@ -12,7 +12,9 @@ _LOG_LEVELS: dict[str, int] = {
 }
 
 
-def configure_logging(level: Literal["debug", "info", "warning", "error", "critical"] = "info") -> None:
+def configure_logging(
+    level: Literal["debug", "info", "warning", "error", "critical"] = "info",
+) -> None:
     """シンプルなロギング初期化処理。"""
 
     logging.basicConfig(
