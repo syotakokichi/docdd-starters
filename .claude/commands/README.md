@@ -18,14 +18,15 @@ Issue #116用の新しいworktreeを作成します。
 ```
 作成したworktreeディレクトリに移動します。
 
-### 3. 通常の開発フロー（1-6）
+### 3. 通常の開発フロー（1-7）
 ```bash
 /1  # Issue作成 - 新しいGitHub Issueを作成
-/2  # 計画立案 - GitHub Issueから実装計画を立案
+/2  # 計画立案 - GitHub Issueから実装計画を立案（エージェントチーム活用可）
 /3  # ブランチ作成（既にworktreeで作成済みならスキップ）
 /4  # 実装 - 進行中ラベル設定 + 計画に基づいて実装
-/5  # PR作成 - GitHub Pull Requestを作成
-/6  # マージ＆クリーンアップ - PRマージ後の後処理
+/5  # 実装検証 - PR作成前の品質ゲート（エージェントチーム並列検証）
+/6  # PR作成 - GitHub Pull Requestを作成
+/7  # マージ＆クリーンアップ - PRマージ後の後処理
 ```
 
 ### 4. Worktree削除
@@ -56,15 +57,16 @@ claude     # 新しいClaude Codeセッション開始
 
 ## コマンド一覧
 
-### 基本開発コマンド（1-6）
+### 基本開発コマンド（1-7）
 | コマンド | 説明 | ファイル |
 |---------|------|----------|
 | `/1` | 新しいGitHub Issueを作成 | 1.create-issue.md |
 | `/2` | GitHub Issueから実装計画を立案 | 2.plan-github-issue.md |
 | `/3` | ブランチ作成とIssue紐付け | 3.create-branch.md |
 | `/4` | 実装フェーズ開始（進行中ラベル設定） | 4.fix-github-issue.md |
-| `/5` | Pull Request作成 | 5.create-pr.md |
-| `/6` | マージ後のクリーンアップ | 6.merge-and-cleanup.md |
+| `/5` | 実装検証（品質ゲート） | 5.verify-implementation.md |
+| `/6` | Pull Request作成 | 6.create-pr.md |
+| `/7` | マージ後のクリーンアップ | 7.merge-and-cleanup.md |
 
 ### Worktree管理コマンド（a-c）
 | コマンド | 説明 | ファイル |

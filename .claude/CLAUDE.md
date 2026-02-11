@@ -7,7 +7,9 @@ Doc Driven Development (DocDD) と 7-axis Traceability を軸にした開発テ�
 - **バックエンド**: FastAPI + モジュラーモノリスパターン
 - **フロントエンド**: Next.js App Router
 - **DocDD**: 7軸トレーサビリティ構造
-- **開発フロー**: Issue駆動開発 + Claude Code スラッシュコマンド
+- **開発フロー**: Issue駆動開発 + Claude Code スラッシュコマンド + エージェントチーム
+- **インフラ**: AWS ECS Fargate + Terraform
+- **CI/CD**: GitHub Actions（CI + ステージング/本番デプロイ）
 
 ---
 
@@ -41,7 +43,11 @@ docdd-starters/
 │   └── testing/           # テスト管理・トレーサビリティmap
 ├── scripts/
 │   ├── test/              # トレーサビリティ検証スクリプト
-│   └── frontend/          # フロントエンド用スクリプト
+│   ├── frontend/          # フロントエンド用スクリプト
+│   └── deploy/            # デプロイスクリプト（Terraform / ECS）
+├── terraform/
+│   ├── environments/      # 環境別設定（stg / prod）
+│   └── modules/           # 再利用可能なインフラモジュール
 ├── .claude/
 │   ├── commands/          # カスタムスラッシュコマンド
 │   ├── skills/            # AI実行知識（ドメイン・パターン）
@@ -58,11 +64,12 @@ docdd-starters/
 | コマンド | 説明 |
 |---------|------|
 | `/1` | Issue作成 |
-| `/2` | 実装計画を立案してIssue本文に追記 |
+| `/2` | 実装計画を立案してIssue本文に追記（エージェントチーム活用可） |
 | `/3` | ブランチ作成とIssue紐付け |
 | `/4` | 実装フェーズ開始（進行中ラベル設定） |
-| `/5` | Pull Request作成 |
-| `/6` | マージ後のクリーンアップ |
+| `/5` | 実装検証（品質ゲート） |
+| `/6` | Pull Request作成 |
+| `/7` | マージ後のクリーンアップ |
 | `/a`,`/b`,`/c` | Worktree並列開発 |
 | `/commit-and-push` | コミットしてプッシュ |
 | `/run-tests` | テスト実行 |
@@ -77,6 +84,7 @@ docdd-starters/
 | [backend-patterns](./skills/backend-patterns/SKILL.md) | FastAPI/モジュラーモノリス |
 | [frontend-patterns](./skills/frontend-patterns/SKILL.md) | Next.js/Private Folder実装 |
 | [testing-patterns](./skills/testing-patterns/SKILL.md) | テスト戦略・フィクスチャ |
+| [design](./skills/design/SKILL.md) | Pencil.dev 連携によるUI設計 |
 
 **詳細**: [skills/README.md](./skills/README.md)
 
@@ -88,6 +96,8 @@ docdd-starters/
 | [commit-messages](./rules/commit-messages.md) | コミットメッセージ規則 |
 | [branch-naming](./rules/branch-naming.md) | ブランチ命名規則 |
 | [file-naming](./rules/file-naming.md) | ファイル命名規則 |
+| [agent-teams](./rules/agent-teams.md) | エージェントチーム運用ルール |
+| [project-workflow](./rules/project-workflow.md) | GitHub Projects 連携ルール |
 
 **詳細**: [rules/README.md](./rules/README.md)
 
@@ -98,12 +108,13 @@ docdd-starters/
 ### Issue駆動開発フロー
 
 ```
-1. /1 - Issue作成   → タスクをIssue化
-2. /2 - 計画立案    → Issue に実装計画を追記
-3. /3 - ブランチ作成 → feature/issue-xxx-short-desc
-4. /4 - 実装開始    → 進行中ラベル設定 + コード実装
-5. /5 - PR作成      → レビュー依頼
-6. /6 - マージ      → クリーンアップ + Webhook連携
+1. /1 - Issue作成    → タスクをIssue化
+2. /2 - 計画立案     → Issue に実装計画を追記（エージェントチーム活用可）
+3. /3 - ブランチ作成  → feature/issue-xxx-short-desc
+4. /4 - 実装開始     → 進行中ラベル設定 + コード実装
+5. /5 - 実装検証     → 品質ゲート（テスト・計画照合）
+6. /6 - PR作成       → レビュー依頼
+7. /7 - マージ       → クリーンアップ
 ```
 
 ### 並列開発（Worktree）
@@ -127,8 +138,10 @@ docdd-starters/
 make test-backend
 
 # フロントエンド
-cd apps/frontend
-npm run lint:biome && npm run check:segments && npm run test:unit
+make test-frontend
+
+# 全テスト
+make test
 
 # トレーサビリティ検証
 make traceability
@@ -140,5 +153,32 @@ make traceability
 - `docs/7-axis/` にテンプレートとサンプルを格納
 - `docs/testing/traceability/` にマッピングファイルを配置
 
+---
 
+## インフラ管理
 
+### Terraform
+
+```bash
+make tf-init                    # 初期化
+make tf-plan                    # プラン確認（stg）
+make tf-plan ENV=prod           # プラン確認（prod）
+make tf-apply                   # 適用
+```
+
+### デプロイ
+
+```bash
+make deploy-stg                 # ステージングへデプロイ
+make deploy-backend-prod        # 本番バックエンドデプロイ
+make deploy-prod                # 本番全体デプロイ
+```
+
+### ECS運用
+
+```bash
+make ecs-status                 # サービス状態確認
+make ecs-logs-backend           # バックエンドログ閲覧
+make ecs-logs-frontend          # フロントエンドログ閲覧
+make ecs-sh                     # コンテナにシェル接続
+```
