@@ -39,6 +39,7 @@ graph LR
 - **7-axis Traceability** - 要件からテストまで全工程を追跡可能
 - **FastAPI + モジュラーモノリス** - 非同期処理・APIドキュメント自動生成・AI/データ分析ライブラリとの高い親和性
 - **Next.js App Router** - Server Components / Server Actions 対応。shadcn/ui・Biome 等のエコシステム活用
+- **Pencil.dev デザイン連携** - AI デザインツールと Claude Code を直結。デザインからコード生成まで一気通貫
 - **Claude Code 統合** - Issue 駆動開発をスラッシュコマンド（`/1`〜`/7`）で自動化
 - **Marp スライド生成** - 開発成果や設計を `/slide` コマンドで即プレゼン資料化
 - **CI/CD** - GitHub Actions によるテスト・リント・デプロイ自動化
