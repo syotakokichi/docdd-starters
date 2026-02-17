@@ -84,7 +84,7 @@ docdd-starters/
 | [backend-patterns](./skills/backend-patterns/SKILL.md) | FastAPI/モジュラーモノリス |
 | [frontend-patterns](./skills/frontend-patterns/SKILL.md) | Next.js/Private Folder実装 |
 | [testing-patterns](./skills/testing-patterns/SKILL.md) | テスト戦略・フィクスチャ |
-| [design](./skills/design/SKILL.md) | Pencil.dev 連携によるUI設計 |
+| [design](./skills/design/SKILL.md) | Pencil.dev MCP 連携によるUI設計・デザイントークン管理 |
 
 **詳細**: [skills/README.md](./skills/README.md)
 

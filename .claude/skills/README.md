@@ -12,7 +12,7 @@ Claude Code が特定のドメインや技術パターンを適用する際に�
 | [testing-patterns](./testing-patterns/SKILL.md) | pytest / Vitest テスト戦略 |
 | [traceability-automation](./traceability-automation/SKILL.md) | トレーサビリティマップ活用 |
 | [presentation](./presentation/SKILL.md) | Marpプレゼンテーション作成 |
-| [design](./design/SKILL.md) | Pencil.dev 連携によるUI設計 |
+| [design](./design/SKILL.md) | Pencil.dev MCP 連携によるUI設計・デザイントークン管理 |
 
 ## スキルの使い方
 
