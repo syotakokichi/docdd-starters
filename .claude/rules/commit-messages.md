@@ -51,7 +51,7 @@ Conventional Commits 形式を採用します。
 Claude Code で生成したコミットには以下を付与:
 
 ```
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ```
 
 ## 例
@@ -64,7 +64,7 @@ feat(frontend): add balance status component
 
 Closes #123
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ```
 
 ```
@@ -75,5 +75,5 @@ fix(backend): correct date calculation in billing
 
 Fixes #456
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 ```
