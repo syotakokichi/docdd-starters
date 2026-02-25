@@ -39,7 +39,6 @@ docdd-starters/
 │       └── src/           # 共通モジュール
 ├── docs/
 │   ├── 7-axis/            # DocDD 7軸トレーサビリティ文書
-│   ├── guides/            # 運用ガイド
 │   └── testing/           # テスト管理・トレーサビリティmap
 ├── scripts/
 │   ├── test/              # トレーサビリティ検証スクリプト
@@ -98,6 +97,9 @@ docdd-starters/
 | [file-naming](./rules/file-naming.md) | ファイル命名規則 |
 | [agent-teams](./rules/agent-teams.md) | エージェントチーム運用ルール |
 | [project-workflow](./rules/project-workflow.md) | GitHub Projects 連携ルール |
+| [completion-quality](./rules/completion-quality.md) | 完了品質ルール |
+| [issue-sizing](./rules/issue-sizing.md) | Issue サイジングルール |
+| [brand](./rules/brand.md) | ブランドガイドライン（テンプレート） |
 
 **詳細**: [rules/README.md](./rules/README.md)
 
