@@ -15,6 +15,9 @@ Claude Code が従うべきコーディング規約と命名規則を定義し�
 | [test-fixtures.md](./test-fixtures.md) | DBフィクスチャのCI対応ルール |
 | [agent-teams.md](./agent-teams.md) | エージェントチーム運用ルール |
 | [project-workflow.md](./project-workflow.md) | GitHub Projects 連携ルール |
+| [completion-quality.md](./completion-quality.md) | 完了品質ルール |
+| [issue-sizing.md](./issue-sizing.md) | Issue サイジングルール |
+| [brand.md](./brand.md) | ブランドガイドライン（テンプレート） |
 
 ## 基本原則
 

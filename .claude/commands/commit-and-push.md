@@ -26,7 +26,8 @@ Follow these steps:
    - If pre-commit hooks modify files:
      - Run `git status` to check what was modified
      - Run `git add .` to stage the modifications
-     - Run `git commit --amend --no-edit` to include changes
+     - Run `git commit -m "style: apply pre-commit fixes"` to create a new commit
+   - **IMPORTANT**: Do NOT use `git commit --amend --no-edit` — if pre-commit hook fails, the original commit was not created, so `--amend` would modify the previous unrelated commit and destroy its changes
 
 7. **Push to remote**
    - Run `git push` to push changes to remote repository
