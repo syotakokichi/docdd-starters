@@ -25,7 +25,7 @@ repos:
         files: ^(\.claude/hooks/|scripts/).*\.sh$
         args: ["--severity=warning"]
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.8.0.1
+    rev: v3.8.0-1
     hooks:
       - id: shfmt
         files: ^(\.claude/hooks/|scripts/).*\.sh$
