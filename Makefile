@@ -1,7 +1,13 @@
 .PHONY: up down backend-shell test test-backend test-frontend traceability install install-dev
+.PHONY: bootstrap
 .PHONY: tf-init tf-plan tf-apply tf-destroy tf-output
 .PHONY: deploy-backend-stg deploy-frontend-stg deploy-stg deploy-backend-prod deploy-frontend-prod deploy-prod
 .PHONY: ecs-status ecs-logs-backend ecs-logs-frontend ecs-sh
+
+# ─── Bootstrap ───────────────────────────────────────────
+
+bootstrap:
+	@./scripts/bootstrap.sh
 
 # ─── Local Development ───────────────────────────────────
 

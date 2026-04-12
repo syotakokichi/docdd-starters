@@ -111,6 +111,7 @@ tests/                  # バックエンド・フロントエンドテスト
 
 | カテゴリ | リンク |
 |---------|--------|
+| Bootstrap ガイド | [docs/guides/bootstrap.md](docs/guides/bootstrap.md) |
 | 7-axis テンプレート | [docs/7-axis](docs/7-axis) |
 | バックエンドガイド | [docs/backend/README.md](docs/backend/README.md) |
 | フロントエンドガイド | [docs/frontend/README.md](docs/frontend/README.md) |
