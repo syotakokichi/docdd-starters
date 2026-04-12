@@ -26,7 +26,7 @@ SAFE_BASENAME=$(echo "$BASENAME" | sed 's/["\\/]/\\&/g')
 # ─── .env files (block, except .env.example and .env.sample) ─
 if echo "$BASENAME" | grep -qE '^\.env'; then
   if echo "$BASENAME" | grep -qE '^\.env\.(example|sample)$'; then
-    exit 0  # allowed
+    exit 0 # allowed
   fi
   echo "{\"decision\":\"block\",\"reason\":\"Writing to $SAFE_BASENAME is blocked. Secrets files (.env*) must be managed manually. Use .env.example for templates.\"}"
   exit 0

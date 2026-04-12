@@ -109,6 +109,7 @@ docdd-starters/
 | [issue-sizing](./rules/issue-sizing.md) | Issue サイジングルール |
 | [brand](./rules/brand.md) | ブランドガイドライン（テンプレート） |
 | [codex-review](./rules/codex-review.md) | Codex CLI レビュー運用ルール |
+| [cli-first](./rules/cli-first.md) | CLI ファースト原則（MCP より CLI 優先） |
 
 **詳細**: [rules/README.md](./rules/README.md)
 
