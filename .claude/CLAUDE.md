@@ -19,6 +19,7 @@ Doc Driven Development (DocDD) と 7-axis Traceability を軸にした開発テ�
 2. **既存パターン尊重**: 新規追加より既存ファイルの編集を優先。プロジェクトの既存パターンに従う
 3. **シンプルさ**: 過度な抽象化を避け、必要最小限の実装にとどめる
 4. **トレーサビリティ**: Issue → Plan → Implementation → PR の流れを追跡可能に保つ
+5. **独立レビュー**: Codex CLI が利用可能な場合、計画（`/2`）と検証（`/5`）で独立レビューを実施する
 
 **詳細なルール**: [.claude/rules/README.md](./rules/README.md)
 
@@ -56,6 +57,7 @@ docdd-starters/
 │   ├── hooks/             # PreToolUse / PostToolUse ガードレール
 │   ├── skills/            # AI実行知識（ドメイン・パターン）
 │   ├── rules/             # モジュール化ルール（命名・規約）
+│   ├── templates/         # プロンプトテンプレート・Handoff テンプレート
 │   └── references/        # コマンド/スキルから参照する静的ドキュメント
 └── README.md
 ```
@@ -106,6 +108,7 @@ docdd-starters/
 | [completion-quality](./rules/completion-quality.md) | 完了品質ルール |
 | [issue-sizing](./rules/issue-sizing.md) | Issue サイジングルール |
 | [brand](./rules/brand.md) | ブランドガイドライン（テンプレート） |
+| [codex-review](./rules/codex-review.md) | Codex CLI レビュー運用ルール |
 
 **詳細**: [rules/README.md](./rules/README.md)
 
