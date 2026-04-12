@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "managed_labels": [
+    { "name": "P0", "color": "B60205", "description": "Priority: critical (canonical). Legacy alias: High" },
+    { "name": "P1", "color": "FBCA04", "description": "Priority: high (canonical). Legacy alias: Medium" },
+    { "name": "P2", "color": "0E8A16", "description": "Priority: normal (canonical). Legacy alias: Low" },
+    { "name": "BE", "color": "1D76DB", "description": "Area: backend (canonical). Legacy alias: バックエンド" },
+    { "name": "FE", "color": "5319E7", "description": "Area: frontend (canonical). Legacy alias: フロントエンド" },
+    { "name": "infra", "color": "006B75", "description": "Area: infrastructure (canonical). Legacy alias: インフラ" },
+    { "name": "status:todo", "color": "CFD3D7", "description": "Status: not started" },
+    { "name": "status:in-progress", "color": "FBCA04", "description": "Status: in progress" },
+    { "name": "status:done", "color": "0E8A16", "description": "Status: completed" },
+    { "name": "docs", "color": "0075CA", "description": "Kind: documentation (canonical). Legacy alias: ドキュメント" },
+    { "name": "tests", "color": "D4C5F9", "description": "Kind: tests (canonical). Legacy alias: テスト" },
+    { "name": "chore", "color": "CFD3D7", "description": "Kind: chores (build, deps, meta)" },
+    { "name": "bug", "color": "d73a4a", "description": "Kind: bug (canonical). Legacy alias: バグ" },
+    { "name": "High", "color": "B60205", "description": "優先度: 高 (legacy). Canonical: P0" },
+    { "name": "Medium", "color": "FBCA04", "description": "優先度: 中 (legacy). Canonical: P1" },
+    { "name": "Low", "color": "0E8A16", "description": "優先度: 低 (legacy). Canonical: P2" },
+    { "name": "バックエンド", "color": "1D76DB", "description": "バックエンド関連 (legacy). Canonical: BE" },
+    { "name": "フロントエンド", "color": "5319E7", "description": "フロントエンド関連 (legacy). Canonical: FE" },
+    { "name": "インフラ", "color": "006B75", "description": "インフラ・CI/CD関連 (legacy). Canonical: infra" },
+    { "name": "ドキュメント", "color": "0075CA", "description": "ドキュメント関連 (legacy). Canonical: docs" },
+    { "name": "テスト", "color": "D4C5F9", "description": "テスト関連 (legacy). Canonical: tests" },
+    { "name": "バグ", "color": "d73a4a", "description": "不具合 (legacy). Canonical: bug" }
+  ],
+  "legacy_alias_map": {
+    "High": "P0",
+    "Medium": "P1",
+    "Low": "P2",
+    "バックエンド": "BE",
+    "フロントエンド": "FE",
+    "インフラ": "infra",
+    "ドキュメント": "docs",
+    "テスト": "tests",
+    "バグ": "bug"
+  }
+}

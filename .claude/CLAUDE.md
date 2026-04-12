@@ -39,8 +39,12 @@ docdd-starters/
 │       └── src/           # 共通モジュール
 ├── docs/
 │   ├── 7-axis/            # DocDD 7軸トレーサビリティ文書
+│   ├── guides/            # セットアップ・運用ガイド（bootstrap 等）
 │   └── testing/           # テスト管理・トレーサビリティmap
 ├── scripts/
+│   ├── bootstrap.sh       # fork 直後の bootstrap wrapper（preflight 統括）
+│   ├── claude/            # capability 検出など Claude 関連スクリプト
+│   ├── github/            # gh CLI を使うラベル/Issue 管理スクリプト
 │   ├── test/              # トレーサビリティ検証スクリプト
 │   ├── frontend/          # フロントエンド用スクリプト
 │   └── deploy/            # デプロイスクリプト（Terraform / ECS）
@@ -50,7 +54,8 @@ docdd-starters/
 ├── .claude/
 │   ├── commands/          # カスタムスラッシュコマンド
 │   ├── skills/            # AI実行知識（ドメイン・パターン）
-│   └── rules/             # モジュール化ルール（命名・規約）
+│   ├── rules/             # モジュール化ルール（命名・規約）
+│   └── references/        # コマンド/スキルから参照する静的ドキュメント
 └── README.md
 ```
 
