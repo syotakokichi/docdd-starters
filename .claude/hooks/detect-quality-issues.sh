@@ -54,14 +54,14 @@ if echo "$DIFF_CONTENT" | grep -qE '"strict"\s*:\s*false|strict:\s*false'; then
 fi
 
 # pytest.mark.skip without reason
-if echo "$DIFF_CONTENT" | grep -qE '@pytest\.mark\.skip($|\s*\()' && \
-   ! echo "$DIFF_CONTENT" | grep -qE '@pytest\.mark\.skip\(reason='; then
+if echo "$DIFF_CONTENT" | grep -qE '@pytest\.mark\.skip($|\s*\()' \
+  && ! echo "$DIFF_CONTENT" | grep -qE '@pytest\.mark\.skip\(reason='; then
   WARNINGS="${WARNINGS}\n- pytest.mark.skip without reason: add a reason for skipping"
 fi
 
 # noqa without specific code
-if echo "$DIFF_CONTENT" | grep -qE '#\s*noqa($|\s)' && \
-   ! echo "$DIFF_CONTENT" | grep -qE '#\s*noqa:\s*[A-Z]'; then
+if echo "$DIFF_CONTENT" | grep -qE '#\s*noqa($|\s)' \
+  && ! echo "$DIFF_CONTENT" | grep -qE '#\s*noqa:\s*[A-Z]'; then
   WARNINGS="${WARNINGS}\n- noqa without specific code: use noqa: E501 format instead of blanket noqa"
 fi
 

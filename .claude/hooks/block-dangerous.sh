@@ -29,15 +29,15 @@ if echo "$COMMAND" | grep -qE '(^|[;&|]\s*)sudo\b'; then
 fi
 
 # git push --force (but NOT --force-with-lease)
-if echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force($|\s|[;&|])' && \
-   ! echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force-with-lease'; then
+if echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force($|\s|[;&|])' \
+  && ! echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force-with-lease'; then
   echo '{"decision":"block","reason":"git push --force is blocked. Use --force-with-lease instead."}'
   exit 0
 fi
 
 # git push -f (short flag, but NOT -fl or --force-with-lease)
-if echo "$COMMAND" | grep -qE 'git\s+push\s+(.*\s)?-f($|\s|[;&|])' && \
-   ! echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force-with-lease'; then
+if echo "$COMMAND" | grep -qE 'git\s+push\s+(.*\s)?-f($|\s|[;&|])' \
+  && ! echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force-with-lease'; then
   echo '{"decision":"block","reason":"git push -f is blocked. Use --force-with-lease instead."}'
   exit 0
 fi
