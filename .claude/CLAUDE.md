@@ -53,6 +53,7 @@ docdd-starters/
 │   └── modules/           # 再利用可能なインフラモジュール
 ├── .claude/
 │   ├── commands/          # カスタムスラッシュコマンド
+│   ├── hooks/             # PreToolUse / PostToolUse ガードレール
 │   ├── skills/            # AI実行知識（ドメイン・パターン）
 │   ├── rules/             # モジュール化ルール（命名・規約）
 │   └── references/        # コマンド/スキルから参照する静的ドキュメント
