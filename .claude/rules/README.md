@@ -18,6 +18,7 @@ Claude Code が従うべきコーディング規約と命名規則を定義し�
 | [completion-quality.md](./completion-quality.md) | 完了品質ルール |
 | [issue-sizing.md](./issue-sizing.md) | Issue サイジングルール |
 | [brand.md](./brand.md) | ブランドガイドライン（テンプレート） |
+| [codex-review.md](./codex-review.md) | Codex CLI レビュー運用ルール |
 
 ## 基本原則
 
