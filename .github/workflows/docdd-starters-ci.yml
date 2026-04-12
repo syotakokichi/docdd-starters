@@ -42,6 +42,25 @@ jobs:
       - name: Run backend tests
         run: PYTHONPATH=apps/backend pytest tests/backend
 
+  shell-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shfmt
+        run: |
+          curl -sS https://webi.sh/shfmt | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install bats
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bats
+      - name: shellcheck
+        run: make shell-lint
+      - name: shfmt
+        run: make shell-format-check
+      - name: bats
+        run: make test-hooks
+
   frontend-tests:
     runs-on: ubuntu-latest
     steps:

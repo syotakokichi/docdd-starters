@@ -16,12 +16,15 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 log() { printf '%s\n' "$*" >&2; }
-die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+die() {
+  printf 'error: %s\n' "$*" >&2
+  exit 1
+}
 
 # ─── Preflight ───────────────────────────────────────────
 
-command -v gh  >/dev/null 2>&1 || die "gh CLI が見つかりません。https://cli.github.com/ からインストールしてください"
-command -v jq  >/dev/null 2>&1 || die "jq が見つかりません。\`brew install jq\` または \`apt install jq\` を実行してください"
+command -v gh >/dev/null 2>&1 || die "gh CLI が見つかりません。https://cli.github.com/ からインストールしてください"
+command -v jq >/dev/null 2>&1 || die "jq が見つかりません。\`brew install jq\` または \`apt install jq\` を実行してください"
 command -v git >/dev/null 2>&1 || die "git が見つかりません。git をインストールしてください"
 
 if ! gh auth status >/dev/null 2>&1; then
@@ -92,7 +95,7 @@ log "preflight OK (owner=$gh_login, labels=$(jq '.managed_labels | length' "$LAB
 
 CAPABILITY_FILE="${DOCDD_CAPABILITY_FILE:-/tmp/docdd-capabilities.json}"
 
-"$REPO_ROOT/scripts/claude/detect-capabilities.sh" > "$CAPABILITY_FILE"
+"$REPO_ROOT/scripts/claude/detect-capabilities.sh" >"$CAPABILITY_FILE"
 
 log "=== capabilities ==="
 jq . "$CAPABILITY_FILE" >&2
