@@ -3,6 +3,7 @@
 .PHONY: tf-init tf-plan tf-apply tf-destroy tf-output
 .PHONY: deploy-backend-stg deploy-frontend-stg deploy-stg deploy-backend-prod deploy-frontend-prod deploy-prod
 .PHONY: ecs-status ecs-logs-backend ecs-logs-frontend ecs-sh
+.PHONY: shell-lint shell-format-check test-hooks
 
 # ─── Bootstrap ───────────────────────────────────────────
 
@@ -44,6 +45,38 @@ install:
 install-dev:
 	npm --prefix apps/frontend install
 	pip install -r apps/backend/requirements-dev.txt
+
+# ─── Shell QA ────────────────────────────────────────────
+
+SHELL_FILES := .claude/hooks/block-dangerous.sh \
+	.claude/hooks/protect-files.sh \
+	.claude/hooks/detect-quality-issues.sh \
+	scripts/bootstrap.sh \
+	scripts/claude/detect-capabilities.sh \
+	scripts/deploy/terraform.sh \
+	scripts/deploy/build-and-deploy.sh \
+	scripts/github/bootstrap-labels.sh
+
+shell-lint:
+	@if command -v shellcheck >/dev/null 2>&1; then \
+		shellcheck --severity=warning $(SHELL_FILES); \
+	else \
+		echo "WARN: shellcheck not found, skipping shell-lint"; \
+	fi
+
+shell-format-check:
+	@if command -v shfmt >/dev/null 2>&1; then \
+		shfmt -i 2 -ci -bn -d $(SHELL_FILES); \
+	else \
+		echo "WARN: shfmt not found, skipping shell-format-check"; \
+	fi
+
+test-hooks:
+	@if command -v bats >/dev/null 2>&1; then \
+		bats scripts/claude/test-hooks.bats; \
+	else \
+		echo "WARN: bats not found, skipping test-hooks"; \
+	fi
 
 # ─── Terraform ───────────────────────────────────────────
 

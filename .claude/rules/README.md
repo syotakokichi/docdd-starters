@@ -19,6 +19,7 @@ Claude Code が従うべきコーディング規約と命名規則を定義し�
 | [issue-sizing.md](./issue-sizing.md) | Issue サイジングルール |
 | [brand.md](./brand.md) | ブランドガイドライン（テンプレート） |
 | [codex-review.md](./codex-review.md) | Codex CLI レビュー運用ルール |
+| [cli-first.md](./cli-first.md) | CLI ファースト原則（MCP より CLI 優先） |
 
 ## 基本原則
 

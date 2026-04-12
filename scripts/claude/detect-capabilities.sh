@@ -71,9 +71,9 @@ repo_write_state="unknown"
 if [ "$gh_auth_state" = "available" ] && [ "$repo_owner" != "unknown" ] && [ "$repo_name" != "unknown" ]; then
   push=$(gh api "repos/$repo_owner/$repo_name" -q .permissions.push 2>/dev/null || echo "")
   case "$push" in
-    true)  repo_write_state="available" ;;
+    true) repo_write_state="available" ;;
     false) repo_write_state="unavailable" ;;
-    *)     repo_write_state="unknown" ;;
+    *) repo_write_state="unknown" ;;
   esac
 fi
 
@@ -117,9 +117,9 @@ pencil_state="unknown"
 computer_use_state="unknown"
 
 declare -a sources=()
-[ -f "$REPO_ROOT/.claude/settings.json" ]        && sources+=("$REPO_ROOT/.claude/settings.json")
-[ -f "$REPO_ROOT/.claude/settings.local.json" ]  && sources+=("$REPO_ROOT/.claude/settings.local.json")
-[ -f "$HOME/.claude.json" ]                      && sources+=("$HOME/.claude.json")
+[ -f "$REPO_ROOT/.claude/settings.json" ] && sources+=("$REPO_ROOT/.claude/settings.json")
+[ -f "$REPO_ROOT/.claude/settings.local.json" ] && sources+=("$REPO_ROOT/.claude/settings.local.json")
+[ -f "$HOME/.claude.json" ] && sources+=("$HOME/.claude.json")
 
 if [ "${#sources[@]}" -gt 0 ]; then
   mcp_sources_json=$(printf '%s\n' "${sources[@]}" | jq -R . | jq -s .)
