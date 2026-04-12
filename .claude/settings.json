@@ -119,7 +119,12 @@
       "Bash(docker logs:*)",
       "Bash(docker compose up:*)",
       "Bash(docker compose down:*)",
-      "Bash(docker compose build:*)"
+      "Bash(docker compose build:*)",
+      "Bash(codex exec:*)",
+      "Bash(codex review:*)",
+      "Bash(codex login)",
+      "Bash(codex --version)",
+      "Bash(codex --help)"
     ],
     "ask": [
       "Bash(git push --force-with-lease:*)",
