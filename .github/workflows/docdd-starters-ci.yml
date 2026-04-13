@@ -61,6 +61,20 @@ jobs:
       - name: bats
         run: make test-hooks
 
+  docdd-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install jq
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq jq
+      - name: Validate Claude config
+        run: make validate-claude
+      - name: Validate traceability
+        run: make traceability
+
   frontend-tests:
     runs-on: ubuntu-latest
     steps:
