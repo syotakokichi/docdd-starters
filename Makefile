@@ -4,6 +4,9 @@
 .PHONY: deploy-backend-stg deploy-frontend-stg deploy-stg deploy-backend-prod deploy-frontend-prod deploy-prod
 .PHONY: ecs-status ecs-logs-backend ecs-logs-frontend ecs-sh
 .PHONY: shell-lint shell-format-check test-hooks
+.PHONY: validate-claude
+
+PYTHON ?= python3
 
 # ─── Bootstrap ───────────────────────────────────────────
 
@@ -24,7 +27,10 @@ backend-shell:
 # ─── Testing ─────────────────────────────────────────────
 
 traceability:
-	python scripts/test/validate_traceability_map.py --map docs/testing/traceability/sample_map.json
+	$(PYTHON) scripts/test/validate_traceability_map.py --map docs/testing/traceability/sample_map.json
+
+validate-claude:
+	./scripts/claude/validate-claude-config.sh
 
 test-backend:
 	PYTHONPATH=apps/backend pytest tests/backend
@@ -53,6 +59,7 @@ SHELL_FILES := .claude/hooks/block-dangerous.sh \
 	.claude/hooks/detect-quality-issues.sh \
 	scripts/bootstrap.sh \
 	scripts/claude/detect-capabilities.sh \
+	scripts/claude/validate-claude-config.sh \
 	scripts/deploy/terraform.sh \
 	scripts/deploy/build-and-deploy.sh \
 	scripts/github/bootstrap-labels.sh
