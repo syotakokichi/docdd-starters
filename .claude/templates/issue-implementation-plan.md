@@ -1,0 +1,186 @@
+# Issue 実装計画テンプレート
+
+`/plan` Phase 4 が Issue 本文に追記するテンプレート。元の Issue 本文（背景・目的・受け入れ条件）はそのまま残し、以下を追記する。
+
+```markdown
+---
+
+## 📚 リサーチ結果
+[調査した公式ドキュメント、ベストプラクティス、参考実装]
+
+## 🎯 影響範囲
+[変更対象ファイル、依存関係、副作用]
+
+### 依存先・波及範囲
+変更起点から下流まで、少なくとも以下を表で明記する。
+
+| 変更起点 | 波及先 | 確認内容 |
+|---------|--------|---------|
+| path/to/source | path/to/consumer | request/response/state/route の整合性 |
+
+### 非対象だが影響確認が必要な箇所
+- [このIssueでは直接実装しないが、壊していないことを確認すべき画面・API・導線]
+
+### 📄 DocDD更新対象
+変更対象から逆引きして、更新が必要な DocDD ドキュメントを特定する。
+
+| 変更レイヤー | 確認先 | 更新要否 |
+|------------|--------|:--------:|
+| API層（FastAPI routes） | `docs/7-axis/6_API/` の該当 yaml | ✅/— |
+| Model/Schema層 | `docs/7-axis/3_DM/` の該当 DM-*.md | ✅/— |
+| Service層（ビジネスルール変更） | `docs/7-axis/4_SR/` の該当 SR-*.md | ✅/— |
+| UseCase / Flow変更 | `docs/7-axis/2_UC/` の該当 UC-*.md | ✅/— |
+| TC / traceability | `docs/7-axis/7_TC/` + `docs/testing/traceability/` | ✅/— |
+
+## 🗺️ 証跡マッピング表
+
+<!-- 全行チェック方式: 全行コピーし、該当行に ✅ + 対象パス/理由、非該当行に — を記入する -->
+
+| 変更パス | 証跡カテゴリ | 必須証跡 | 自動検知 | 該当 | 対象パス/理由 |
+|---------|------------|---------|:--------:|:----:|-------------|
+| `apps/backend/app/modules/**/domain/**`, `apps/backend/app/modules/**/services/**` | backend-unit | ユニットテスト（pytest） | make test-backend | | |
+| `apps/backend/app/modules/**/infrastructure/**` | backend-integration | 統合テスト（DB/外部連携） | make test-backend | | |
+| `apps/backend/app/modules/**/presentation/**`, `apps/backend/app/shared/**/routes.py` | api-route | 統合テスト + API仕様書(6_API)更新 + caller全件確認 | make test-backend + 手動 | | |
+| `apps/backend/app/**/schemas/**`, `apps/frontend/**/_types/**` | api-contract | Frontend 型一致確認 | 手動 | | |
+| `apps/backend/app/kernel/**` | backend-core | ユニットテスト + 動作確認 | make test-backend + 手動 | | |
+| `apps/backend/alembic/versions/**` | migration-safety | up/down/up サイクル | CI | | |
+| `apps/frontend/app/**/page.tsx`, `apps/frontend/app/**/layout.tsx`, `apps/frontend/app/**/_containers/**`, `apps/frontend/app/**/_components/**`, `apps/frontend/src/components/**` | frontend-ui | Vitest OR ブラウザ目視 | make test-frontend / 手動 | | |
+| `apps/frontend/app/**/_hooks/**`, `apps/frontend/app/**/_lib/**` | frontend-logic | Vitest テスト必須 | make test-frontend | | |
+| `apps/frontend/src/lib/**`, `apps/frontend/src/store/**`, `apps/frontend/src/hooks/**` | frontend-shared | Vitest テスト必須 | make test-frontend | | |
+| `apps/frontend/app/**/globals.css`, `apps/frontend/tailwind.config.*`, `apps/frontend/postcss.config.*` | frontend-style | ブラウザ目視 | 手動 | | |
+| `docs/7-axis/**`, `docs/testing/traceability/**` | docdd | frontmatter + traceability | make traceability | | |
+| `scripts/**`, `Makefile*`, `*.config.*`, `.claude/hooks/**`, `.claude/settings.json`, `.github/**`, `terraform/**` | dx-config | 動作確認 + 既存テスト非破壊 | 手動 | | |
+| `.claude/commands/**`, `.claude/rules/**`, `.claude/skills/**`, `.claude/templates/**`, `.claude/references/**` | dx-docs | validate-claude + 目視確認 | make validate-claude | | |
+
+## 🖥️ UI State Matrix
+
+<!-- 適用条件: apps/frontend/app/**/page.tsx, apps/frontend/app/**/layout.tsx, apps/frontend/app/**/_containers/**, apps/frontend/app/**/_components/**, apps/frontend/src/components/** のいずれかを変更する場合に記入する。非該当なら「UI 変更なし — 適用外」と記載 -->
+<!-- N/A 可。ただし理由必須（例: N/A — 一覧ページのため送信中状態なし） -->
+
+| 状態 | トリガー | 期待 UI | 検証方法 | 該当 | 備考 |
+|------|---------|--------|:--------:|:----:|------|
+| Loading（初期表示） | データ初回フェッチ中 | Skeleton / Spinner | ブラウザ | | |
+| Loading（送信中） | フォーム送信 / アクション実行中 | ボタン disabled + 「処理中...」 | ブラウザ | | |
+| Empty（フィルタなし） | データ 0 件 | 「まだ○○がありません」 | ブラウザ | | |
+| Empty（フィルタあり） | 検索結果 0 件 | 「該当する○○がありません」 | ブラウザ | | |
+| Error（API / ネットワーク） | API 5xx / ネットワーク障害 | エラーメッセージ表示 | ブラウザ | | |
+| Error（バリデーション / ビジネスルール） | 入力不正 / 無効・期限切れ / ルール違反 | フィールドエラー or メッセージ | ブラウザ | | |
+| Success | 正常データ | 主導線の正常表示 | ブラウザ | | |
+| 権限なし | 権限不足 | 403 ページ or メッセージ | ブラウザ | | |
+| Route resilience | Reload / Back / URL欠落 | 状態復元 or 適切なフォールバック | ブラウザ | | |
+
+## 📏 サイズチェック
+| 指標 | 値 | 上限 | 判定 |
+|------|:--:|:----:|:----:|
+| 変更対象ファイル | ? | 20 | |
+| 実装タスク数 | ? | 8 | |
+| 起因 Issue / 負債 | ? | 1 | |
+| Phase 数 | ? | 1 | |
+| API/型の契約変更点 | ? | 3 | |
+| 下流呼び出し元数 | ? | 5 | |
+
+> 詳細: `.claude/rules/issue-sizing.md`
+
+## ⚠️ 重要ポイント
+[特に注意が必要な箇所 - 🔴Critical / 🟠High / 🟡Medium / 🟢Low]
+
+## 📋 実装タスク
+- [ ] タスク1
+- [ ] タスク2
+- [ ] タスク3
+
+## ✅ 検証定義
+
+| ID | 対象/観点 | コマンド/操作 | 期待結果 | PASS条件 | 備考/証跡 |
+|----|----------|-------------|---------|---------|---------|
+| V1 | frontmatter validator | `make validate-claude` | 全 PASS（warning は許容） | exit 0 | baseline モード |
+| V2 | traceability | `make traceability` | sample_map.json 整合 | exit 0 | DocDD 変更時に必須 |
+
+### TDD 判定（/develop 実装前に記録する）
+
+**空欄禁止**: 必須 / スキップ（理由）のどちらかを記載すること。空欄 = 証跡漏れとして扱う。
+
+| 項目 | 内容 |
+|------|------|
+| TDD 判定 | 必須 / スキップ（理由: ）|
+| 対象領域 | Backend service / API 契約変更 / Frontend pure logic / 認証 / 状態遷移 / バグ修正 / 該当なし |
+| 想定 RED コマンド | `make test-backend` / `make test-frontend` または focused pytest / vitest コマンド |
+| 想定 GREEN コマンド | `make test-backend` / `make test-frontend` または focused pytest / vitest コマンド |
+
+> **判断基準**: 後続 Issue で `.claude/rules/tdd-gate.md` を追加予定。当面は「外部連携・状態遷移・認証・API 契約変更を含むなら必須、それ以外は任意」の経験則で判定する。
+
+### Critical Path / Coverage expectation
+
+<!-- 判定基準（簡易リファレンス）:
+  Critical: 状態遷移・外部連携・callback・認証・申込導線を含む
+  Non-critical: 上記に該当しない（UI文言、CSS、DX等）
+  Mixed: Critical + Non-critical が混在
+  N/A 条件: .claude/ / docs/ のみの変更、デザイン調整のみ、文言修正のみ
+-->
+
+| 項目 | 内容 |
+|------|------|
+| Critical Path 判定 | Critical / Non-critical / Mixed / N/A |
+| Critical scope | Critical と判定した領域を列挙（Non-critical の場合は「なし」） |
+| 保護レイヤー | Unit / Integration / Browser evidence / Manual |
+| Coverage expectation | Critical = 100% / Non-critical touched scope = 90% / Mixed = critical 100% + touched non-critical 90% / N/A |
+| Focused test commands | /plan の計画から転記 |
+
+### Issue 固有の検証定義
+
+| ID | 対象/観点 | コマンド/操作 | 期待結果 | PASS条件 | 備考/証跡 |
+|----|----------|-------------|---------|---------|---------|
+| V3 | [対象] | [コマンド or 操作手順] | [期待する出力・状態] | [合否の判定基準] | [証跡URL・コマンド結果] |
+
+## 🔗 参照スキル
+- backend-patterns
+- frontend-patterns
+- testing-patterns
+- docdd-workflow
+- design
+
+> 一覧: `.claude/skills/README.md`
+
+## 📖 参照ドキュメント
+
+### プロジェクト内
+- [関連するプロジェクト内ドキュメントへのリンク]
+
+### 外部リファレンス
+- [調査した公式ドキュメント、ベストプラクティス記事へのリンク]
+- [参考にしたGitHubリポジトリ、技術ブログ等]
+
+## 🔄 後続Issue（必要な場合）
+[Phase 1 で確認した既存Issueを踏まえ、後続作業の方針を記載]
+
+判断結果:
+- [ ] 既存Issue #XXX に統合 / 新規Issue #XXX を作成 / 後続なし
+
+> 判断基準: PR差分300行以下なら統合OK。既存の関連Issueがあればそちらに統合を優先。
+
+**本Issue完了後に作成する後続Issue:**
+- [ ] 後続Issue-X: [内容]（なければ「後続なし」と記載）
+
+## ✅ 完了条件
+- [ ] 全テストがパス（`make test` または変更レイヤー対応の `make test-backend` / `make test-frontend`）
+- [ ] `make validate-claude` PASS
+- [ ] DocDD 更新が必要な場合は `make traceability` PASS
+- [ ] レビュー承認
+
+（ADRセクション - アーキテクチャ決定がある場合）
+（DocDD 7軸セクション - 新機能の場合）
+```
+
+---
+
+## 📋 後続 Issue で導入予定（forward reference の隔離）
+
+> 本テンプレートに含まれる検証定義表は最小構成。下記の項目は後続 Issue で skill / script として整備予定。本 Issue の `/plan` 段階では既存 rule のみを参照する。
+
+| 参照先（未存在） | 用途 | 予定 Issue |
+|--------------|------|----------|
+| `.claude/rules/tdd-gate.md` | TDD 判定の SSOT | 後続 Issue（4-2 想定） |
+| `.claude/skills/test-design/SKILL.md` | Critical Path 判定スキル | 後続 Issue（4-2 想定） |
+| `scripts/claude/verify-issue.sh`, `scripts/claude/quality-gate.sh` | Issue 単位の品質ゲート自動化 | 後続 Issue（5-1 / D-1 想定） |
+| `.claude/rules/multi-model-review.md` | 3 reviewer 並列レビュー | 後続 Issue（D-1 想定） |
+| `.claude/references/applicable-skills.md` | 適用スキル一覧の SSOT | 後続 Issue（4-1 想定） |
