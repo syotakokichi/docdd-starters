@@ -33,3 +33,6 @@ Thumbs.db
 .specstory/**
 
 .cursorindexingignore
+
+# Worktrees (canonical /worktree creates these)
+.claude/worktrees/
