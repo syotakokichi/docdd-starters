@@ -22,19 +22,24 @@ gh issue edit <issue_number> --title "[実装計画] 元のタイトル"
 ### 3. コマンドフロー
 
 ```
-/1 → /2 → /3 → /4 → /5 → /6 → /7
- ↓    ↓    ↓    ↓    ↓    ↓    ↓
-Issue 計画 ブランチ 実装 検証 PR作成 クリーンアップ
-作成       作成
+/issue → /plan → /worktree → /develop → /verify → /review → /pr → /merge
+   ↓       ↓         ↓          ↓         ↓         ↓        ↓      ↓
+ 作成    計画    ブランチ     実装      検証     独立     PR    マージ
+                + worktree                       レビュー  作成   + cleanup
 ```
 
-- `/1`: Issue作成
-- `/2`: 計画立案 → Issue本文更新（エージェントチーム活用可）
-- `/3`: ブランチ作成
-- `/4`: 実装
-- `/5`: 実装検証（品質ゲート）
-- `/6`: PR作成
-- `/7`: マージ後クリーンアップ
+- `/issue`: Issue作成
+- `/plan`: 計画立案 → Issue本文更新（エージェントチーム活用可）
+- `/worktree`: worktree 作成 + ブランチ命名（並列開発の起点）
+- `/develop`: 実装（進行中ラベル設定）
+- `/verify`: 実装検証（品質ゲート + Codex 差分レビュー）
+- `/review`: 独立レビュー（実装文脈外）
+- `/pr`: PR作成
+- `/merge`: マージ + worktree クリーンアップ
+- `/discard-worktree`: 未マージ worktree の破棄
+
+> コマンド名 SSOT: [.claude/rules/terminology.md](./terminology.md)
+> 旧コマンドからの移行: [docs/guides/migration-from-legacy-commands.md](../../docs/guides/migration-from-legacy-commands.md)
 
 ---
 
