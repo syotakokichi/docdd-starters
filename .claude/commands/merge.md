@@ -127,10 +127,10 @@ echo "関連 Issue: $RELATED_ISSUES"
 ```bash
 # squash / merge / rebase はプロジェクトの方針に従う（既存 PR の運用と揃える）
 # デフォルトは --merge（マージコミットを残す）。リポジトリのデフォルトに合わせる
-gh pr merge $PR_NUMBER --merge --delete-branch
+gh pr merge $PR_NUMBER --merge
 ```
 
-> **`--delete-branch`**: マージ後にリモートブランチを削除する。`Closes #<N>` による Issue auto close は GitHub 側で実行されるが、Step 7 で明示的に確認する。
+> **ブランチ削除は Step 5 / Step 6 で明示削除**: `gh pr merge` の組込ブランチ削除オプションは local 削除失敗（worktree が local branch を占有しているケース）で exit 1 → remote 削除もスキップする事故が再現するため使用しない。local は Step 5 / Step 6 の `git branch -d`、remote は Step 5 / Step 6 末尾の独立ブロックの `git push origin --delete` で分離して実行する。`Closes #<N>` による Issue auto close は GitHub 側で実行されるが、Step 7 で明示的に確認する。
 
 ### Step 5: main 同期 + ローカルブランチ削除
 
@@ -157,6 +157,26 @@ else
   git fetch origin main
   echo "ℹ️  Mode A を worktree 内から実行: primary worktree（$MAIN_ROOT）に戻ってから 'git checkout main && git pull' を実行してください"
   echo "ℹ️  ローカルブランチ $MERGED_BRANCH の削除も primary 側で実施してください（現在 worktree がそのブランチを保持しているため）"
+fi
+
+# Mode A: remote 削除（cwd / worktree 有無に依存しない独立ブロック）
+# 旧 `gh pr merge --delete-branch` は local 削除失敗時に remote 削除もスキップする事故があったため、
+# remote 削除は cwd 分岐の外に置き、primary でも連結 worktree でも確実に発火させる
+if [ "$MODE" = "A" ] && [ -n "$MERGED_BRANCH" ] && [ "$MERGED_BRANCH" != "main" ]; then
+  # MERGED ガード: merge queue / auto-merge 環境で `gh pr merge` が queued/open のまま戻る場合に
+  # head branch を merge 前に消して PR を unmergeable にする事故を防ぐ
+  PR_STATE=$(gh pr view "$PR_NUMBER" --json state --jq .state 2>/dev/null)
+  if [ "$PR_STATE" != "MERGED" ]; then
+    echo "⚠️  PR #$PR_NUMBER は MERGED 状態ではありません（state: ${PR_STATE:-unknown}）。remote ブランチ削除はスキップ"
+  else
+    IS_CROSS_REPO=$(gh pr view "$PR_NUMBER" --json isCrossRepository --jq .isCrossRepository 2>/dev/null)
+    if [ "$IS_CROSS_REPO" = "true" ]; then
+      echo "ℹ️  PR #$PR_NUMBER は fork からの PR。remote ブランチ削除はスキップ"
+    else
+      err=$(git push origin --delete "$MERGED_BRANCH" 2>&1) || \
+        echo "⚠️  リモートブランチ $MERGED_BRANCH の削除に失敗: $err"
+    fi
+  fi
 fi
 
 # リモート追跡ブランチを整理
@@ -186,6 +206,31 @@ if [ "$MODE" = "B" ]; then
   else
     echo "⚠️  worktree $WORKTREE_PATH が見つかりません（既に削除済み？）"
   fi
+
+  # remote 削除（worktree 有無に依存しない独立ブロック）
+  # `if [ -d "$WORKTREE_PATH" ]` の **外** に配置することで、
+  # worktree 既削除（再実行）/ WORKTREE_PATH 不在でも remote 削除を確実に発火させる
+  if [ -n "$MERGED_BRANCH" ] && [ "$MERGED_BRANCH" != "main" ]; then
+    # MERGED ガード: merge queue / auto-merge 環境で `gh pr merge` が queued/open のまま戻る場合に
+    # head branch を merge 前に消して PR を unmergeable にする事故を防ぐ
+    PR_STATE=$(gh pr view "$PR_NUMBER" --json state --jq .state 2>/dev/null)
+    if [ "$PR_STATE" != "MERGED" ]; then
+      echo "⚠️  PR #$PR_NUMBER は MERGED 状態ではありません（state: ${PR_STATE:-unknown}）。remote ブランチ削除はスキップ"
+    else
+      IS_CROSS_REPO=$(gh pr view "$PR_NUMBER" --json isCrossRepository --jq .isCrossRepository 2>/dev/null)
+      if [ "$IS_CROSS_REPO" = "true" ]; then
+        echo "ℹ️  PR #$PR_NUMBER は fork からの PR。remote ブランチ削除はスキップ"
+      else
+        err=$(git push origin --delete "$MERGED_BRANCH" 2>&1) || \
+          echo "⚠️  リモートブランチ $MERGED_BRANCH の削除に失敗: $err"
+      fi
+    fi
+  fi
+
+  # Mode B 用 remote-tracking ref 整理（Step 5 の `git remote prune origin` は
+  # 上記 Mode B remote 削除より前に実行されているため、削除した remote ブランチに
+  # 対応するローカル追跡 ref が残っている。ここで再 prune して checklist を成立させる）
+  git remote prune origin
 fi
 ```
 
@@ -272,6 +317,7 @@ git worktree list
 
 - [ ] 関連 Issue が Close されている
 - [ ] ローカルブランチが削除されている（Mode A）/ worktree が削除されている（Mode B）
+- [ ] リモートブランチが削除されている（`git ls-remote --heads origin "$MERGED_BRANCH"` が空）
 - [ ] `git remote prune origin` でリモート追跡ブランチが整理されている
 
 ---
@@ -285,6 +331,7 @@ git worktree list
 | Mode B で worktree 内から実行した | Step 0 で停止する。`cd "$MAIN_ROOT"` してから再実行 |
 | 未マージで worktree を削除したい | `/discard-worktree <N>` を使う（`/merge` ではなく） |
 | Issue が auto close されていない | `gh issue close <N>` を手動実行（Step 7 でも実行している） |
+| （旧仕様起因）`Closes #N` 後に origin にブランチが残っている | 旧 `/merge` は worktree 占有時に local 削除失敗 → remote もスキップする問題があった。手動で `git push origin --delete <branch>` を実行。本コマンドは Step 5 / Step 6 で明示削除済み |
 
 ---
 
