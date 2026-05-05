@@ -1,3 +1,7 @@
+---
+description: Marp 形式のスライド作成を壁打ちで支援します。
+disable-model-invocation: true
+---
 スライド作成の壁打ちを行います。
 
 ## ヒアリング

@@ -1,3 +1,8 @@
+---
+description: バックエンド/フロントエンド/トレーサビリティのテスト実行コマンド集を提示します。
+disable-model-invocation: true
+---
+
 # テスト実行コマンド
 
 DocDD Starters で {PROJECT} の品質を担保するためのテストコマンドをまとめています。必要に応じて Issue や PR からこのファイルへリンクし、再現可能な検証ログを残してください。

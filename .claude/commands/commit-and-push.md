@@ -1,3 +1,7 @@
+---
+description: 現在の変更をコミットしてリモートにプッシュします。
+disable-model-invocation: true
+---
 Please commit changes and push to the remote repository.
 
 Follow these steps:
