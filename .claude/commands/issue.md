@@ -97,7 +97,7 @@ EOF
 
 #### ステータス
 
-- `status:todo` を初期付与（`/develop` で `status:in-progress`、`/7` 系で `status:done` に遷移）
+- `status:todo` を初期付与（`/develop` で `status:in-progress`、`/merge` で `status:done` に遷移）
 
 #### 適用例
 
@@ -128,7 +128,7 @@ Issue #<N> 作成完了
 ## 注意事項
 
 - Issue 作成後、`/plan` で実装計画を立案して Issue 本文に追記する
-- 並列開発する場合は `/worktree <N>` を先に実行し、worktree 内で `/plan` 〜 `/6` を進める
+- 並列開発する場合は `/worktree <N>` を先に実行し、worktree 内で `/plan` 〜 `/pr` を進める
 - 単独 sequential で進める場合は `/plan` 直後に `/develop` でも可（`.claude/skills/parallel-development/SKILL.md` 参照）
 
 ---

@@ -51,11 +51,9 @@ Issue 本文が「実装可能」ではなく、**仕様固定済み** になっ
 **出力例（デフォルト・次のステップ — `/plan` 完了時点）:**
 ```
 /develop <N>
-/verify <N>
-/6
 ```
 
-> worktree は `/plan` の前段（`/worktree <N>`）で作成済みのはず。`/plan` が main で実行された場合は、以降の `/develop` / `/verify` / `/6` を worktree で実行するため先に `/worktree <N>` を案内する（`/plan` 自体の再実行は不要）。
+> worktree は `/plan` の前段（`/worktree <N>`）で作成済みのはず。`/plan` が main で実行された場合は、以降の `/develop` を worktree で実行するため先に `/worktree <N>` を案内する（`/plan` 自体の再実行は不要）。
 
 ---
 
