@@ -1,95 +1,21 @@
 ---
-description: .claude/skills 配下に新しいスキルを作成します。
-argument-hint: "<skill-name>"
+description: run-skill-creator を起動し、Step 0–8 で新しい Skill を設計・採点して提示します。
+argument-hint: "<skill description>"
 disable-model-invocation: true
 ---
-新しいスキルを作成します。
 
-## 手順
+`$ARGUMENTS` を入力として `run-skill-creator` skill に委譲します。Step 0–8（適格性 → 4 軸判定 → 起草 → description 最適化 → セルフチェック → assign-agent-skill-evaluator レビュー → 提示）の手順は本コマンドでは持たず、SKILL.md 側に SSOT を置きます（命令の二重管理を避けるため）。
 
-### 1. スキル名の確認
+## 起動
 
-引数 `$ARGUMENTS` からスキル名を取得します。
-未指定の場合は対話形式で確認してください。
+Skill ツールで委譲してください:
 
-### 2. スキル概要の確認
-
-ユーザーに以下を確認:
-- 「このスキルの目的は何ですか？」
-- 「いつ使われるスキルですか？」
-
-### 3. 雛形生成
-
-```bash
-mkdir -p .claude/skills/{skill-name}
-touch .claude/skills/{skill-name}/SKILL.md
 ```
-
-### 4. SKILL.md の編集
-
-以下の必須構造で作成:
-
-```markdown
----
-name: {skill-name}
-description: |
-  {スキルの説明}
----
-
-# {スキル名}
-
-## 概要
-{目的・背景}
-
-## 使い方
-{いつ使うか}
+Skill({ skill: "run-skill-creator", args: "$ARGUMENTS" })
+```
 
 ## 詳細
-{具体的な情報・ルール}
 
-## 関連ファイル
-{参照リンク}
-```
-
-### 5. README更新リマインド
-
-以下のファイルの更新を促す:
-- `.claude/skills/README.md` - スキル一覧に追加
-- 必要に応じて `CLAUDE.md` に参照を追加
-
-### 6. 確認
-
-作成したスキルの内容を表示して確認を求める。
-
-## スキル設計ガイドライン
-
-### 行数目安
-- SKILL.md: ~500行以内
-- 長いコード例は外部ファイルに分離
-
-### スキルとテンプレートの使い分け
-| SKILL.mdに含める | 外部に分離する |
-|-----------------|---------------|
-| 方針・制約・判断基準 | コピペして使う成果物の型 |
-| 20行未満のコード例 | 20行以上のコードブロック |
-| スキル専用の設定 | 複数用途で再利用される型 |
-
-### Progressive Disclosure
-1. 概要（what）
-2. 使い方（when）
-3. 詳細（how）
-4. 関連ファイル（where）
-
-## 出力例
-
-```
-スキル「{skill-name}」を作成しました。
-
-作成ファイル:
-- .claude/skills/{skill-name}/SKILL.md
-
-次のステップ:
-1. SKILL.md の内容を確認・編集
-2. .claude/skills/README.md にスキルを追加
-3. 必要に応じて CLAUDE.md に参照を追加
-```
+- 手順・適格性判定・prefix 決定木・description 最適化・evaluator レビュー契約は [.claude/skills/run-skill-creator/SKILL.md](../skills/run-skill-creator/SKILL.md) を参照
+- 採点 schema・breakdown キーは [.claude/skills/assign-agent-skill-evaluator/SKILL.md](../skills/assign-agent-skill-evaluator/SKILL.md) と並置の `eval-schema.json` を参照
+- 設計原則（4 軸 / 5 prefix / 共通ルール）は [.claude/skills/ref-agent-skill/SKILL.md](../skills/ref-agent-skill/SKILL.md) を参照
