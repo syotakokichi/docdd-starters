@@ -39,3 +39,6 @@ Thumbs.db
 
 # Claude Code runtime state (machine-specific session/pid lock — must not be committed)
 .claude/scheduled_tasks.lock
+
+# Skill evaluator output (root-anchored — must not match scripts/test/output/ etc.)
+/output/
