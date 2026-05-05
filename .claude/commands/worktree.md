@@ -29,16 +29,15 @@ Create the canonical worktree environment for Issue $ARGUMENTS.
 /plan <N>
 /develop <N>
 /verify <N>
-/6                 # PR 作成（旧コマンド体系。後続 Issue で /pr 化予定）
+/pr <N>            # PR 作成
 ```
 
 ## 関連コマンド
 
 | コマンド | 用途 |
 |---------|------|
-| `/c <N>` | 未マージ worktree の破棄（旧コマンド体系。`/7` がマージ前提のため） |
-
-> 後続 Issue で `/discard-worktree` `/merge` への置換を予定。
+| `/discard-worktree <N>` | 未マージ worktree の破棄（`/merge` がマージ前提のため別コマンド） |
+| `/merge <N>` | マージ + worktree クリーンアップ |
 
 ---
 
@@ -242,7 +241,7 @@ Worktree 作成完了:
   /plan <N>      # 計画立案（未計画の場合）
   /develop <N>   # 実装開始
   /verify <N>    # 実装検証
-  /6             # PR 作成
+  /pr <N>        # PR 作成
 ```
 
 ---
@@ -257,9 +256,9 @@ Worktree 作成完了:
 /develop 42      # 実装
 /verify 42       # 実装検証（同一セッション）
 # ⚠️ 検証は新しいセッションを開いて行うのが推奨（確証バイアス回避）
-/6               # PR 作成（worktree 内で最後のステップ）
+/pr 42           # PR 作成（worktree 内で最後のステップ）
 # → メインリポジトリのターミナルに切り替え
-/7 42            # メインから: マージ + クリーンアップ
+/merge 42        # メインから: マージ + クリーンアップ
 ```
 
 ### 方法 B: 別エディタウィンドウ（長時間並列向け、推奨）
@@ -275,10 +274,10 @@ Worktree 作成完了:
 /plan 42         # 計画立案
 /develop 42      # 実装
 /verify 42       # 実装検証
-/6               # PR 作成
+/pr 42           # PR 作成
 
 # メイン Window に戻る
-/7 42            # マージ + クリーンアップ
+/merge 42        # マージ + クリーンアップ
 ```
 
 > **別ウィンドウの利点**: 検索対象・タブ・AI 文脈・ターミナル cwd・Git ブランチ表示が全て worktree に揃い、メイン checkout を誤って触るリスクがなくなる。
@@ -298,8 +297,6 @@ Worktree 作成完了:
 
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
-| `/discard-worktree` コマンド | 未マージ worktree の破棄（canonical） | 後続 Issue（2-2 想定） |
-| `/merge` コマンド | PR マージ + worktree 削除（canonical） | 後続 Issue（2-2 想定） |
 | `validate-merge-cwd.sh` hook | worktree 内からのマージ操作を決定論的にブロック | 後続 Issue（D-1 想定） |
 
 ARGUMENTS: issue_number

@@ -20,14 +20,14 @@ Epic #23 の全 21 Issue について、必要な capability と fallback 挙動
 | 1-1 | Core | `gh_authenticated`, `repo_write_access` | capability 参照実装の初出 | consumer 接続の最初 |
 | 1-2 | Core | — | `make shell-lint` 用 shellcheck 統合 | shellcheck 未導入環境は skip + warn |
 | 1-3 | Core | `projects_api_available` | `unknown`/`unavailable` なら Projects 連携を skip、Issue ラベルのみで代替 | GitHub Projects 連携 |
-| 1-4 | Core | `codex_cli` | `unavailable` なら Codex レビューステップを skip + warn | `/2` のエージェントレビュー |
-| 1-5 | Core | `gh_authenticated` | `unavailable` なら PR コマンドを停止 | `/6` PR 作成 |
+| 1-4 | Core | `codex_cli` | `unavailable` なら Codex レビューステップを skip + warn | `/plan` のエージェントレビュー |
+| 1-5 | Core | `gh_authenticated` | `unavailable` なら PR コマンドを停止 | `/pr` PR 作成 |
 
 ## Phase 2 — Canonicalization
 
 | Issue | Track | Required | Fallback | Notes |
 |:-----:|:-----:|----------|----------|-------|
-| 2-1 | Core | `.github/labels.json` | `legacy_alias_map` を使って既存日本語ラベルを canonical 英語ラベルへ機械的に移行 | `/1` / `/2` の canonical 化 |
+| 2-1 | Core | `.github/labels.json` | `legacy_alias_map` を使って既存日本語ラベルを canonical 英語ラベルへ機械的に移行 | `/issue` / `/plan` の canonical 化 |
 | 2-2 | Core | `gh_authenticated` | unavailable で停止 | Issue template 整備 |
 | 2-3 | Core | — | rules 更新のみ | commit-messages / branch-naming の英語化 |
 
@@ -43,7 +43,7 @@ Epic #23 の全 21 Issue について、必要な capability と fallback 挙動
 
 | Issue | Track | Required | Fallback | Notes |
 |:-----:|:-----:|----------|----------|-------|
-| 4-1 | Core | `codex_cli` | `unavailable` なら単独 Claude 実行に退避 | `/5` verify quality-gate |
+| 4-1 | Core | `codex_cli` | `unavailable` なら単独 Claude 実行に退避 | `/verify` quality-gate |
 | 4-2 | Core | — | ロール定義のみ | agent-teams rules 拡張 |
 
 ## Optional A — Pencil design integration
@@ -51,14 +51,14 @@ Epic #23 の全 21 Issue について、必要な capability と fallback 挙動
 | Issue | Track | Required | Fallback | Notes |
 |:-----:|:-----:|----------|----------|-------|
 | A-1 | Optional | `mcp_servers`, `pencil_mcp` | `unavailable` なら design スキルを doc-only で動作 | Pencil MCP 未設定でも可 |
-| A-2 | Optional | `pencil_mcp` | unavailable で skip | `/2` で Pencil 差分チェック |
+| A-2 | Optional | `pencil_mcp` | unavailable で skip | `/plan` で Pencil 差分チェック |
 
 ## Optional B — Computer Use automation
 
 | Issue | Track | Required | Fallback | Notes |
 |:-----:|:-----:|----------|----------|-------|
-| B-1 | Optional | `computer_use` | `unavailable` なら UI 検証を手動に案内 | `/4` の UI 確認自動化 |
-| B-2 | Optional | `computer_use` | 同上 | `/5` の UI 検証自動化 |
+| B-1 | Optional | `computer_use` | `unavailable` なら UI 検証を手動に案内 | `/develop` の UI 確認自動化 |
+| B-2 | Optional | `computer_use` | 同上 | `/verify` の UI 検証自動化 |
 
 ## Optional C — MCP ecosystem extensions
 
@@ -71,7 +71,7 @@ Epic #23 の全 21 Issue について、必要な capability と fallback 挙動
 
 | Issue | Track | Required | Fallback | Notes |
 |:-----:|:-----:|----------|----------|-------|
-| F-1 | Core | 全 capability | 全 Fallback 経路を `make bootstrap` → `/1` シナリオで E2E 検証 | リリース前最終チェック |
+| F-1 | Core | 全 capability | 全 Fallback 経路を `make bootstrap` → `/issue` シナリオで E2E 検証 | リリース前最終チェック |
 
 ## 凡例
 

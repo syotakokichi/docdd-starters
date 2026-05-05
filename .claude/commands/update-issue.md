@@ -74,7 +74,7 @@ GitHub Issue $ARGUMENTS の本文を実装変更に合わせて更新してく�
 
 - 既存の内容（背景・目的・受け入れ条件）は削除しない
 - 変更履歴セクションで何が変わったかを明記
-- `/2` で立案した計画との差分を明確にする
+- `/plan` で立案した計画との差分を明確にする
 - 日本語で記述
 
 Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.

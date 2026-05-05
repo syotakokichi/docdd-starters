@@ -33,11 +33,11 @@
 
 | チェックポイント | 該当基準 | 実装箇所 | ゲートの強さ |
 |---|---|---|---|
-| `/2` 計画立案 | 繰り返し使われる | [planning-quality.md](./planning-quality.md) | リサーチ必須 |
-| `/4` 実装完了時 | — | `/5` に委譲 | 実装自体は可逆 |
-| `/5` 実装検証 | 取り消せない（PR直前） | [5.verify-implementation.md](../commands/5.verify-implementation.md) | 6ステップ + 8項目チェックリスト |
-| `/6` PR作成 | 取り消せない + 印象に残る | [6.create-pr.md](../commands/6.create-pr.md) | CI確認 + ドキュメント更新 |
-| `/7` マージ | 取り消せない | [7.merge-and-cleanup.md](../commands/7.merge-and-cleanup.md) | CI watch で担保 |
+| `/plan` 計画立案 | 繰り返し使われる | [planning-quality.md](./planning-quality.md) | リサーチ必須 |
+| `/develop` 実装完了時 | — | `/verify` に委譲 | 実装自体は可逆 |
+| `/verify` 実装検証 | 取り消せない（PR直前） | [verify.md](../commands/verify.md) | 6ステップ + 8項目チェックリスト |
+| `/pr` PR作成 | 取り消せない + 印象に残る | [pr.md](../commands/pr.md) | CI確認 + ドキュメント更新 |
+| `/merge` マージ | 取り消せない | [merge.md](../commands/merge.md) | CI watch で担保 |
 | `/commit-and-push` | 取り消しにくい | [commit-and-push.md](../commands/commit-and-push.md) | 差分確認 |
 
 ---
@@ -66,7 +66,7 @@ AIを「作業者」ではなく「見えない角度からの確認者」とし
 
 - 3基準のいずれにも当てはまらないタスク
 - ローカルで完結する変更（ファイル編集、ブランチ内コミット）
-- `/5` で検証される前提の、実装中の判断
+- `/verify` で検証される前提の、実装中の判断
 - 機械的な変更（リネーム、フォーマット統一）
 
 **止まるコストが止まらないリスクを上回るなら、止まらない。**
@@ -78,4 +78,4 @@ AIを「作業者」ではなく「見えない角度からの確認者」とし
 - [planning-quality.md](./planning-quality.md) - 計画立案品質（リサーチ必須）
 - [issue-sizing.md](./issue-sizing.md) - 適切なサイズで切る（縦スライス）
 - [agent-teams.md](./agent-teams.md) - 横断チェッカーによるブラインドスポット検出
-- [issue-workflow.md](./issue-workflow.md) - `/1`〜`/7` の開発フロー
+- [issue-workflow.md](./issue-workflow.md) - `/issue` 〜 `/merge` の開発フロー

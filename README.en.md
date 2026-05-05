@@ -39,7 +39,7 @@ graph LR
 - **7-axis Traceability** - Full traceability from requirements to test cases
 - **FastAPI + Modular Monolith** - Async-first Python backend with auto-generated API docs and strong AI/data science library support
 - **Next.js App Router** - Server Components / Server Actions with shadcn/ui and Biome ecosystem
-- **Claude Code Integration** - Issue-driven development automated via slash commands (`/1`–`/7`)
+- **Claude Code Integration** - Issue-driven development automated via slash commands (`/issue` → `/plan` → `/develop` → `/verify` → `/pr` → `/merge`)
 - **Marp Slide Generation** - Turn development outcomes and designs into presentations with `/slide`
 - **CI/CD** - GitHub Actions for testing, linting, and deployment
 - **Terraform** - Infrastructure as Code for AWS ECS Fargate
@@ -120,7 +120,7 @@ tests/                  # Backend & frontend tests
 
 ## Claude Code Development Flow
 
-Automate the full cycle from issue creation to PR merge with slash commands (`/1`–`/7`). Parallel development across multiple issues is supported via Worktrees (`/a`–`/c`).
+Automate the full cycle from issue creation to PR merge with slash commands (`/issue` → `/plan` → `/develop` → `/verify` → `/pr` → `/merge`). Parallel development across multiple issues is supported via `/worktree` (see [docs/guides/migration-from-legacy-commands.md](docs/guides/migration-from-legacy-commands.md) for migration from removed legacy commands).
 
 Use `/slide` to generate Marp-based presentations — ideal for sharing development outcomes, architectural decisions, and technical proposals.
 

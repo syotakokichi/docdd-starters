@@ -20,6 +20,7 @@ Claude Code が従うべきコーディング規約と命名規則を定義し�
 | [brand.md](./brand.md) | ブランドガイドライン（テンプレート） |
 | [codex-review.md](./codex-review.md) | Codex CLI レビュー運用ルール |
 | [cli-first.md](./cli-first.md) | CLI ファースト原則（MCP より CLI 優先） |
+| [terminology.md](./terminology.md) | canonical 用語 SSOT（コマンド名 / Phase / Wave / 7 軸） |
 
 ## 基本原則
 

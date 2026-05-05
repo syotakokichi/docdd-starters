@@ -2,106 +2,95 @@
 
 このディレクトリには、開発を効率化するためのカスタムコマンドが含まれています。
 
+旧コマンド（`/1`–`/7`, `/a`–`/c`, `/run-tests`）からの移行案内: [docs/guides/migration-from-legacy-commands.md](../../docs/guides/migration-from-legacy-commands.md)
+コマンド名の SSOT: [.claude/rules/terminology.md](../rules/terminology.md)
+
+## 開発フロー（canonical）
+
+Issue 駆動開発の標準フローです。
+
+```bash
+/issue                # Issue作成 - 新しい GitHub Issue を作成
+/plan <N>             # 計画立案 - 実装計画を Issue 本文に追記
+/worktree <N>         # worktree 作成 + ブランチ命名（並列開発の起点）
+/develop <N>          # 実装 - 進行中ラベル設定 + 実装
+/verify <N>           # 実装検証 - 品質ゲート + Codex 差分レビュー
+/review <N>           # 独立レビュー - 実装文脈外からの見落とし検出
+/pr <N>               # PR 作成 - GitHub Pull Request を作成
+/merge <N>            # マージ + worktree クリーンアップ
+```
+
 ## 並列開発の完全フロー
 
-複数のIssueを同時に進行させる際の推奨ワークフローです。
+複数の Issue を同時進行する場合の推奨ワークフロー。
 
-### 1. Worktree作成
-```bash
-/a 116
-```
-Issue #116用の新しいworktreeを作成します。
+### ターミナル 1（メインタスク）
 
-### 2. Worktreeに移動
 ```bash
-/b 116
-```
-作成したworktreeディレクトリに移動します。
-
-### 3. 通常の開発フロー（1-7）
-```bash
-/1  # Issue作成 - 新しいGitHub Issueを作成
-/2  # 計画立案 - GitHub Issueから実装計画を立案（エージェントチーム活用可）
-/3  # ブランチ作成（既にworktreeで作成済みならスキップ）
-/4  # 実装 - 進行中ラベル設定 + 計画に基づいて実装
-/5  # 実装検証 - PR作成前の品質ゲート（エージェントチーム並列検証）
-/6  # PR作成 - GitHub Pull Requestを作成
-/7  # マージ＆クリーンアップ - PRマージ後の後処理
+# Issue #115 の作業継続
+/develop 115
 ```
 
-### 4. Worktree削除
-```bash
-/c 116
-```
-作業完了後、worktreeを削除します。
+### ターミナル 2（新しいタスク）
 
-## 実際の並列作業例
-
-### ターミナル1（メインタスク）
 ```bash
-# Issue #115の作業継続
-/4 115  # 実装中
+/worktree 116    # worktree 作成 + ブランチセットアップ + 別ウィンドウ起動
+# 別エディタウィンドウに切り替え
+/plan 116        # 計画立案
+/develop 116     # 実装
+/verify 116      # 実装検証
+/review 116      # 独立レビュー（新セッション推奨）
+/pr 116          # PR 作成
+# レビュー・マージ後、メインリポジトリに戻る
+/merge 116       # マージ + worktree クリーンアップ
 ```
 
-### ターミナル2（新しいタスク）
-```bash
-/a 116     # worktree作成
-/b 116     # worktreeへ移動
-claude     # 新しいClaude Codeセッション開始
-/2 116     # 計画立案
-/4 116     # 実装
-/5 116     # PR作成
-# ...レビュー・マージ後...
-/6 116     # マージ＆クリーンアップ
-```
+未マージのまま破棄する場合: `/discard-worktree 116`
 
 ## コマンド一覧
 
-### 基本開発コマンド（1-7）
+### 開発フローコマンド
+
 | コマンド | 説明 | ファイル |
 |---------|------|----------|
-| `/1` | 新しいGitHub Issueを作成 | 1.create-issue.md |
-| `/2` | GitHub Issueから実装計画を立案 | 2.plan-github-issue.md |
-| `/3` | ブランチ作成とIssue紐付け | 3.create-branch.md |
-| `/4` | 実装フェーズ開始（進行中ラベル設定） | 4.fix-github-issue.md |
-| `/5` | 実装検証（品質ゲート） | 5.verify-implementation.md |
-| `/6` | Pull Request作成 | 6.create-pr.md |
-| `/7` | マージ後のクリーンアップ | 7.merge-and-cleanup.md |
+| `/issue` | 新しい GitHub Issue を作成 | issue.md |
+| `/plan` | GitHub Issue から実装計画を立案 | plan.md |
+| `/worktree` | Issue 用の worktree 環境を作成 | worktree.md |
+| `/develop` | 実装フェーズ開始（進行中ラベル設定） | develop.md |
+| `/verify` | 実装検証（品質ゲート） | verify.md |
+| `/review` | 独立レビュー（実装文脈外） | review.md |
+| `/pr` | Pull Request 作成 | pr.md |
+| `/merge` | PR マージ + worktree クリーンアップ | merge.md |
+| `/discard-worktree` | 未マージ worktree の破棄 | discard-worktree.md |
 
-### Worktree管理コマンド（a-c）
-| コマンド | 説明 | ファイル |
-|---------|------|----------|
-| `/a` | 新しいworktree作成 | a.create-worktree.md |
-| `/b` | worktreeへ移動 | b.move-to-worktree.md |
-| `/c` | worktree削除 | c.remove-worktree.md |
+### Git 操作コマンド
 
-### Git操作コマンド
 | コマンド | 説明 | ファイル |
 |---------|------|----------|
 | `/commit-and-push` | 変更をコミットしてプッシュ | commit-and-push.md |
 
-### テスト関連コマンド
-| コマンド | 説明 | ファイル |
-|---------|------|----------|
-| `/run-tests` | テストスイートの実行 | run-tests.md |
-
 ### ユーティリティコマンド
+
 | コマンド | 説明 | ファイル |
 |---------|------|----------|
+| `/brainstorm` | 早期段階の壁打ち / アイデア整理 | brainstorm.md |
 | `/discuss` | 実装・設計の壁打ちセッション | discuss.md |
 | `/skill-create` | 新しいスキルを作成 | skill-create.md |
-| `/update-issue` | Issue本文を実装変更に合わせて更新 | update-issue.md |
-| `/slide` | Marpスライド作成の壁打ち | slide.md |
+| `/update-issue` | Issue 本文を実装変更に合わせて更新 | update-issue.md |
+| `/tdd` | TDD ワークフロー（後続 Issue で本実装） | tdd.md |
+| `/slide` | Marp スライド作成の壁打ち | slide.md |
+
+> テスト実行は Makefile target を使用する: `make test` / `make test-backend` / `make test-frontend` / `make traceability` / `make validate-claude`
 
 ## メリット
 
-- **並列開発**: 複数のIssueを同時進行可能
-- **コンテキスト分離**: 各worktreeで独立した作業環境
+- **並列開発**: 複数の Issue を同時進行可能
+- **コンテキスト分離**: 各 worktree で独立した作業環境
 - **効率化**: 定型作業の自動化
 - **一貫性**: 統一されたワークフロー
 
 ## 注意事項
 
-- worktreeはGit 2.5以降で利用可能
-- 各worktreeは独立したディレクトリとして扱われる
-- 不要になったworktreeは必ず `/c` コマンドで削除する
+- worktree は Git 2.5 以降で利用可能
+- 各 worktree は独立したディレクトリとして扱われる
+- 不要になった worktree は `/merge`（マージ完了後）または `/discard-worktree`（破棄）で削除する

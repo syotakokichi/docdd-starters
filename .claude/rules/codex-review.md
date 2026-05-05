@@ -3,7 +3,7 @@
 ## 概要
 
 Codex CLI を活用した独立レビューの運用ルール。
-`/2`（計画立案）と `/5`（実装検証）に Codex レビューステップを組み込む。
+`/plan`（計画立案）と `/verify`（実装検証）に Codex レビューステップを組み込む。
 
 ---
 
@@ -19,7 +19,7 @@ codex --version
 
 ---
 
-## `/2` Phase 5: 計画テキストレビュー
+## `/plan` Phase 5: 計画テキストレビュー
 
 計画立案完了後、Codex で計画テキストをレビューする。
 
@@ -50,12 +50,12 @@ gh issue comment <N> --body "## Codex 計画レビュー結果
 
 ### 注意
 
-- **`--base` は使わない**: `/2` はコード差分ではなく計画テキストのレビュー
+- **`--base` は使わない**: `/plan` はコード差分ではなく計画テキストのレビュー
 - `codex exec` + プロンプトで実行する
 
 ---
 
-## `/5` Step 7: コード差分レビュー
+## `/verify` Step 5: コード差分レビュー
 
 実装検証の最終ステップで、Codex にコード差分をレビューさせる。
 
@@ -177,9 +177,9 @@ fi
 
 ## 関連ファイル
 
-- [commands/2.plan-github-issue.md](../commands/2.plan-github-issue.md) — Phase 5
-- [commands/5.verify-implementation.md](../commands/5.verify-implementation.md) — Step 7
-- [templates/codex-plan-review-prompt.md](../templates/codex-plan-review-prompt.md) — `/2` 用プロンプト
-- [templates/codex-verify-review-prompt.md](../templates/codex-verify-review-prompt.md) — `/5` 用観点メモ
+- [commands/plan.md](../commands/plan.md) — Phase 5
+- [commands/verify.md](../commands/verify.md) — Step 5
+- [templates/codex-plan-review-prompt.md](../templates/codex-plan-review-prompt.md) — `/plan` 用プロンプト
+- [templates/codex-verify-review-prompt.md](../templates/codex-verify-review-prompt.md) — `/verify` 用観点メモ
 - [templates/codex-review-handoff.md](../templates/codex-review-handoff.md) — Fallback テンプレ
 - [references/capability-matrix.md](../references/capability-matrix.md) — capability 定義

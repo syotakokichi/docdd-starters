@@ -1,6 +1,6 @@
 # Bootstrap Guide
 
-fork 直後のユーザーが最初の `/1` を実行するまでに必要なセットアップをまとめます。
+fork 直後のユーザーが最初の `/issue` を実行するまでに必要なセットアップをまとめます。
 
 ## 対応 OS
 
@@ -127,13 +127,13 @@ bootstrap 完了後は、以下の流れで開発を開始できます:
 
 ```bash
 # Issue 作成（Claude Code スラッシュコマンド）
-/1
+/issue
 
 # 計画立案
-/2 <issue-number>
+/plan <issue-number>
 
-# ブランチ作成
-/3 <issue-number>
+# Worktree 作成 + ブランチセットアップ
+/worktree <issue-number>
 ```
 
 詳細は [.claude/commands/README.md](../../.claude/commands/README.md) を参照してください。
