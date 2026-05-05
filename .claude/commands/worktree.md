@@ -216,21 +216,19 @@ npm --prefix apps/frontend install
 > **Backend (Python)**: venv はホスト共有 or Docker 内実行のため、通常は追加作業不要。
 > **`make install-dev` の挙動**: Frontend の `npm install` を含む dev 依存セットアップを一括で実施する。
 
-### Step 8: 別エディタウィンドウで開く（任意）
+### Step 8: Cursor 別ウィンドウで開く
 
-VS Code / Cursor を使っている場合は worktree ルートの **絶対パス** を渡して新しいウィンドウで開く。
+worktree ルートの **絶対パス** を渡して開く。`cursor .` は Step 7 等で cwd がずれていると誤ったディレクトリを開くため使用しない。
 
 ```bash
-# pwd ではなく worktree の絶対パスを明示的に指定
-# VS Code の場合
-code "$(git rev-parse --show-toplevel)"
-
-# Cursor の場合
+# pwd ではなく worktree の絶対パスを明示的に指定する
 cursor "$(git rev-parse --show-toplevel)"
 ```
 
 > **なぜ絶対パス?**: `npm install` 等のサブコマンドで cwd が変わる場合がある。`git rev-parse --show-toplevel` は常に worktree ルートを返すため安全。
-> **メイン Window はそのまま維持**: メインリポジトリの Window はマージ・Issue 作成等の管理操作に専有する。
+
+- メインの Cursor ウィンドウはそのまま維持（マージ・Issue 作成等の管理操作に専有）
+- 新しい Cursor ウィンドウで検索・タブ・ターミナル・Git ブランチ表示が worktree に揃う
 
 ### Step 9: 次のステップを案内
 
@@ -238,8 +236,9 @@ cursor "$(git rev-parse --show-toplevel)"
 Worktree 作成完了:
   パス: .claude/worktrees/issue-<N>
   ブランチ: <type>/issue-<N>-<short-description>
+  Cursor: 別ウィンドウで開き済み
 
-次のステップ（worktree 内で実行）:
+次のステップ（Cursor 別ウィンドウ側で実行）:
   /plan <N>      # 計画立案（未計画の場合）
   /develop <N>   # 実装開始
   /verify <N>    # 実装検証
