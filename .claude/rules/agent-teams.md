@@ -99,7 +99,7 @@ Agent B: テストへの影響調査
 → 影響範囲レポート
 ```
 
-### 9. 品質ゲート並列検証（/5 コマンド）
+### 9. 品質ゲート並列検証（/verify コマンド）
 
 実装完了後の品質チェックを並列実行。
 
@@ -109,7 +109,7 @@ Agent B: コード品質 + 計画との整合性チェック
 → PR作成可否判定
 ```
 
-### 10. Issue 分析・計画（/2 コマンド）
+### 10. Issue 分析・計画（/plan コマンド）
 
 計画立案時のリサーチと分析を並列実行。
 
@@ -168,4 +168,4 @@ Agent B: 公式ドキュメント・ベストプラクティスの調査
 ## 関連ファイル
 
 - [.claude/settings.json](../settings.json) — エージェントチーム有効化設定
-- [commands/5.verify-implementation.md](../commands/5.verify-implementation.md) — 品質ゲートコマンド
+- [commands/verify.md](../commands/verify.md) — 品質ゲートコマンド

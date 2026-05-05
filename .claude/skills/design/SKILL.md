@@ -132,7 +132,7 @@ instance=I("parent", { ref: "componentNodeId", ... })
 
 ## 設計フロー
 
-### /2 計画コマンドとの連携
+### /plan 計画コマンドとの連携
 
 UI 変更を伴う Issue の計画立案時:
 
@@ -140,7 +140,7 @@ UI 変更を伴う Issue の計画立案時:
 2. `get_screenshot` でスクリーンショットを取得し Issue に添付
 3. 実装計画にコンポーネント分割とデザイントークンの変更を記載
 
-### /4 実装コマンドとの連携
+### /develop 実装コマンドとの連携
 
 ```
 Pencil でデザイン確定
@@ -154,7 +154,7 @@ get_variables でデザイントークン取得
 
 詳細なワークフローは [pencil-workflow.md](./pencil-workflow.md) を参照。
 
-### /5 検証コマンドとの連携
+### /verify 検証コマンドとの連携
 
 - `get_screenshot` でデザインと実装を視覚比較
 - `get_variables` でトークンの一貫性を確認

@@ -20,7 +20,7 @@ description: |
 - `/worktree` — Worktree 作成 + ブランチセットアップ
 - `/plan` — 計画立案時に worktree 要否を案内する SSOT として参照
 
-> 後続 Issue でマージ・破棄系コマンド（`/merge` / `/discard-worktree`）を整備予定。本 Issue では `/7`（旧マージコマンド）と `/c`（旧 worktree 削除）が並存している。
+> マージ・破棄系コマンドは `/merge`（PR マージ + cleanup）と `/discard-worktree`（未マージ破棄）を使う。
 
 ---
 
@@ -80,7 +80,7 @@ Issue が渡された
 ```
 ┌──────────────────────┬──────────────────────┐
 │ Window 1: main       │ Window 2: worktree-A │
-│ /7 / /1 等の管理系   │ Issue #X の実装      │
+│ /merge / /issue 管理 │ Issue #X の実装      │
 ├──────────────────────┼──────────────────────┤
 │ Window 3: worktree-B │ Window 4: worktree-C │
 │ Issue #Y の実装      │ Issue #Z の実装      │
@@ -88,7 +88,7 @@ Issue が渡された
 ```
 
 - **Window 1 (main)**: マージ・Issue 作成・ロードマップ更新など worktree 外コマンド
-- **Window 2-N (worktree)**: それぞれ独立した Issue の `/plan` → `/develop` → `/verify` → `/6`
+- **Window 2-N (worktree)**: それぞれ独立した Issue の `/plan` → `/develop` → `/verify` → `/pr`
 
 ### 運用ルール
 
@@ -135,13 +135,13 @@ docdd-starters/                    # メインリポジトリ（Window 1 専有�
 
 [Worktree 内 (Window 2-N)]
 /plan <N>       → 計画立案（未計画の場合）
-/develop <N>    → 実装（旧 /4）
-/verify <N>     → 実装検証（旧 /5）
-/6              → PR 作成 ← worktree 内の最後のステップ
+/develop <N>    → 実装
+/verify <N>     → 実装検証
+/pr <N>         → PR 作成 ← worktree 内の最後のステップ
 
 [メインリポジトリに戻る (Window 1)]
-/7 <N>          → PR マージ + クリーンアップ（旧コマンド体系。後続 Issue で /merge に置換予定）
-/c <N>          → 未マージ Worktree 削除（旧コマンド体系）
+/merge <N>             → PR マージ + worktree クリーンアップ
+/discard-worktree <N>  → 未マージ Worktree 破棄
 ```
 
 > **重要**: マージ操作（`gh pr merge` / `git worktree remove`）はメインリポジトリから実行する。
@@ -173,7 +173,7 @@ docdd-starters/                    # メインリポジトリ（Window 1 専有�
 | `/plan` | コード読み取り + `gh` CLI のみ |
 | `/develop` + `make test-backend` | DB はホスト共有 or Docker。PYTHONPATH は Makefile が設定 |
 | `/verify` | コード読み取り + `gh` CLI + `make` のみ |
-| `/6`（PR 作成） | `gh` CLI のみ |
+| `/pr`（PR 作成） | `gh` CLI のみ |
 | `git diff` / `git merge-base` | worktree でも正常動作 |
 | `make validate-claude` | スクリプト経由のため worktree でも動作 |
 | `make traceability` | スクリプト経由のため worktree でも動作 |
@@ -202,10 +202,9 @@ docdd-starters/                    # メインリポジトリ（Window 1 専有�
 
 ## 関連ファイル
 
-- [.claude/commands/worktree.md](../../commands/worktree.md) — Worktree 作成（canonical）
-- [.claude/commands/a.create-worktree.md](../../commands/a.create-worktree.md) — Worktree 作成（旧コマンド・並存）
-- [.claude/commands/b.move-to-worktree.md](../../commands/b.move-to-worktree.md) — Worktree 移動（旧コマンド・並存）
-- [.claude/commands/c.remove-worktree.md](../../commands/c.remove-worktree.md) — Worktree 削除（旧コマンド・並存）
+- [.claude/commands/worktree.md](../../commands/worktree.md) — Worktree 作成
+- [.claude/commands/merge.md](../../commands/merge.md) — PR マージ + worktree クリーンアップ
+- [.claude/commands/discard-worktree.md](../../commands/discard-worktree.md) — 未マージ Worktree 破棄
 - [.claude/rules/branch-naming.md](../../rules/branch-naming.md) — ブランチ命名規則
 - [.claude/rules/cli-first.md](../../rules/cli-first.md) — CLI-first 原則
 - [.claude/rules/agent-teams.md](../../rules/agent-teams.md) — エージェントチーム運用
@@ -216,5 +215,4 @@ docdd-starters/                    # メインリポジトリ（Window 1 専有�
 
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
-| `/merge`, `/discard-worktree` コマンド | canonical マージ・破棄フロー | 後続 Issue（2-2 想定） |
 | `validate-merge-cwd.sh` hook | worktree 内からのマージ操作を決定論的にブロック | 後続 Issue（D-1 想定） |

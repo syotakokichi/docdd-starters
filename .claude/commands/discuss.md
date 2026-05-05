@@ -113,8 +113,8 @@ disable-model-invocation: true
 
 ## 関連コマンド
 
-- `/2`: 計画立案（Phase 2 で相談フェーズあり）
-- `/4`: 実装（途中で困ったら `/discuss` へ）
+- `/plan`: 計画立案（Phase 2 で相談フェーズあり）
+- `/develop`: 実装（途中で困ったら `/discuss` へ）
 - `/update-issue`: 相談の結果をIssueに反映
 
 ---

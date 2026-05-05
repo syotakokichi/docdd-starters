@@ -19,7 +19,7 @@ Doc Driven Development (DocDD) と 7-axis Traceability を軸にした開発テ�
 2. **既存パターン尊重**: 新規追加より既存ファイルの編集を優先。プロジェクトの既存パターンに従う
 3. **シンプルさ**: 過度な抽象化を避け、必要最小限の実装にとどめる
 4. **トレーサビリティ**: Issue → Plan → Implementation → PR の流れを追跡可能に保つ
-5. **独立レビュー**: Codex CLI が利用可能な場合、計画（`/2`）と検証（`/5`）で独立レビューを実施する
+5. **独立レビュー**: Codex CLI が利用可能な場合、計画（`/plan`）と検証（`/verify`）で独立レビューを実施する
 
 **詳細なルール**: [.claude/rules/README.md](./rules/README.md)
 
@@ -70,18 +70,18 @@ docdd-starters/
 
 | コマンド | 説明 |
 |---------|------|
-| `/1` | Issue作成 |
-| `/2` | 実装計画を立案してIssue本文に追記（エージェントチーム活用可） |
-| `/3` | ブランチ作成とIssue紐付け |
-| `/4` | 実装フェーズ開始（進行中ラベル設定） |
-| `/5` | 実装検証（品質ゲート） |
-| `/6` | Pull Request作成 |
-| `/7` | マージ後のクリーンアップ |
-| `/a`,`/b`,`/c` | Worktree並列開発 |
+| `/issue` | Issue作成 |
+| `/plan` | 実装計画を立案してIssue本文に追記（エージェントチーム活用可） |
+| `/worktree` | Issue 用 worktree 作成 + ブランチ命名（並列開発の起点） |
+| `/develop` | 実装フェーズ開始（進行中ラベル設定 + 実装） |
+| `/verify` | 実装検証（品質ゲート + Codex 差分レビュー） |
+| `/review` | 独立レビュー（実装文脈外からの見落とし検出） |
+| `/pr` | Pull Request 作成 |
+| `/merge` | PR マージ + worktree クリーンアップ |
+| `/discard-worktree` | 未マージ worktree の破棄 |
 | `/commit-and-push` | コミットしてプッシュ |
-| `/run-tests` | テスト実行 |
 
-**詳細**: [commands/README.md](./commands/README.md)
+**詳細**: [commands/README.md](./commands/README.md) / 旧コマンドからの移行: [docs/guides/migration-from-legacy-commands.md](../docs/guides/migration-from-legacy-commands.md)
 
 ### スキル（AI実行知識）
 
@@ -120,13 +120,14 @@ docdd-starters/
 ### Issue駆動開発フロー
 
 ```
-1. /1 - Issue作成    → タスクをIssue化
-2. /2 - 計画立案     → Issue に実装計画を追記（エージェントチーム活用可）
-3. /3 - ブランチ作成  → feature/issue-xxx-short-desc
-4. /4 - 実装開始     → 進行中ラベル設定 + コード実装
-5. /5 - 実装検証     → 品質ゲート（テスト・計画照合）
-6. /6 - PR作成       → レビュー依頼
-7. /7 - マージ       → クリーンアップ
+1. /issue            → タスクをIssue化
+2. /plan <N>         → Issue に実装計画を追記（エージェントチーム活用可）
+3. /worktree <N>     → worktree 作成 + ブランチ命名（並列開発の起点）
+4. /develop <N>      → 実装フェーズ（進行中ラベル設定 + コード実装）
+5. /verify <N>       → 実装検証（品質ゲート + Codex 差分レビュー）
+6. /review <N>       → 独立レビュー（実装文脈外からの見落とし検出）
+7. /pr <N>           → PR 作成
+8. /merge <N>        → マージ + worktree クリーンアップ
 ```
 
 ### 並列開発（Worktree）
@@ -134,9 +135,9 @@ docdd-starters/
 複数Issueを同時進行する場合：
 
 ```
-/a issue-123  → Worktree作成
-/b issue-123  → Worktree移動・マージ
-/c issue-123  → Worktree削除
+/worktree 123          → Worktree 作成（既存があれば再利用）
+/discard-worktree 123  → 未マージ worktree の破棄
+/merge 123             → PR マージ + worktree クリーンアップ
 ```
 
 ---
