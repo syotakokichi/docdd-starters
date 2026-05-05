@@ -1,14 +1,16 @@
-Create a new worktree for the issue: $ARGUMENTS.
+---
+description: '[deprecated] /worktree に移行しました。'
+argument-hint: "<issue-number>"
+disable-model-invocation: true
+---
 
-Follow these steps:
+# [deprecated] /a.create-worktree
 
-1. Use `gh issue view` to get the issue details
-2. Generate branch name from issue title
-3. Create worktree directory at ../<project>-issue-<number>
-4. Use `git worktree add` to create the worktree
-5. Show the created worktree path and next steps
+このコマンドは **`/worktree`** に置き換わりました。
 
-Remember to:
-- Check if worktree already exists
-- Create new branch if it doesn't exist
-- Show current worktrees with `git worktree list`
+> ⚠️ **このコマンドはここで処理を停止します。自動転送は行いません。**
+> ユーザーが手動で `/worktree $ARGUMENTS` を再実行してください。
+
+詳細: `.claude/commands/worktree.md`
+
+> 削除予定: Phase E 完了 + 1 週間後（Issue F-1 で物理削除）

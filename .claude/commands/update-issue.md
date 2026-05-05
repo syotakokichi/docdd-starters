@@ -1,3 +1,8 @@
+---
+description: GitHub Issue 本文を実装中の仕様変更・方針変更に合わせて更新します。
+argument-hint: "<issue-number>"
+disable-model-invocation: true
+---
 GitHub Issue $ARGUMENTS の本文を実装変更に合わせて更新してください。
 
 実装中に仕様変更や方針変更があった場合、GitHub Issue の本文を現状に合わせて更新します。
