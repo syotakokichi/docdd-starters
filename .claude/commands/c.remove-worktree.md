@@ -1,14 +1,18 @@
-Remove a worktree for the completed issue: $ARGUMENTS.
+---
+description: '[deprecated] /discard-worktree に移行しました（用途: 未マージ破棄のみ）。'
+argument-hint: "<issue-number>"
+disable-model-invocation: true
+---
 
-Follow these steps:
+# [deprecated] /c.remove-worktree
 
-1. List all worktrees with `git worktree list`
-2. Find the worktree for the given issue number
-3. Check if there are uncommitted changes
-4. Use `git worktree remove` to delete the worktree
-5. Optionally delete the branch if merged
+このコマンドは **`/discard-worktree`** に置き換わりました。
 
-Remember to:
-- Warn about uncommitted changes
-- Ask for confirmation before removing
-- Show remaining worktrees after removal
+> ⚠️ **このコマンドはここで処理を停止します。自動転送は行いません。**
+> 用途に応じてユーザーが手動で実行してください:
+> - **未マージの破棄** → `/discard-worktree $ARGUMENTS`
+> - **PR マージ後の cleanup** → `/merge` 内で実行（`/discard-worktree` ではない）
+
+詳細: `.claude/commands/discard-worktree.md` / `.claude/commands/merge.md`
+
+> 削除予定: Phase E 完了 + 1 週間後（Issue F-1 で物理削除）

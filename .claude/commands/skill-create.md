@@ -1,3 +1,8 @@
+---
+description: .claude/skills 配下に新しいスキルを作成します。
+argument-hint: "<skill-name>"
+disable-model-invocation: true
+---
 新しいスキルを作成します。
 
 ## 手順

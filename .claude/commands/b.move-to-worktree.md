@@ -1,56 +1,18 @@
-Issue $ARGUMENTS 用の worktree ディレクトリに移動してください。
-
+---
+description: '[deprecated] /worktree に移行しました（既存 worktree への移動は git worktree list を使用）。'
+argument-hint: "<issue-number>"
+disable-model-invocation: true
 ---
 
-## 手順
+# [deprecated] /b.move-to-worktree
 
-### 1. Worktree の確認
+このコマンドは **`/worktree`** に置き換わりました。
 
-```bash
-# 既存のworktreeを一覧表示
-git worktree list
-```
+> ⚠️ **このコマンドはここで処理を停止します。自動転送は行いません。**
+> 用途に応じてユーザーが手動で実行してください:
+> - **未作成** → `/worktree $ARGUMENTS`（新規 worktree を作成）
+> - **既存 worktree への移動** → `git worktree list` でパス確認後、ターミナルで `cd <path>`（`/worktree` を再実行すると `git worktree add` エラーになるため不可）
 
-### 2. Worktree ディレクトリに移動
+詳細: `.claude/commands/worktree.md`
 
-```bash
-# worktreeディレクトリに移動
-cd ../<project>-issue-$ARGUMENTS
-```
-
-または親ディレクトリからの絶対パス:
-
-```bash
-cd /path/to/parent/<project>-issue-$ARGUMENTS
-```
-
-### 3. 移動の確認
-
-```bash
-# 現在のディレクトリを確認
-pwd
-
-# 現在のブランチを確認
-git branch --show-current
-
-# ステータスを確認
-git status
-```
-
----
-
-## 注意事項
-
-- Worktree が存在しない場合は先に `/a $ARGUMENTS` で作成
-- 移動後は新しい Claude Code セッションを開始することを推奨
-- 各 worktree は独立した作業環境として機能
-
-## 関連コマンド
-
-- `/a`: worktree 作成
-- `/c`: worktree 削除
-- `/6`: PR マージ & クリーンアップ
-
-ARGUMENTS: issue_number
-
-Example usage: `/b 123`
+> 削除予定: Phase E 完了 + 1 週間後（Issue F-1 で物理削除）
