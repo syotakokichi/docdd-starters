@@ -36,3 +36,6 @@ Thumbs.db
 
 # Worktrees (canonical /worktree creates these)
 .claude/worktrees/
+
+# Claude Code runtime state (machine-specific session/pid lock — must not be committed)
+.claude/scheduled_tasks.lock
