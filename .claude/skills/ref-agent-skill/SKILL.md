@@ -378,4 +378,3 @@ review / 検証系 Skill (`assign-*-evaluator`) は、評価基準 (lint 設定�
 - evaluator は Read のみ。成果物も基準も書き換えない
 
 評価基準を変えたい場合は別経路 (人間レビュー + `ref-*` skill の改版) で行う。
-
