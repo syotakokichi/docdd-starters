@@ -296,10 +296,29 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 
 ## 次のステップ
 
-Step 6 完了後、ユーザーに以下を案内する:
+実装検証完了。Codex コード差分レビュー実施済み。新セッションで `/review` に渡す。
 
 ```
-次のステップ: /review <N>
+---
+✨ **このセッションで進んだこと**
+- 品質ゲート再実行 PASS（`make test-backend` / `make test-frontend` / `make validate-claude` のうち該当）
+- ブラウザヘルスチェック: PASS / N/A / Console / Network 0 件
+- TDD 証跡確認: PASS / Codex レビュー: 🔴 必須 <X> 件（解消 <Y>） / 未解消 0 件
+
+🎯 **これによって変わること**
+- DocDD 7軸: BR=<…> / UC=<…> / DM=<…> / SR=<…> / EXT=<…> / API=<…> / TC=<…>（整合性検証結果）
+- 受け入れ条件と実装が一致したことが Issue コメントに残り、`/review` の独立レビューに渡せる
+
+📋 **次のステップ**
+- Issue #<N>（status:in-progress / 検証 PASS）
+- 新セッションで `/review <N>` を起動
+---
+```
+
+コピペ用:
+
+```bash
+/review <N>
 ```
 
 > **新しいセッションで PR 作成 / 独立レビューを行うのが推奨**: 検証者の文脈を引き継いだまま PR を出すと、見落としを PR コメントとして拾えない。

@@ -26,7 +26,7 @@ disable-model-invocation: true
 - 背景や理由
 - 完了条件
 
-## 次のステップ
+## 標準フロー
 
 Issue 作成後の正規フロー:
 
@@ -113,15 +113,7 @@ gh issue create --title "..." --body "..." --label "Medium" --label "バック�
 
 ### Step 4: 後続フローの案内
 
-Issue 番号を控えて、ユーザーに次のステップを案内する:
-
-```
-Issue #<N> 作成完了
-
-次のステップ:
-  /worktree <N>   # worktree 作成 + ブランチ命名（推奨）
-  /plan <N>       # 実装計画立案
-```
+Issue 番号を控えて、`## 次のステップ` セクションの ✨/🎯/📋 trailer をユーザーに出力する（trailer SSOT: `.claude/rules/command-trailer.md`）。
 
 ---
 
@@ -130,6 +122,34 @@ Issue #<N> 作成完了
 - Issue 作成後、`/plan` で実装計画を立案して Issue 本文に追記する
 - 並列開発する場合は `/worktree <N>` を先に実行し、worktree 内で `/plan` 〜 `/pr` を進める
 - 単独 sequential で進める場合は `/plan` 直後に `/develop` でも可（`.claude/skills/parallel-development/SKILL.md` 参照）
+
+---
+
+## 次のステップ
+
+Issue 起票完了。並列開発するなら `/worktree` を先に、単独 sequential なら `/plan` を直接呼ぶ。
+
+```
+---
+✨ **このセッションで進んだこと**
+- Issue #<N> 作成（labels: <優先度> / <領域> / status:todo）
+- サイズチェック PASS（変更ファイル <M> 件想定 / 実装タスク <K> 件想定）
+
+🎯 **これによって変わること**
+- 起票内容が Issue tracker 上の単一参照源になり、`/plan` 以降が Issue 番号で追跡可能になる
+- 並列開発する場合は次の `/worktree` で worktree + 専用ブランチが立ち上がる
+
+📋 **次のステップ**
+- Issue #<N>（status:todo）
+- 並列開発するなら `/worktree <N>`、単独 sequential なら `/plan <N>` を直接
+---
+```
+
+コピペ用:
+
+```bash
+/worktree <N>
+```
 
 ---
 
