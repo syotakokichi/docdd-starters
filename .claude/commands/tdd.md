@@ -182,6 +182,35 @@ RED 証跡作成完了:
 
 ---
 
+## 次のステップ
+
+RED 証跡を Issue コメントに残した。`/develop` で GREEN を達成する。
+
+```
+---
+✨ **このセッションで進んだこと**
+- 追加した Failing test: <M> 件（FAILED 確認済み）
+- RED コマンド: `pytest <path>::<test>`（または `npx vitest run ...`）
+- 実装本体は未編集
+
+🎯 **これによって変わること**
+- 期待挙動がテストとして固定され、`/develop` での GREEN 実装が同じコマンドで検証可能になる
+- スコープ漏れがあれば `/plan` の Critical Path テーブルとの差分が見える
+
+📋 **次のステップ**
+- Issue #<N>（RED 証跡記録済み）
+- `/develop <N>` で GREEN 実装
+---
+```
+
+コピペ用:
+
+```bash
+/develop <N>
+```
+
+---
+
 ## 📋 後続 Issue で導入予定（forward reference の隔離）
 
 | 参照先（未存在） | 用途 | 予定 Issue |

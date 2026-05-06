@@ -161,14 +161,29 @@ EOF
 
 ## 次のステップ
 
-```
-Brainstorm 結論まとめ完了:
-  - Goal: [...]
-  - Chosen direction: [...]
-  - Issue split: [N 件 / なし]
+Brainstorm 結論まとめ完了。`/issue` で起票に渡す。
 
-次のステップ:
-  /issue              # Goal / Non-goals / 受け入れ条件をもとに起票
+```
+---
+✨ **このセッションで進んだこと**
+- Goal / Non-goals / Options / Risks 4 軸で整理
+- Chosen direction 確定 / Issue split: <N 件 / なし>
+- Codex 単一相談: 実施 / 未実施
+
+🎯 **これによって変わること**
+- 曖昧な要望が起票可能な粒度（受け入れ条件付き）まで分解され、`/issue` でそのまま起票できる
+- 分割が必要な場合は子 Issue / 親 Epic の構成案が決まる
+
+📋 **次のステップ**
+- 起票候補: <N> 件
+- `/issue` を呼び、Brainstorm 結論を貼り付けて起票
+---
+```
+
+コピペ用:
+
+```bash
+/issue
 ```
 
 複数 Issue に分割する場合、最も大きいものから順に `/issue` を呼んで起票する。
