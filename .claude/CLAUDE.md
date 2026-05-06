@@ -85,6 +85,8 @@ docdd-starters/
 
 ### スキル（AI実行知識）
 
+#### ドメインスキル
+
 | スキル | 説明 |
 |--------|------|
 | [docdd-workflow](./skills/docdd-workflow/SKILL.md) | DocDD 7軸の運用ルール |
@@ -93,6 +95,17 @@ docdd-starters/
 | [testing-patterns](./skills/testing-patterns/SKILL.md) | テスト戦略・フィクスチャ |
 | [design](./skills/design/SKILL.md) | Pencil.dev MCP 連携によるUI設計・デザイントークン管理 |
 
+#### Cross-Cutting Skills（フロー横断）
+
+| スキル | 説明 |
+|--------|------|
+| [planning-quality](./skills/planning-quality/SKILL.md) | 計画立案品質ルール（リサーチ / 依存先トレース / Codex レビュー） |
+| [issue-sizing](./skills/issue-sizing/SKILL.md) | Issue サイジング（縦スライス / 分割 / Umbrella / 観察集約） |
+| [agent-teams](./skills/agent-teams/SKILL.md) | エージェントチーム運用（コンテキストフレッシュ戦略） |
+| [parallel-development](./skills/parallel-development/SKILL.md) | 並列開発（Worktree）運用ルール |
+| [verify-input-capture](./skills/verify-input-capture/SKILL.md) | `/verify` Step 1 の入力固定（Issue 番号検証 / merge-base diff） |
+
+> Issue 種別 → 適用 skill の SSOT は [references/applicable-skills.md](./references/applicable-skills.md)。
 > prefix 命名のメタ skill 群（`ref-*` / `assign-*-evaluator` / `run-*` / `delegate-*`）一覧と決定木は [skills/README.md](./skills/README.md) を参照。
 
 **詳細**: [skills/README.md](./skills/README.md)

@@ -41,7 +41,7 @@ Issue 作成後の正規フロー:
 
 ### Step 1: サイズチェック
 
-Issue の概要から影響範囲を概算し、`.claude/rules/issue-sizing.md` に照らす:
+Issue の概要から影響範囲を概算し、[`.claude/skills/issue-sizing/SKILL.md`](../skills/issue-sizing/SKILL.md) に照らす（適用スキル選択は [`.claude/references/applicable-skills.md`](../references/applicable-skills.md) を参照）:
 
 | 指標 | 上限 |
 |------|:----:|
