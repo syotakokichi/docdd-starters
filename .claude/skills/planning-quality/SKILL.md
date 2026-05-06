@@ -137,11 +137,14 @@ UI 変更がある場合、`.claude/templates/issue-implementation-plan.md` の�
 
 ### 9. ユーザー相談
 
-計画確定前に、以下を相談する。
+計画確定前に、以下の **候補トピック** を Pattern B フィルタ（`commands/plan.md` Phase 2 SSOT）にかけ、default で進められないものだけ AskUserQuestion で surface する。**4 つすべてを必ず質問するわけではない**（候補トピックはフィルタ入力であり、強制相談リストではない）。
+
 - 実装方針の候補
 - 推奨方針と理由
 - 技術的トレードオフ
 - 後続 Issue の見通し
+
+**0 個例外**: 候補がすべて default で処理できる場合は AskUserQuestion を呼ばず、default 進行を宣言した上で Phase 3 へ進む。論点フィルタとフォーマット定義（呼び出しルール / 禁止パターン / 呼び出し例）の SSOT は [`commands/plan.md`](../../commands/plan.md) Phase 2（Pattern B + AskUserQuestion）。本セクションの候補リスト以外は HOW（フォーマット・上限・例）と重複させない（Phase 2 SSOT に委譲する）。
 
 ### 10. Codex レビュー（必須）
 
@@ -160,7 +163,7 @@ UI 変更がある場合、`.claude/templates/issue-implementation-plan.md` の�
 - DocDD / TC / traceability map の更新要否が出ていない
 - 証跡マッピング表が全行埋まっていない
 - UI 変更があるのに UI State Matrix が埋まっていない
-- ユーザー相談を経ずに方針を確定している
+- **相談すべき論点があるのに**ユーザー相談を経ずに方針を確定している
 - Codex レビューを実施していない（または handoff も出していない）
 
 ### 重要ポイントの書き方

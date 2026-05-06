@@ -22,7 +22,7 @@
 | 1.3 | Critical Path 判定 | テンプレ「Critical Path / Coverage expectation」 |
 | 1.5 | UI 設計確認（UI 変更時） | [`project-workflow.md`](./project-workflow.md) |
 | 1.6 | サイズチェック | [`skills/issue-sizing`](../skills/issue-sizing/SKILL.md) |
-| 2 | ユーザー相談 | — |
+| 2 | ユーザー相談（Pattern B + AskUserQuestion） | [`commands/plan.md`](../commands/plan.md) Phase 2 |
 | 3 | リサーチ | [`skills/agent-teams`](../skills/agent-teams/SKILL.md) |
 | 4 | Issue 本文更新（テンプレ反映） | テンプレ全体 |
 | 5 | Codex 計画レビュー | [`codex-review.md`](./codex-review.md) |
