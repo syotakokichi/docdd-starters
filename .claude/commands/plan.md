@@ -176,22 +176,73 @@ B: [メリット/デメリット]
 
 ### Phase 4: Issue 更新（必須）
 
-1. **`gh issue edit` で Issue 本文に計画を追記**（テンプレート: `.claude/templates/issue-implementation-plan.md`）
-2. **`gh issue edit --title` でタイトルに `[実装計画]` を追加**
-3. **ラベル付与**（最低 2 つ。canonical 優先 — `.github/labels.json` 参照）:
+#### Step 1: テンプレートの heading 順序・必須項目を遵守する
+
+1. **テンプレ本文を読み込む**: `.claude/templates/issue-implementation-plan.md` を Read し、コードフェンス（` ```markdown ` 〜 ` ``` `）内の `## ` heading 順序を取得する
+2. **heading を Issue 本文へ literal に反映する**: フェンス内の `## ` 〜 `### ` heading 列を、その**順序のまま** Issue 本文の追記セクションへコピーする（heading 名は変更禁止）
+3. **必須項目を埋める**: 各 heading 配下のプレースホルダ（`[...]` / `?` / `✅/—` 等）を Issue 固有の値で置換する
+4. **HTML コメントは Issue 本文に出さない**: テンプレ内の `<!-- ... -->` ガイダンスはプランナーの判断材料。Issue 本文には出力しない
+5. **元 Issue 本文（背景・目的・スコープ・受け入れ条件）は保全**する。書き換え禁止
+
+#### Step 2: 条件付き表示ロジック（必須）
+
+テンプレを反映する際、以下の 3 ロジックで該当セクションを出し分ける:
+
+1. **TDD 判定 row の出し分け**:
+   - **TDD 必須** の場合: 「想定 RED コマンド」「想定 GREEN コマンド」に focused pytest / vitest コマンドを**具体値**で記入
+   - **TDD スキップ** の場合: 同じ row に「該当なし」と記入し、判定欄に `スキップ（理由: <one-liner>）` と記入
+   - **空欄禁止**: 必須 / スキップどちらかを必ず記入する。空欄 = 証跡漏れとして扱う
+
+2. **サイズチェック超過時の分割提案**:
+   - 上限を 2 つ以上超過した場合、サイズチェック表の直後に `## 🪓 分割提案` セクションを追加し、子 Issue 候補を列挙する（縦スライス優先）
+   - 上限内の場合は分割提案セクションを出さない
+   - 判定 SSOT: [`.claude/rules/issue-sizing.md`](../rules/issue-sizing.md)
+
+3. **forward reference の末尾隔離**:
+   - 本 Issue が **未存在 path** を参照する場合（例: `tdd-gate.md`、`scripts/claude/verify-issue.sh` 等）、Issue 本文の末尾に `## 📋 後続 Issue で導入予定（forward reference の隔離）` セクションを追加し、`---` 区切りで隔離する
+   - 既存 path への参照は本セクションに含めない
+   - 参照先が無い場合は本セクションを出さない
+
+#### Step 3: dogfooding ガード（上書き安全性）
+
+`gh issue edit --body-file` で Issue 本文を更新する**直前**に、**最新 body を再取得**して上書きリスクを排除する:
+
+```bash
+# 1. 最新 body と更新時刻を取得
+gh issue view $ARGUMENTS --json body,updatedAt > /tmp/issue_${ARGUMENTS}_remote.json
+
+# 2. ローカル作成本文との差分を目視確認
+#    - 他セッションの追記 / レビューコメント反映が無いか確認
+#    - updatedAt がローカル取得時刻より新しい場合は競合の可能性
+diff <(jq -r '.body' /tmp/issue_${ARGUMENTS}_remote.json) /tmp/issue_${ARGUMENTS}.md
+
+# 3. 差分が想定内であることを確認してから edit
+gh issue edit $ARGUMENTS --body-file /tmp/issue_${ARGUMENTS}.md
+```
+
+**競合検出時の対応**: 他セッションの追記が見つかった場合は、ローカル本文に統合してから再度 dogfooding ガード手順を実行する。サイレントに上書きしない。
+
+#### Step 4: タイトル・ラベル付与
+
+1. **`gh issue edit --title` でタイトルに `[実装計画]` を追加**
+2. **ラベル付与**（最低 2 つ。canonical 優先 — `.github/labels.json` 参照）:
    - 優先度: `P0` / `P1` / `P2`（legacy alias: `High` / `Medium` / `Low`）
    - 領域: `BE` / `FE` / `infra` / `docs` / `tests` / `bug` / `chore`（legacy alias: `バックエンド` / `フロントエンド` / `インフラ` / `ドキュメント` / `テスト` / `バグ`）
    - ステータス: `status:todo` または `status:in-progress`
 
-#### 長い計画の場合
+#### 長い計画の場合（一時ファイル経由）
 
 ```bash
-# 1. 一時ファイルに書き出し
+# 1. 一時ファイルに書き出し（Step 1〜2 を反映）
 cat > /tmp/issue_$ARGUMENTS.md << 'EOF'
 [既存の内容 + 計画]
 EOF
 
-# 2. Issue 更新
+# 2. dogfooding ガード（Step 3）
+gh issue view $ARGUMENTS --json body,updatedAt > /tmp/issue_${ARGUMENTS}_remote.json
+diff <(jq -r '.body' /tmp/issue_${ARGUMENTS}_remote.json) /tmp/issue_$ARGUMENTS.md
+
+# 3. Issue 更新
 gh issue edit $ARGUMENTS --body-file /tmp/issue_$ARGUMENTS.md
 ```
 
