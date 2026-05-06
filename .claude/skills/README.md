@@ -34,6 +34,9 @@ Skill 設計品質を機械的に上げるためのメタ skill 群です。`ref
 | [ref-skill-component-design](./ref-skill-component-design/SKILL.md) | `ref-*` (`kind: meta`) | コンポーネント構造規定：ペア形式（ref + evaluator）/ 三組形式（ref + evaluator + generator）/ `pair:` 契約 |
 | [assign-agent-skill-evaluator](./assign-agent-skill-evaluator/SKILL.md) | `assign-*-evaluator` | SKILL.md の品質を 4 観点（軸整合性 / prefix 導出 / frontmatter / 共通ルール）で採点。並置 `eval-schema.json` あり |
 | [run-skill-creator](./run-skill-creator/SKILL.md) | `run-*` (orchestrator) | Step 0–8 で skill 新規作成を指揮：適格性 → 4 軸判定 → 起草 → description 最適化 → セルフチェック → evaluator レビュー |
+| [delegate-codex](./delegate-codex/SKILL.md) | `delegate-*` (pass-through) | Codex CLI に任意タスクを委譲する thin wrapper。heredoc + stdin で zsh メタ文字耐性を確保。「Codex に任せて」「codex で実装して」で発動 |
+| [delegate-explorer](./delegate-explorer/SKILL.md) | `delegate-*` (pass-through) | read-only でコードベースを調査する general-purpose (haiku) サブエージェント。「コード探索」「ファイル探索」で発動 |
+| [delegate-planner](./delegate-planner/SKILL.md) | `delegate-*` (pass-through) | read-only で実装プランを設計する general-purpose (opus) サブエージェント。`delegate-explorer` と連携。「プラン作って」「設計プラン」で発動 |
 
 #### prefix 決定木（5 種）
 

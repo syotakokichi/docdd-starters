@@ -93,6 +93,8 @@ docdd-starters/
 | [testing-patterns](./skills/testing-patterns/SKILL.md) | テスト戦略・フィクスチャ |
 | [design](./skills/design/SKILL.md) | Pencil.dev MCP 連携によるUI設計・デザイントークン管理 |
 
+> prefix 命名のメタ skill 群（`ref-*` / `assign-*-evaluator` / `run-*` / `delegate-*`）一覧と決定木は [skills/README.md](./skills/README.md) を参照。
+
 **詳細**: [skills/README.md](./skills/README.md)
 
 ### ルール
