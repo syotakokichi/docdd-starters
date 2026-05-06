@@ -293,6 +293,35 @@ Worktree 作成完了:
 
 ---
 
+## 次のステップ
+
+Worktree とブランチを作成、別ウィンドウで開いた。新ウィンドウで `/plan` から進める。
+
+```
+---
+✨ **このセッションで進んだこと**
+- worktree: `.claude/worktrees/issue-<N>/` 作成
+- ブランチ: `<type>/issue-<N>-<short>` を main ベースで作成
+- env symlink: <Backend / Frontend / N/A> / Cursor 別ウィンドウ起動済み
+
+🎯 **これによって変わること**
+- main checkout を触らずに Issue #<N> 用の独立作業環境が確立
+- 別ウィンドウ側で `/plan` 〜 `/pr` を進めても main 側の他 Issue 作業と競合しない
+
+📋 **次のステップ**
+- Worktree #<N>（status:todo / 別ウィンドウ起動済み）
+- 別ウィンドウで `/plan <N>` を実行
+---
+```
+
+コピペ用:
+
+```bash
+/plan <N>
+```
+
+---
+
 ## 📋 後続 Issue で導入予定（forward reference の隔離）
 
 | 参照先（未存在） | 用途 | 予定 Issue |

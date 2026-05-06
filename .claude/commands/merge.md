@@ -335,6 +335,34 @@ git worktree list
 
 ---
 
+## 次のステップ
+
+PR をマージし、worktree とブランチをクリーンアップした。
+
+```
+---
+✨ **このセッションで進んだこと**
+- PR #<PR_NUMBER> マージ（merge / squash / rebase: <strategy>）
+- main 同期 / ローカルブランチ削除 / リモートブランチ削除 / worktree 削除（Mode B）
+- 関連 Issue Close: #<N1> #<N2> / 実装サマリーコメント投稿済み
+
+🎯 **これによって変わること**
+- DocDD 7軸: BR=<…> / UC=<…> / DM=<…> / SR=<…> / EXT=<…> / API=<…> / TC=<…>（本流反映完了）
+- Issue #<N> がクローズされ、main が最新化された状態で次の Issue に着手できる
+
+📋 **次のステップ**
+- 次の Issue へ: `/issue` で起票、または `/worktree <次の N>` で並列着手
+---
+```
+
+コピペ用:
+
+```bash
+/issue
+```
+
+---
+
 ## 注意事項
 
 - `/merge` は **PR が存在し、CI が PASS していること** が前提

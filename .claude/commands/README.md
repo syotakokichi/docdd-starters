@@ -4,6 +4,7 @@
 
 旧コマンド（`/1`–`/7`, `/a`–`/c`, `/run-tests`）からの移行案内: [docs/guides/migration-from-legacy-commands.md](../../docs/guides/migration-from-legacy-commands.md)
 コマンド名の SSOT: [.claude/rules/terminology.md](../rules/terminology.md)
+全 13 verb コマンドは末尾に ✨/🎯/📋 3 ブロック trailer を出力する（SSOT: [.claude/rules/command-trailer.md](../rules/command-trailer.md)）
 
 ## 開発フロー（canonical）
 
