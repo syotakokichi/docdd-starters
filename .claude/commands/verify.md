@@ -25,6 +25,8 @@ Issue #$ARGUMENTS の実装検証を行ってください。
 
 ### Step 1: 変更内容と入力を固定
 
+> Step 1 の Issue 番号検証 / merge-base diff / 実行コンテキスト記録の **手順 SSOT** は [`.claude/skills/verify-input-capture/SKILL.md`](../skills/verify-input-capture/SKILL.md) を参照。本セクションの bash snippet は同 skill の literal 反映。
+
 `/verify` は `/pr`（PR 作成のコミット）より前に実行されるため、実装はコミット済みではなく
 **ワーキングツリーに残っている可能性が高い**。コミット済み差分（`MERGE_BASE...HEAD`）だけを見ると
 未コミット変更が抜け落ちて検証入力が空になる。コミット済みとワーキングツリーの両方を取得する。
@@ -184,7 +186,7 @@ DocDD の変更がある、または本来あるべき変更がある場合は�
 - 新しいサブエージェントを spawn し、最小限の入力（Issue 本文、`git diff`、テスト結果）のみ渡すこと
 - 修正後の再検証でも新しいサブエージェントを spawn すること
 
-参照: `.claude/rules/agent-teams.md`
+参照: [`.claude/skills/agent-teams/SKILL.md`](../skills/agent-teams/SKILL.md)（[`.claude/rules/agent-teams.md`](../rules/agent-teams.md) は薄いポインタ）
 
 **バックエンド検証チーム例:**
 ```text
@@ -340,7 +342,6 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 |--------------|------|----------|
 | `/review` コマンド | 独立レビュー（実装者文脈を外した見落とし検出） | 後続 Issue（2-2 想定） |
 | `.claude/rules/multi-model-review.md` | Codex + Claude SA × 2 の 3 reviewer 並列レビュー | 後続 Issue（D-1 想定） |
-| `.claude/skills/verify-input-capture/SKILL.md` | Step 1 の入力固定 SSOT | 後続 Issue（5-1 想定） |
 | `.claude/skills/receiving-code-review/SKILL.md` | レビュー指摘の分類スキル | 後続 Issue（4-3 想定） |
 | `scripts/claude/verify-issue.sh` / `quality-gate.sh` | Issue 単位の品質ゲート自動化 | 後続 Issue（5-1 想定） |
 | `make quality-gate` ターゲット | 品質ゲート一括実行 | 後続 Issue（5-1 想定） |

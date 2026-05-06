@@ -13,6 +13,8 @@ Claude Code が特定のドメインや技術パターンを適用する際に�
 
 ### プロジェクト固有スキル（flat 命名）
 
+#### ドメイン / 領域スキル
+
 | スキル | 説明 |
 |--------|------|
 | [docdd-workflow](./docdd-workflow/SKILL.md) | DocDD 7軸トレーサビリティの運用ルール |
@@ -22,7 +24,18 @@ Claude Code が特定のドメインや技術パターンを適用する際に�
 | [traceability-automation](./traceability-automation/SKILL.md) | トレーサビリティマップ活用 |
 | [presentation](./presentation/SKILL.md) | Marpプレゼンテーション作成 |
 | [design](./design/SKILL.md) | Pencil.dev MCP 連携によるUI設計・デザイントークン管理 |
+
+#### Cross-Cutting Skills（フロー横断 / 必要時ロード）
+
+ドメイン非依存で、コマンドから必要時にロードされる横断スキル群。Issue → 適用 skill のマッピングは [`../references/applicable-skills.md`](../references/applicable-skills.md) を参照。
+
+| スキル | 説明 |
+|--------|------|
+| [planning-quality](./planning-quality/SKILL.md) | 計画立案品質ルール（リサーチ / 依存先トレース / 観点別チェック / Codex レビュー） |
+| [issue-sizing](./issue-sizing/SKILL.md) | Issue サイジング（縦スライス / サイズ上限 / Umbrella / 観察集約） |
+| [agent-teams](./agent-teams/SKILL.md) | エージェントチーム運用（粒度判断 / コンテキストフレッシュ / 検証テンプレ） |
 | [parallel-development](./parallel-development/SKILL.md) | 並列開発（Worktree）運用ルール |
+| [verify-input-capture](./verify-input-capture/SKILL.md) | `/verify` Step 1 の入力固定（Issue 番号検証 / merge-base diff / 実行コンテキスト） |
 
 ### 外部 taxonomy 採用領域（prefix 命名）
 
