@@ -62,6 +62,9 @@ graph LR
 | Node.js | 20+ |
 | Docker & Docker Compose | 最新版推奨 |
 | Git | 2.5+（Worktree 利用時） |
+| Codex CLI | optional — `delegate-codex` skill / `/plan` Phase 5 / `/verify` Step 5 で利用。未導入時は自動でスキップ |
+| `jq` | optional — `delegate-codex` の JSON モード (`{"task": "...", "mode": "read_only", ...}`) で必須。`brew install jq`。JSON 風入力で `jq` 不在時は明示的に `exit 1` で失敗 |
+| coreutils (`gtimeout`) | optional — macOS で `delegate-codex` の timeout 制御に推奨。未導入時は同梱の Python ベース fallback が動作 |
 
 ### セットアップ
 
