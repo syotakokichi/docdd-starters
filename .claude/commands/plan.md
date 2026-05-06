@@ -137,24 +137,65 @@ UI 変更を伴う Issue の場合は、計画前にデザインを検討:
 **2 つ以上 ❌ の場合**: 分割案をユーザーに提示してから計画を進める。
 分割の方針: ドメイン概念ごとの縦スライスを優先。
 
-### Phase 2: ユーザーと相談（必須）
+### Phase 2: ユーザーと相談（Pattern B + AskUserQuestion）
 
-**計画を確定する前に、必ずユーザーと方向性を相談してください。**
+**真に判断が必要な論点だけを AskUserQuestion ツールで surface する。** default で進めて問題ない論点は質問しない。
 
-相談すべき内容:
-- 実装アプローチの選択肢（複数ある場合）
-- 技術的なトレードオフ
-- 優先順位の確認
-- 不明点の確認
-- 後続 Issue の見通し（Backend → Frontend → DocDD 等、複数段階になる場合）
+#### 原則 3 点
 
+1. **論点フィルタ**: default で進める論点は質問しない。前置き 1〜2 行で「〜は default で進めます」と宣言するだけにする
+2. **AskUserQuestion 使用**: 真に判断が必要な論点だけ AskUserQuestion でボタン選択 UI を投げる。ユーザーは入力ゼロで意思決定できる
+3. **0 個ガード**: 真の論点が 0 個なら AskUserQuestion を呼ばず、default 進行を宣言した上で **そのまま Phase 3 へ進む**
+
+#### AskUserQuestion 呼び出しルール
+
+ツール schema 準拠（runtime で `InputValidationError` を起こさないため必須）:
+
+- `questions`: 1〜4 個
+- 各 question の必須項目: `question` / `header`（**12 文字以内**）/ `options`（2〜4）/ `multiSelect`（boolean、必須）
+- 各 option の必須項目: `label` / `description`（`preview` は optional）
+- 推奨案がある場合は **1 番目に置き、`label` 末尾に `(Recommended)` を付ける**
+- 「Other」選択肢は **自動付与される**（手動で `options` に追加してはいけない）
+- `description` は 1 行で trade-off を簡潔に記述
+
+#### 呼び出し例（JSON-like payload 形式）
+
+```json
+{
+  "questions": [
+    {
+      "question": "X の実装方針をどちらにしますか？",
+      "header": "実装方針",
+      "multiSelect": false,
+      "options": [
+        {"label": "A: 既存 module 拡張 (Recommended)", "description": "差分小・テストが既存に乗る・後方互換維持"},
+        {"label": "B: 新 module 切り出し", "description": "責務分離が綺麗だが移行コストと参照箇所更新が広い"}
+      ]
+    }
+  ]
+}
 ```
-例: 「Issue #XX について調査しました。
-実装方針として A と B の選択肢があります。
-A: [メリット/デメリット]
-B: [メリット/デメリット]
-どちらで進めますか？」
-```
+
+#### 典型的な相談観点（surface するか判断する材料）
+
+- **実装方針の選択**: 複数の現実的な選択肢があり、どちらが良いか default では決まらない
+- **後続 Issue の見通し**: 本 Issue で完結させるか、別 Issue へ分割するか
+- **スコープ境界**: 隣接する負債を一緒に直すか、別 Issue に逃がすか
+
+これらに **default で答えがあるなら surface しない**（前置きで「〜で進めます」と宣言するだけ）。
+
+#### ❌ 禁止パターン
+
+いずれもユーザー負荷が高くなり禁止:
+
+- 番号付き Q&A フォーマット（「Q1: 〜 / Q2: 〜」とテキストで列挙）
+- 6 行以上の論点表 + 自由回答欄（読む量と入力量が線形に増える）
+- 「OK と返してください」式の同意要求（ボタン UI でない）
+- 1 計画あたり 5 個以上の論点を surface する（schema 上限 = 1 payload あたり 1〜4 questions。**複数 AskUserQuestion 呼び出しに分割しても合計 4 個までに収める**。5 個以上必要に見えるなら論点フィルタを再度かける）
+
+#### Pattern A（旧フォーマット）との対比
+
+旧 Pattern A では論点を表で網羅的に提示し自由回答を求めていたが、ユーザーは全行を読み・該当行を文字で指摘する必要があり負荷が高かった。Pattern B は「default で進めます」宣言で論点を圧縮し、残った真の論点だけ AskUserQuestion のボタン選択で投げる。
 
 ### Phase 3: リサーチ（必要時）
 
