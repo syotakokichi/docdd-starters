@@ -43,4 +43,33 @@ Additional options:
 - Skip push: Stop after step 6
 - Dry run: Use `git diff --cached` to preview staged changes
 
+---
+
+## 次のステップ
+
+変更をコミットしてリモートに push 済み。次の作業フェーズへ。
+
+```
+---
+✨ **このセッションで進んだこと**
+- コミット <N> 件（subject + body 形式）
+- pre-commit hook PASS / 修正コミット追加
+- リモート push 完了（origin/<branch>）
+
+🎯 **これによって変わること**
+- ローカル変更がリモートに反映され、CI が走り始める
+- 他セッション・他エディタウィンドウからも最新ブランチを pull できる
+
+📋 **次のステップ**
+- ブランチ: <branch>（origin と同期済み）
+- 検証フェーズに進むなら `/verify <N>`、PR 作成なら `/pr <N>`
+---
+```
+
+コピペ用:
+
+```bash
+/verify <N>
+```
+
 Remember to follow the project's commit message conventions in Japanese and include the standard footer:

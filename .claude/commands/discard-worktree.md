@@ -245,6 +245,35 @@ worktree 破棄完了:
 
 ---
 
+## 次のステップ
+
+Worktree とブランチを破棄した。Issue は Open のまま、必要なら手動で Close。
+
+```
+---
+✨ **このセッションで進んだこと**
+- worktree `<WORKTREE_PATH>` 削除
+- ローカルブランチ `<BRANCH>`: 削除済 / 残置（理由: <reason>）
+- リモートブランチ: 削除済 / 未操作
+
+🎯 **これによって変わること**
+- 未マージのまま中断した作業が main 側のリポジトリ状態から消え、`git worktree list` がクリーンになる
+- 後続で別の Issue 番号で `/worktree` を呼べる空き状態に戻る
+
+📋 **次のステップ**
+- Issue #<N>（Open のまま / 必要なら `gh issue close <N>`）
+- 次の Issue へ: `/issue` または `/worktree <次の N>`
+---
+```
+
+コピペ用:
+
+```bash
+/issue
+```
+
+---
+
 ## 📋 後続 Issue で導入予定（forward reference の隔離）
 
 | 参照先（未存在） | 用途 | 予定 Issue |

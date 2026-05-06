@@ -219,14 +219,29 @@ PR 作成前に確認:
 
 ## 次のステップ
 
-```
-PR #<PR_NUMBER> 作成完了:
-  - URL: <PR_URL>
-  - Closes #<N>
+PR を作成した。`/merge` は **main 側のターミナル** に切り替えてから実行する。
 
-次のステップ:
-  /merge <N>     # CI watch + マージ + worktree クリーンアップ
-                  # （worktree 内からは実行しない。main 側で実行すること）
+```
+---
+✨ **このセッションで進んだこと**
+- PR #<PR_NUMBER> 作成（タイトル: Conventional Commits 形式 / body に `Closes #<N>`）
+- 差分: 変更ファイル <N> 件 / 追加 <+L> / 削除 <-L>
+- CI 起動済み（gh pr checks <PR_NUMBER> で進捗確認）
+
+🎯 **これによって変わること**
+- DocDD 7軸: BR=<…> / UC=<…> / DM=<…> / SR=<…> / EXT=<…> / API=<…> / TC=<…>（更新コミット有無）
+- レビュー対象が main 候補として可視化され、CI 完了次第 `/merge` でマージできる
+
+📋 **次のステップ**
+- PR #<PR_NUMBER>（CI 進行中 / レビュー待ち）
+- main 側ターミナルで `/merge <N>`（worktree 内では実行しない）
+---
+```
+
+コピペ用:
+
+```bash
+/merge <N>
 ```
 
 > **`/merge` は main 側で実行する**: worktree 内から `/merge` を実行すると main 同期がスキップされるため、メインリポジトリのターミナルに戻ってから実行する。
