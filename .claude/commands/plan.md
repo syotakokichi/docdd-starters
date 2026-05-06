@@ -76,15 +76,9 @@ gh issue view $ARGUMENTS --json title,body,labels,state
 1. `gh issue view $ARGUMENTS --comments` で Issue の内容と既存コメントを確認
 2. **適用スキルを読み込む**（Issue の内容に応じて選択）:
 
-   | Issue involves... | Applicable Skill | Path |
-   |-------------------|------------------|------|
-   | Backend API / FastAPI | backend-patterns | `.claude/skills/backend-patterns/SKILL.md` |
-   | Frontend / Next.js / UI | frontend-patterns | `.claude/skills/frontend-patterns/SKILL.md` |
-   | Test implementation | testing-patterns | `.claude/skills/testing-patterns/SKILL.md` |
-   | DocDD documents / 7-axis | docdd-workflow | `.claude/skills/docdd-workflow/SKILL.md` |
-   | UI design / デザイントークン | design | `.claude/skills/design/SKILL.md` |
+   Issue 種別 → 適用 skill の SSOT は [`.claude/references/applicable-skills.md`](../references/applicable-skills.md) を参照。該当する skill の SKILL.md を `Read` で読み込み、計画立案に反映する。複数該当する場合は両方読む。
 
-3. **品質ルール** `.claude/rules/planning-quality.md` を参照
+3. **品質ルール** [`.claude/skills/planning-quality/SKILL.md`](../skills/planning-quality/SKILL.md) を参照（[`.claude/rules/planning-quality.md`](../rules/planning-quality.md) は薄いポインタ）
 4. コードベースを調査し、影響範囲を特定
    - **変更起点ごとに依存先をトレースすること**（API → schema → repo → caller、UI → container → hook → API）
    - 同じドメインの既存 Issue を `gh issue list --label <label> --state open` で確認
@@ -129,7 +123,7 @@ UI 変更を伴う Issue の場合は、計画前にデザインを検討:
 
 ### Phase 1.6: サイズチェック（必須）
 
-影響範囲の特定後、`.claude/rules/issue-sizing.md` に照らしてサイズチェックを行う:
+影響範囲の特定後、[`.claude/skills/issue-sizing/SKILL.md`](../skills/issue-sizing/SKILL.md) に照らしてサイズチェックを行う:
 
 | 指標 | 上限 |
 |------|:----:|
@@ -172,7 +166,7 @@ B: [メリット/デメリット]
 **エージェントチーム活用**（複雑な Issue の場合）:
 - 複数ドメインにまたがる場合は、並列リサーチエージェントで調査を効率化
 - 技術選定では、複数候補を並列で調査し比較検討
-- 詳細は `.claude/rules/agent-teams.md` のパターン 1（並列リサーチ）・パターン 10（Issue 分析・計画）を参照
+- 詳細は [`.claude/skills/agent-teams/SKILL.md`](../skills/agent-teams/SKILL.md) のリサーチ系パターン（パターン 7: 技術選定、パターン 8: 多角的リサーチ）を参照
 
 ### Phase 4: Issue 更新（必須）
 
@@ -196,7 +190,7 @@ B: [メリット/デメリット]
 2. **サイズチェック超過時の分割提案**:
    - 上限を 2 つ以上超過した場合、サイズチェック表の直後に `## 🪓 分割提案` セクションを追加し、子 Issue 候補を列挙する（縦スライス優先）
    - 上限内の場合は分割提案セクションを出さない
-   - 判定 SSOT: [`.claude/rules/issue-sizing.md`](../rules/issue-sizing.md)
+   - 判定 SSOT: [`.claude/skills/issue-sizing/SKILL.md`](../skills/issue-sizing/SKILL.md)
 
 3. **forward reference の末尾隔離**:
    - 本 Issue が **未存在 path** を参照する場合（例: `tdd-gate.md`、`scripts/claude/verify-issue.sh` 等）、Issue 本文の末尾に `## 📋 後続 Issue で導入予定（forward reference の隔離）` セクションを追加し、`---` 区切りで隔離する
@@ -316,8 +310,9 @@ codex --version > /dev/null 2>&1
 - Codex レビュープロンプト: `.claude/templates/codex-plan-review-prompt.md`
 - Codex レビュー引き継ぎテンプレート: `.claude/templates/codex-review-handoff.md`（Codex CLI 未導入時のフォールバック）
 - Codex CLI レビュー運用ルール: `.claude/rules/codex-review.md`
-- 計画品質ルール: `.claude/rules/planning-quality.md`
-- サイジングルール: `.claude/rules/issue-sizing.md`
+- 計画品質 SSOT: [`.claude/skills/planning-quality/SKILL.md`](../skills/planning-quality/SKILL.md)（[`.claude/rules/planning-quality.md`](../rules/planning-quality.md) は薄いポインタ）
+- サイジング SSOT: [`.claude/skills/issue-sizing/SKILL.md`](../skills/issue-sizing/SKILL.md)（[`.claude/rules/issue-sizing.md`](../rules/issue-sizing.md) は薄いポインタ）
+- 適用スキル一覧: [`.claude/references/applicable-skills.md`](../references/applicable-skills.md)
 - Pencil 調整ルール: `.claude/rules/project-workflow.md`
 - 並列開発判定 SSOT: `.claude/skills/parallel-development/SKILL.md`
 
@@ -373,7 +368,5 @@ Issue 本文を仕様固定済み計画に更新し、Codex 計画レビュー�
 | `.claude/rules/multi-model-review.md` | Codex + Claude SA × 2 の 3 reviewer 並列レビュー | 後続 Issue（D-1 想定） |
 | `.claude/skills/test-design/SKILL.md` | Critical Path 判定スキル化 | 後続 Issue（4-2 想定） |
 | `.claude/rules/tdd-gate.md` | TDD 判定の SSOT | 後続 Issue（4-2 想定） |
-| `.claude/references/applicable-skills.md` | 適用スキル一覧の SSOT | 後続 Issue（4-1 想定） |
-| `.claude/skills/planning-quality/SKILL.md` | `rules/planning-quality.md` の skill 化 | 後続 Issue（4-1 想定） |
 
 Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.
