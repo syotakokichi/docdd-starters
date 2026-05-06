@@ -183,3 +183,6 @@ fi
 - [templates/codex-verify-review-prompt.md](../templates/codex-verify-review-prompt.md) — `/verify` 用観点メモ
 - [templates/codex-review-handoff.md](../templates/codex-review-handoff.md) — Fallback テンプレ
 - [references/capability-matrix.md](../references/capability-matrix.md) — capability 定義
+- [skills/delegate-codex/SKILL.md](../skills/delegate-codex/SKILL.md) — Codex CLI への **任意タスク委譲** チャネル（heredoc + stdin の thin wrapper）
+
+> 役割の違い: 本ルール（`/plan` Phase 5 / `/verify` Step 5）は **独立レビュー** 専用で `codex exec` / `codex review --base main` を直接呼ぶ。`delegate-codex` は **任意タスクの pass-through 委譲** であり、レビュー以外の自然文タスクや JSON 指示を Codex に投げる用途で使う（混同しないこと）。
