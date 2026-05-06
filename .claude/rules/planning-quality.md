@@ -1,109 +1,40 @@
 # Planning Quality - 計画立案品質ルール
 
-Issue に実装計画を追記する際の品質基準を定義します。
+Issue 実装計画の **構造 SSOT** は [`.claude/templates/issue-implementation-plan.md`](../templates/issue-implementation-plan.md) に集約されています。本ファイルは `/plan` が遵守する **コア原則** と **フェーズ構成** のみを定義します。
 
-## 計画に含めるべき項目
+## コア原則
 
-### 1. 背景・目的
+1. **リサーチ必須**: 公式ドキュメント・ベストプラクティスを調査し、参照リンクを Issue 本文（`📚 リサーチ結果`）に記録する
+2. **縦スライス遵守**: 1 Issue = 1 つのドメイン概念で完結させる。サイズ上限を超える場合は分割（[`issue-sizing.md`](./issue-sizing.md)）
+3. **トレーサビリティ必須**: 関連する BR/UC/SR/API/TC の ID と DocDD 更新要否を 7 軸テーブルに記入する（[`docdd-frontmatter.md`](./docdd-frontmatter.md)）
 
-- なぜこの変更が必要か
-- 解決したい課題は何か
-- 期待される効果
+## `/plan` フェーズの役割
 
-### 2. スコープ
+| Phase | 役割 | 参照 |
+|-------|------|------|
+| 0 | Issue ステータス確認 | [`commands/plan.md`](../commands/plan.md) Phase 0 |
+| 1 | 理解・適用スキル選択 | [`skills/README.md`](../skills/README.md) |
+| 1.2 | 依存先・呼び出し元トレース | テンプレ「依存先・波及範囲」 |
+| 1.2.5 | 証跡マッピング表 + UI State Matrix | テンプレ該当節 |
+| 1.3 | Critical Path 判定 | テンプレ「Critical Path / Coverage expectation」 |
+| 1.5 | UI 設計確認（UI 変更時） | [`project-workflow.md`](./project-workflow.md) |
+| 1.6 | サイズチェック | [`issue-sizing.md`](./issue-sizing.md) |
+| 2 | ユーザー相談 | — |
+| 3 | リサーチ | [`agent-teams.md`](./agent-teams.md) |
+| 4 | Issue 本文更新（テンプレ反映） | テンプレ全体 |
+| 5 | Codex 計画レビュー | [`codex-review.md`](./codex-review.md) |
 
-- 変更対象のファイル・モジュール
-- 影響範囲の明示
-- スコープ外の明示（やらないこと）
+## 旧コンテンツ移植判断（Issue #51 T2 記録）
 
-### 3. 実装アプローチ
+旧ファイルにあった「アンチパターン / OK 例」（曖昧な計画 vs 具体的な計画の例示）の扱い:
 
-- 技術的な方針
-- 採用するパターン・ライブラリ
-- 代替案と選定理由
+- **判断**: 削除
+- **理由**: テンプレ側のセクション構造（影響範囲 / 実装タスク / 検証定義 / TDD 判定 / Critical Path）が「具体的な計画」の構造を強制しており、OK 例は冗長。`/plan` Phase 4 がテンプレ heading を literal に反映するため、抽象論で書く余地がない
+- **代替**: テンプレ自体が「OK 例」として機能する。実例は Closed Issue（gh issue list --state closed --label '実装計画'）を参照
 
-### 4. 詳細ステップ
+## 関連
 
-```markdown
-## 実装ステップ
-
-1. [ ] ステップ1の説明
-   - 対象ファイル: `path/to/file.ts`
-   - 変更内容: 具体的な内容
-
-2. [ ] ステップ2の説明
-   - 対象ファイル: `path/to/another.ts`
-   - 変更内容: 具体的な内容
-```
-
-### 5. テスト計画
-
-- 追加・修正するテストケース
-- 手動確認項目
-- 既存テストへの影響
-
-### 6. リスク・注意点
-
-- 既存機能への影響
-- 移行が必要な場合の手順
-- ロールバック方法
-
-## 品質チェックリスト
-
-計画作成時に確認:
-
-- [ ] 背景・目的が明確か
-- [ ] スコープが適切に限定されているか
-- [ ] 実装ステップが具体的か
-- [ ] 対象ファイルが明示されているか
-- [ ] テスト計画が含まれているか
-- [ ] リスクが考慮されているか
-
-## アンチパターン
-
-### NG: 曖昧な計画
-
-```markdown
-## 計画
-ログイン機能を実装する
-```
-
-### OK: 具体的な計画
-
-```markdown
-## 計画
-
-### 背景
-現在はセッションベースの認証だが、APIアクセス用にJWT認証を追加する必要がある。
-
-### スコープ
-- 対象: `apps/backend/app/modules/auth/`
-- スコープ外: フロントエンドの認証UI変更
-
-### 実装ステップ
-1. [ ] JWTトークン生成・検証ロジック追加
-   - `auth/domain/jwt_service.py` 新規作成
-   - PyJWT ライブラリを使用
-
-2. [ ] 認証エンドポイント追加
-   - `auth/presentation/routes.py` に `/auth/token` 追加
-   - Request/Response スキーマ定義
-
-3. [ ] 依存関係追加
-   - `requirements.txt` に PyJWT 追加
-
-### テスト
-- [ ] `tests/backend/unit/test_jwt_service.py` 追加
-- [ ] `tests/backend/integration/test_auth_api.py` に統合テスト追加
-
-### リスク
-- 既存のセッション認証は維持し、並行運用可能にする
-```
-
-## トレーサビリティ
-
-計画には必ず以下を含める:
-
-- 関連する BR/UC/SR の ID
-- 影響を受ける TC の ID
-- `docs/testing/traceability/` への更新要否
+- [`.claude/templates/issue-implementation-plan.md`](../templates/issue-implementation-plan.md) — 構造 SSOT
+- [`.claude/commands/plan.md`](../commands/plan.md) — `/plan` 手順 SSOT
+- [`issue-sizing.md`](./issue-sizing.md) — サイズ上限・縦スライス原則
+- [`codex-review.md`](./codex-review.md) — Codex CLI レビュー運用
