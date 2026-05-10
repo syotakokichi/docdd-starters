@@ -103,6 +103,7 @@ make traceability
 #### Step 3-2: TDD 証跡確認
 
 `/develop` の実装サマリーの「TDD 証跡」テーブルを確認する。
+判定基準 SSOT: [`.claude/rules/tdd-gate.md`](../rules/tdd-gate.md) / RED-GREEN 証跡フォーマット SSOT: [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md)。
 
 | 確認項目 | PASS 条件 |
 |---------|---------|
@@ -116,7 +117,9 @@ make traceability
 
 #### Step 3-3: 失敗扱いにする例
 
-- `pytest` が marker 条件で全 deselect
+完了主張前のゲート（5 ステップ）と禁止表現の SSOT は [`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md)。以下を「成功」扱いにしない:
+
+- `pytest` が path / pattern 指定ミスで全 deselect（`0 selected`）
 - `npm run xxx` が script 不在で失敗
 - `make test-backend` / `make test-frontend` / `make validate-claude` / `make traceability` が FAIL
 - 実行したと書いてあるが結果が残っていない
