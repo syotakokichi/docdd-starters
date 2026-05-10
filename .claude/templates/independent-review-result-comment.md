@@ -79,5 +79,4 @@
 |--------------|------|----------|
 | 3 reviewer adversarial review（Codex + Claude SA × 2） | レビュアー多重化による見落とし検出強化 | 後続 Issue（D-1 想定） |
 | `.claude/rules/multi-model-review.md` | multi-reviewer 統合ルール SSOT | 後続 Issue（D-1 想定） |
-| `.claude/skills/receiving-code-review/SKILL.md` | レビュー指摘の受領パターン | 後続 Issue（4-3 想定） |
 | `.claude/skills/ephemeral-session-memory/SKILL.md` | レビュー raw 出力の session memory 退避 | 後続 Slice（未起票） |

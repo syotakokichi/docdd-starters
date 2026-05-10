@@ -46,7 +46,7 @@ GitHub Issue $ARGUMENTS の実装を行ってください。
 
 > **Note**: UI 設計（Pencil）の確認は `/plan` Phase 1.5 で完結済みの想定。`/develop` では計画で確認済みのデザインを正として進める（`.claude/rules/project-workflow.md` 参照）。
 
-> **バグ修正時**: 原因調査に行き詰まったら、変更対象を最小化し、再現テストを書いてから修正する。
+> **バグ修正時**: 原因調査に行き詰まったら、変更対象を最小化し、再現テストを書いてから修正する。場当たり的な修正で症状を消す前に、4 フェーズプロセス（根本原因 → パターン分析 → 仮説とテスト → 修正）と 3 回失敗中断ルールを `.claude/skills/systematic-debugging/SKILL.md` で確認する。
 
 #### チーム活用（2 レイヤー以上の変更時）
 
@@ -252,7 +252,6 @@ gh issue edit $ARGUMENTS --body-file /tmp/issue_$ARGUMENTS.md
 
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
-| `.claude/skills/systematic-debugging/SKILL.md` | バグ修正の体系化スキル | 後続 Issue（4-3 想定） |
 | `make quality-gate` ターゲット | 品質ゲート一括実行 | 後続 Issue（5-1 想定） |
 | `/screen-verify` + TC YAML 自動実行 | post-merge ステージング検証 | 後続 Issue（D-X 想定） |
 
