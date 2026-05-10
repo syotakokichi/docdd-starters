@@ -27,6 +27,9 @@ Issue の内容に応じて、該当するスキルだけを読み込む SSOT。
 | Organizing agent teams / context-fresh strategy (`/plan`, `/develop`, `/verify`, `/review`) | agent-teams | [`.claude/skills/agent-teams/SKILL.md`](../skills/agent-teams/SKILL.md) |
 | Parallel development with worktrees (`/worktree`, `/merge`, `/discard-worktree`) | parallel-development | [`.claude/skills/parallel-development/SKILL.md`](../skills/parallel-development/SKILL.md) |
 | `/verify` Step 1 input capture (issue number validation / merge-base diff / execution context) | verify-input-capture | [`.claude/skills/verify-input-capture/SKILL.md`](../skills/verify-input-capture/SKILL.md) |
+| TDD workflow / RED-GREEN cycle / 証跡フォーマット (`/tdd`, `/develop`, `/verify`) | tdd-workflow | [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md) |
+| Critical Path 判定・保護レイヤー選択・Coverage expectation (`/plan` Phase 1.3 で Critical/Mixed と判定された場合) | test-design | [`.claude/skills/test-design/SKILL.md`](../skills/test-design/SKILL.md) |
+| 完了主張前の 5 ステップゲート（IDENTIFY/RUN/READ/VERIFY/CLAIM） (`/develop` Phase 3, `/verify`, `/pr`) | verification-before-completion | [`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md) |
 
 ## 使い方
 

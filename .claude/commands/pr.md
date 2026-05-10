@@ -56,7 +56,7 @@ if ! gh issue view $ARGUMENTS --comments | grep -qE "実装検証結果（/verif
 fi
 ```
 
-> **逃げない**: `/verify` を飛ばしての PR 作成は禁止。完了品質ルール（`.claude/rules/completion-quality.md`）に従い、検証コメントが揃ってから先に進む。Pre-flight gate は **warning ではなく hard failure（exit 1）** にしてゲートを担保する。
+> **逃げない**: `/verify` を飛ばしての PR 作成は禁止。完了品質ルール（[`.claude/rules/completion-quality.md`](../rules/completion-quality.md)）と完了主張前のゲート SSOT（[`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md)）に従い、検証コメントが揃ってから先に進む。Pre-flight gate は **warning ではなく hard failure（exit 1）** にしてゲートを担保する。
 
 ### Step 2: 差分確認
 
@@ -261,7 +261,6 @@ PR を作成した。`/merge` は **main 側のターミナル** に切り替え
 
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
-| `.claude/skills/verification-before-completion/SKILL.md` | Pre-flight gate の SSOT | 後続 Issue（4-2 想定） |
 | `make verify-issue` / `make quality-gate` | Pre-flight gate の自動化 | 後続 Issue（5-1 想定） |
 | `.claude/policies/landing-path-state.yaml` + validator | UI 変更時の auto close 抑止（`screen-verify` 連携） | **持ち込まない**（`screen-verify` がスコープ外のため） |
 | `roadmap.md` 更新ステップ | リリース計画との突合 | starter に roadmap なし。**持ち込まない** |

@@ -36,6 +36,9 @@ Claude Code が特定のドメインや技術パターンを適用する際に�
 | [agent-teams](./agent-teams/SKILL.md) | エージェントチーム運用（粒度判断 / コンテキストフレッシュ / 検証テンプレ） |
 | [parallel-development](./parallel-development/SKILL.md) | 並列開発（Worktree）運用ルール |
 | [verify-input-capture](./verify-input-capture/SKILL.md) | `/verify` Step 1 の入力固定（Issue 番号検証 / merge-base diff / 実行コンテキスト） |
+| [tdd-workflow](./tdd-workflow/SKILL.md) | TDD（RED-GREEN-REFACTOR）サイクル / pytest・Vitest パターン / 証跡フォーマット |
+| [test-design](./test-design/SKILL.md) | Critical Path 判定 / 保護レイヤー選択 / Coverage expectation（`/plan` Critical/Mixed 時に追加読込） |
+| [verification-before-completion](./verification-before-completion/SKILL.md) | 完了主張前の 5 ステップゲート（IDENTIFY / RUN / READ / VERIFY / CLAIM） |
 
 ### 外部 taxonomy 採用領域（prefix 命名）
 

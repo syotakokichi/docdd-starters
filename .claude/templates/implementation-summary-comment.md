@@ -43,8 +43,8 @@
 | 項目 | 内容 |
 |------|------|
 | TDD 判定 | 必須 / スキップ（理由: ）|
-| 追加したテスト | Backend: `apps/backend/tests/.../test_xxx.py::test_name` / Frontend: `apps/frontend/src/.../__tests__/xxx.test.ts`（スキップの場合は「なし」）|
-| RED コマンド | `make test-backend` / `make test-frontend` 等（スキップの場合は「なし」）|
+| 追加したテスト | Backend: `tests/backend/<unit\|integration>/test_xxx.py::test_name` / Frontend: `tests/frontend/unit/xxx.test.ts`（スキップの場合は「なし」）|
+| RED コマンド | `make test-backend` / `make test-frontend` または focused: `PYTHONPATH=apps/backend pytest tests/backend/.../test_xxx.py::test_name -v` / `cd apps/frontend && npx vitest run ../../tests/frontend/unit/xxx.test.ts`（スキップの場合は「なし」）|
 | RED 結果 | FAILED: X failed（AssertionError / ImportError 等）/ なし（スキップ）|
 | GREEN コマンド | `make test-backend` / `make test-frontend` 等（スキップの場合は「なし」）|
 | GREEN 結果 | PASSED: X passed / なし（スキップ）|
@@ -52,7 +52,7 @@
 ### Coverage 証跡
 | 項目 | 内容 |
 |------|------|
-| Critical Path 判定 | /plan の検証定義から転記（Critical / Non-critical / Mixed / N/A） |
+| Critical Path 判定 | /plan の検証定義から転記（Critical / Non-critical / Mixed。N/A は Critical Path 判定では選択不可、Coverage expectation の例外として Non-critical に対してのみ使用） |
 | 保護レイヤー | /plan の検証定義から転記 |
 | Coverage expectation | /plan の検証定義から転記 |
 | Focused test commands | /plan の検証定義から転記 |
