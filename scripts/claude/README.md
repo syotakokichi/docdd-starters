@@ -75,6 +75,11 @@ VERIFY_BASE_REF=origin/main scripts/claude/verify-issue-detect.sh --git
 
 CI shallow checkout / 別名 default branch / worktree 配下のいずれでも壊れないこと。
 
+> ⚠️ **`--git` のスコープ**: `merge-base..HEAD` の **コミット済み差分のみ** を対象とする。
+> staged / working-tree / untracked の未コミット変更は出ない。pre-commit ローカル
+> 検出には `--stdin` か `--files` を使う（`/verify` 標準フローでは `/develop`
+> でコミット済みのため `--git` で問題ない）。
+
 ### Make ターゲット
 
 | ターゲット | 動作 |
@@ -107,7 +112,7 @@ CI shallow checkout / 別名 default branch / worktree 配下のいずれでも�
 | `scripts/**`, `Makefile*`, `*.config.*`, `.claude/hooks/**`, `.claude/settings.json`, `.github/**`, `terraform/**` | `dx-config` | 動作確認 + 既存テスト非破壊 | 手動 |
 | `.claude/commands/**`, `.claude/rules/**`, `.claude/skills/**`, `.claude/templates/**`, `.claude/references/**` | `dx-docs` | `make validate-claude` + 目視確認 | `make validate-claude` |
 
-> **glob 表記はドキュメント用**。実装は anchored regex（例: `^apps/backend/app/modules/[^/]+/(domain|services)/`）で `verify-issue-detect.sh` 内に固定する。glob を `grep -E` に直渡しはしない。
+> **glob 表記はドキュメント用**。実装は anchored regex（例: `^apps/backend/app/modules/.+/(domain|services)/`）で `verify-issue-detect.sh` 内に固定する。`.+`（vs `[^/]+`）はネストしたモジュール（`modules/<a>/<b>/<layer>/...`）も拾うため。glob を `grep -E` に直渡しはしない。
 
 ---
 

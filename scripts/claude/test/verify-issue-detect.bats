@@ -61,6 +61,16 @@ teardown() {
   echo "$result" | grep -qx "api-route"
 }
 
+@test "category: api-route (shared/routes.py at zero depth)" {
+  result=$(echo "apps/backend/app/shared/routes.py" | "$DETECTOR" --stdin)
+  echo "$result" | grep -qx "api-route"
+}
+
+@test "category: api-route (shared/<sub>/routes.py at >=1 depth)" {
+  result=$(echo "apps/backend/app/shared/admin/routes.py" | "$DETECTOR" --stdin)
+  echo "$result" | grep -qx "api-route"
+}
+
 # ─── 4. api-contract ──────────────────────────────────────
 
 @test "category: api-contract (modules/<domain>/schemas/)" {
@@ -225,6 +235,30 @@ teardown() {
 
   result=$(VERIFY_BASE_REF=HEAD~1 "$DETECTOR" --git)
   echo "$result" | grep -qx "backend-unit"
+}
+
+# ─── Nested modules (** depth) ────────────────────────────
+
+@test "nested module: modules/<a>/<b>/domain/ -> backend-unit" {
+  result=$(echo "apps/backend/app/modules/billing/invoices/domain/model.py" | "$DETECTOR" --stdin)
+  echo "$result" | grep -qx "backend-unit"
+}
+
+@test "nested module: modules/<a>/<b>/repositories/ -> backend-integration" {
+  result=$(echo "apps/backend/app/modules/billing/invoices/repositories/repo.py" | "$DETECTOR" --stdin)
+  echo "$result" | grep -qx "backend-integration"
+}
+
+@test "nested module: modules/<a>/<b>/api/ -> api-route" {
+  result=$(echo "apps/backend/app/modules/billing/invoices/api/routes.py" | "$DETECTOR" --stdin)
+  echo "$result" | grep -qx "api-route"
+}
+
+# ─── Near-miss negative ───────────────────────────────────
+
+@test "near-miss: modules/<x>/notdomain/ does NOT emit backend-unit" {
+  result=$(echo "apps/backend/app/modules/example/notdomain/foo.py" | "$DETECTOR" --stdin)
+  ! echo "$result" | grep -qx "backend-unit"
 }
 
 # ─── Shape variation ──────────────────────────────────────
