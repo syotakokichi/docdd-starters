@@ -30,7 +30,7 @@ Issue #$ARGUMENTS の TDD（Test-Driven Development）ガード付き実装を�
 
 ### Step 1: TDD 判定を確認
 
-`/plan` の検証定義から TDD 判定を読み取る。
+`/plan` の検証定義から TDD 判定を読み取る。判定基準の SSOT は [`.claude/rules/tdd-gate.md`](../rules/tdd-gate.md)。
 
 ```bash
 # Issue 本文の TDD 判定を確認
@@ -58,17 +58,18 @@ gh issue view $ARGUMENTS --json body --jq .body | grep -A 5 "Focused test comman
 
 | 項目 | 内容 |
 |------|------|
-| 想定 RED コマンド | `pytest apps/backend/tests/.../test_xxx.py::test_new_case` |
-| 想定 GREEN コマンド | `pytest apps/backend/tests/.../test_xxx.py::test_new_case` |
+| 想定 RED コマンド | `PYTHONPATH=apps/backend pytest tests/backend/.../test_xxx.py::test_new_case -v` |
+| 想定 GREEN コマンド | `PYTHONPATH=apps/backend pytest tests/backend/.../test_xxx.py::test_new_case -v` |
 
 ### Step 3: Failing test を先行作成
 
 実装本体には触れず、**期待挙動を表現する Failing test** だけを書く。
+パターン集（新規ロジック / バグ修正 / 状態遷移 / API / parametrize）と heredoc 利用判断は [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md) を参照。
 
 | レイヤー | パターン | 補足 |
 |---------|---------|------|
-| Backend (pytest) | `apps/backend/tests/<unit\|integration>/test_xxx.py` に `test_新挙動` を追加 | `.claude/skills/testing-patterns/SKILL.md` 参照 |
-| Frontend (Vitest) | `apps/frontend/src/.../__tests__/xxx.test.ts(x)` に新ケースを追加 | `.claude/skills/testing-patterns/SKILL.md` 参照 |
+| Backend (pytest) | `tests/backend/<unit\|integration>/test_xxx.py` に `test_新挙動` を追加 | [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md) / [`.claude/skills/testing-patterns/SKILL.md`](../skills/testing-patterns/SKILL.md) 参照 |
+| Frontend (Vitest) | `tests/frontend/unit/xxx.test.ts(x)` に新ケースを追加 | [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md) / [`.claude/skills/testing-patterns/SKILL.md`](../skills/testing-patterns/SKILL.md) 参照 |
 
 **禁止事項**:
 - ❌ 実装本体（`apps/backend/app/...` の domain/service/route）には一切触れない
@@ -78,13 +79,14 @@ gh issue view $ARGUMENTS --json body --jq .body | grep -A 5 "Focused test comman
 ### Step 4: RED 確認（Failing 結果を取る）
 
 新規テストが想定どおり FAILED で落ちることを確認する。
+「`0 selected` / `all skipped` を成功扱いにしない」など完了判定の SSOT は [`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md) を参照。
 
 ```bash
 # Backend 例
-pytest apps/backend/tests/<path>/test_xxx.py::test_new_case -v
+PYTHONPATH=apps/backend pytest tests/backend/<path>/test_xxx.py::test_new_case -v
 
 # Frontend 例
-cd apps/frontend && npx vitest run src/.../__tests__/xxx.test.ts -t "test_new_case"
+cd apps/frontend && npx vitest run ../../tests/frontend/unit/xxx.test.ts -t "test_new_case"
 ```
 
 **RED として有効な結果**:
@@ -110,17 +112,17 @@ gh issue comment $ARGUMENTS --body "$(cat <<'EOF'
 - 対象領域: [Backend / Frontend / 両方]
 
 ### 追加したテスト
-- `apps/backend/tests/<path>/test_xxx.py::test_new_case`（Failing で先行追加）
+- `tests/backend/<path>/test_xxx.py::test_new_case`（Failing で先行追加）
 - [複数ある場合は箇条書き]
 
 ### RED コマンド
 \`\`\`bash
-pytest apps/backend/tests/<path>/test_xxx.py::test_new_case -v
+PYTHONPATH=apps/backend pytest tests/backend/<path>/test_xxx.py::test_new_case -v
 \`\`\`
 
 ### RED 結果
 \`\`\`
-FAILED apps/backend/tests/<path>/test_xxx.py::test_new_case
+FAILED tests/backend/<path>/test_xxx.py::test_new_case
 - AssertionError / ImportError / 等の要点を 1〜3 行
 - 1 failed in X.Xs
 \`\`\`
@@ -134,6 +136,8 @@ EOF
 
 > **記法ルール**: `/develop` Phase 5 / `/verify` Step 6 で証跡を確認するため、見出し `## TDD RED 証跡（/tdd 完了時点）` をそのまま使う。コマンドと結果はコードブロックで囲む。
 > **ファイル参照**: 結果が長い場合は `/tmp/tdd_red_$ARGUMENTS.txt` に書き出して `gh issue comment --body-file` で投稿してもよい。
+
+> **記法・ガイドライン SSOT**: 証跡フォーマット詳細は [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md)（証跡記録セクション）。完了主張前のゲート（5 ステップ）は [`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md)。
 
 ### Step 6: `/develop` への引き渡し
 
@@ -215,9 +219,6 @@ RED 証跡を Issue コメントに残した。`/develop` で GREEN を達成す
 
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
-| `.claude/rules/tdd-gate.md` | TDD 判定の SSOT（必須判定基準・スキップ条件） | 後続 Issue（4-2 想定） |
-| `.claude/skills/tdd-workflow/SKILL.md` | TDD 実行スキル（RED-GREEN-Refactor の詳細手順） | 後続 Issue（4-2 想定） |
-| `.claude/skills/verification-before-completion/SKILL.md` | RED 完了主張前のゲート | 後続 Issue（4-2 想定） |
 | failure-escalation Level 3 hook | RED が連続 3 回失敗した場合の停止 hook | 後続 Issue（1-1 baseline 拡張 想定） |
 
 Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.

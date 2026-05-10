@@ -146,24 +146,31 @@
 | 想定 RED コマンド | `make test-backend` / `make test-frontend` または focused pytest / vitest コマンド（スキップ時は「該当なし」） |
 | 想定 GREEN コマンド | `make test-backend` / `make test-frontend` または focused pytest / vitest コマンド（スキップ時は「該当なし」） |
 
-> **判断基準**: 「外部連携・状態遷移・認証・API 契約変更を含むなら必須、それ以外は任意」の経験則で判定する（SSOT 化の予定はテンプレ末尾の forward reference を参照）。
+> **判断基準 SSOT**: [`.claude/rules/tdd-gate.md`](../rules/tdd-gate.md)（必須領域・スキップ条件・Critical Path 連携）。RED-GREEN サイクル・パターン集・証跡フォーマットは [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md) を参照。
 
 ### Critical Path / Coverage expectation
 
-<!-- 判定基準（簡易リファレンス）:
-  Critical: 状態遷移・外部連携・callback・認証・申込導線を含む
-  Non-critical: 上記に該当しない（UI文言、CSS、DX等）
-  Mixed: Critical + Non-critical が混在
-  N/A 条件: .claude/ / docs/ のみの変更、デザイン調整のみ、文言修正のみ
+<!-- 判定基準・保護レイヤー選択・Coverage expectation の SSOT は .claude/skills/test-design/SKILL.md。
+  Critical / Mixed と判定した場合は同 skill を Read してから保護レイヤーと Focused test commands を埋める。
+  簡易リファレンス:
+    Critical Path 判定（3 値）:
+      Critical: 状態遷移・外部連携・callback・認証・申込導線を含む
+      Non-critical: 上記に該当しない（UI文言、CSS、DX等）
+      Mixed: Critical + Non-critical が混在
+    Coverage expectation の N/A 条件（Non-critical で実行コードを含まない場合の例外）:
+      .claude/ / docs/ のみの変更、デザイン調整のみ、文言修正のみ
+      → Critical / Mixed では N/A を選択不可
 -->
 
 | 項目 | 内容 |
 |------|------|
-| Critical Path 判定 | Critical / Non-critical / Mixed / N/A |
+| Critical Path 判定 | Critical / Non-critical / Mixed |
 | Critical scope | Critical と判定した領域を列挙（Non-critical の場合は「なし」） |
 | 保護レイヤー | Unit / Integration / Browser evidence / Manual |
-| Coverage expectation | Critical = 100% / Non-critical touched scope = 90% / Mixed = critical 100% + touched non-critical 90% / N/A |
+| Coverage expectation | Critical = 100% / Non-critical touched scope = 90% / Mixed = critical 100% + touched non-critical 90% / N/A（Non-critical で実行コードなしの場合のみ） |
 | Focused test commands | /plan の計画から転記 |
+
+> **判定 SSOT**: [`.claude/skills/test-design/SKILL.md`](../skills/test-design/SKILL.md)（保護レイヤー選択 / Coverage expectation の詳細表）
 
 ### Issue 固有の検証定義
 
@@ -220,8 +227,5 @@
 
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
-| `.claude/rules/tdd-gate.md` | TDD 判定の SSOT | 後続 Issue（4-2 想定） |
-| `.claude/skills/test-design/SKILL.md` | Critical Path 判定スキル | 後続 Issue（4-2 想定） |
 | `scripts/claude/verify-issue.sh`, `scripts/claude/quality-gate.sh` | Issue 単位の品質ゲート自動化 | 後続 Issue（5-1 / D-1 想定） |
 | `.claude/rules/multi-model-review.md` | 3 reviewer 並列レビュー | 後続 Issue（D-1 想定） |
-| `.claude/references/applicable-skills.md` | 適用スキル一覧の SSOT | 後続 Issue（4-1 想定） |
