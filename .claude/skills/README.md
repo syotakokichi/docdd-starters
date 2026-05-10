@@ -39,6 +39,9 @@ Claude Code が特定のドメインや技術パターンを適用する際に�
 | [tdd-workflow](./tdd-workflow/SKILL.md) | TDD（RED-GREEN-REFACTOR）サイクル / pytest・Vitest パターン / 証跡フォーマット |
 | [test-design](./test-design/SKILL.md) | Critical Path 判定 / 保護レイヤー選択 / Coverage expectation（`/plan` Critical/Mixed 時に追加読込） |
 | [verification-before-completion](./verification-before-completion/SKILL.md) | 完了主張前の 5 ステップゲート（IDENTIFY / RUN / READ / VERIFY / CLAIM） |
+| [systematic-debugging](./systematic-debugging/SKILL.md) | バグ・テスト失敗・予期しない挙動への 4 フェーズ調査（修正前の根本原因特定 / 3 回失敗中断ルール） |
+| [receiving-code-review](./receiving-code-review/SKILL.md) | レビュー指摘の受領パターン（6 ステップ / ソース別ハンドリング / 4 例外） |
+| [update-knowledge](./update-knowledge/SKILL.md) | セッション中の学びを skills / rules / commands / templates に体系反映する判断 SSOT |
 
 ### 外部 taxonomy 採用領域（prefix 命名）
 

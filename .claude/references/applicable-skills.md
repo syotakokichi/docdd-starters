@@ -30,6 +30,9 @@ Issue の内容に応じて、該当するスキルだけを読み込む SSOT。
 | TDD workflow / RED-GREEN cycle / 証跡フォーマット (`/tdd`, `/develop`, `/verify`) | tdd-workflow | [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md) |
 | Critical Path 判定・保護レイヤー選択・Coverage expectation (`/plan` Phase 1.3 で Critical/Mixed と判定された場合) | test-design | [`.claude/skills/test-design/SKILL.md`](../skills/test-design/SKILL.md) |
 | 完了主張前の 5 ステップゲート（IDENTIFY/RUN/READ/VERIFY/CLAIM） (`/develop` Phase 3, `/verify`, `/pr`) | verification-before-completion | [`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md) |
+| バグ・テスト失敗・予期しない挙動への 4 フェーズ調査（修正前の根本原因特定 / 3 回失敗中断ルール） (`/develop` Phase 2 バグ修正時) | systematic-debugging | [`.claude/skills/systematic-debugging/SKILL.md`](../skills/systematic-debugging/SKILL.md) |
+| レビュー指摘の受領パターン（READ→UNDERSTAND→VERIFY→EVALUATE→RESPOND→IMPLEMENT の 6 ステップ / ソース別ハンドリング） (`/plan` Phase 5, `/verify` Step 5, `/review` Step 4) | receiving-code-review | [`.claude/skills/receiving-code-review/SKILL.md`](../skills/receiving-code-review/SKILL.md) |
+| セッション中の学びを skills / rules / commands / templates に体系反映する判断 SSOT (`/merge` 後の振り返り / 「ナレッジ更新」「ハーネス更新」「学びを反映して」) | update-knowledge | [`.claude/skills/update-knowledge/SKILL.md`](../skills/update-knowledge/SKILL.md) |
 
 ## 使い方
 
