@@ -249,6 +249,8 @@ codex review --base main
 
 #### Codex 結果の反映
 
+> **指摘の受領プロトコル**: `.claude/skills/receiving-code-review/SKILL.md` の 6 ステップ（READ → UNDERSTAND → VERIFY → EVALUATE → RESPOND → IMPLEMENT）に従う。`「おっしゃる通りです」` 等のパフォーマティブな同意は禁止。`/verify` 文脈での `🔴/🟡/🟢/❌` ハンドリングは同 SKILL の `/verify`（Codex 単独レビュー）節を参照。
+
 1. **指摘を分類**（`.claude/rules/codex-review.md` 参照）:
    - 🔴 必須修正: 本 Issue 内で即対応（バグ・脆弱性・データ損失リスク）
    - 🟡 推奨: 理由付きで記録、対応要否を判断
@@ -257,7 +259,7 @@ codex review --base main
 
 2. **必要な修正を本セッション内で即適用**: 🔴 / 🟡 で actionable な修正案は、ユーザー承認を待たずにその場で修正し、Step 3 の品質チェックを再実行する。
 
-> **逃げない**: 🔴 / 🟡 で actionable な指摘を後回しにしない。`/verify` は実装検証の最後の関門。
+> **逃げない**: 🔴 / 🟡 で actionable な指摘を後回しにしない。`/verify` は実装検証の最後の関門。本セッション内で修正完了できない場合（`receiving-code-review/SKILL.md` の「ユーザー判断を仰ぐ 4 例外」に該当する場合）は **ユーザー判断待ちに切り替える** — `/review` への bypass は 4 例外でも非該当でも認めない（同 SKILL `/verify` Step 5 節）。
 
 3. **差分があれば Issue 本文を更新**: `gh issue edit $ARGUMENTS --body-file ...` または `/update-issue` を実行
 
@@ -345,7 +347,6 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 |--------------|------|----------|
 | `/review` コマンド | 独立レビュー（実装者文脈を外した見落とし検出） | 後続 Issue（2-2 想定） |
 | `.claude/rules/multi-model-review.md` | Codex + Claude SA × 2 の 3 reviewer 並列レビュー | 後続 Issue（D-1 想定） |
-| `.claude/skills/receiving-code-review/SKILL.md` | レビュー指摘の分類スキル | 後続 Issue（4-3 想定） |
 | `scripts/claude/verify-issue.sh` / `quality-gate.sh` | Issue 単位の品質ゲート自動化 | 後続 Issue（5-1 想定） |
 | `make quality-gate` ターゲット | 品質ゲート一括実行 | 後続 Issue（5-1 想定） |
 | `/screen-verify` + TC YAML 自動実行 | post-merge ステージング検証 | 後続 Issue（D-X 想定） |

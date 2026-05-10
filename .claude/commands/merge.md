@@ -289,6 +289,8 @@ git worktree list
   - 次の Issue へ: /issue / /worktree <次の N>
 ```
 
+> **本 Issue で得た学びの体系反映**: 実装中に発見した再利用可能な知見（新パターン / harness 改善 / フィードバック）が本 Issue にあれば、**次の Issue に進む前に** `.claude/skills/update-knowledge/SKILL.md` を参照し、skills / rules / commands / templates のうち適切な反映先を判断する（一時的な情報・コードから読み取れることは memory に逃がす or 反映しない）。
+
 ---
 
 <!-- Optional: stg sync (デフォルト無効)

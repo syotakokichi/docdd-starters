@@ -149,6 +149,8 @@ codex review --base main
 
 ### Step 4: 指摘の分類と即時対応
 
+> **指摘の受領プロトコル**: `.claude/skills/receiving-code-review/SKILL.md` の 6 ステップ（READ → UNDERSTAND → VERIFY → EVALUATE → RESPOND → IMPLEMENT）に従う。`/review` 文脈での P1/P2/P3 ハンドリング・ユーザー判断を仰ぐ 4 例外（スコープ超過 / 過去 design 衝突 / reviewer 間対立 / issue-sizing 超過）は同 SKILL の `/review`（独立レビュー）節を参照。
+
 Codex / 5 軸レビューで得た指摘を以下のように分類する（`.claude/rules/codex-review.md` 準拠）:
 
 | 分類 | 意味 | 対応 |
@@ -256,7 +258,6 @@ gh issue comment $ARGUMENTS --body-file /tmp/review_result_${ARGUMENTS}.md
 | 3 reviewer adversarial review（Codex + Claude SA × 2） | レビュアー多重化 | 後続 Issue（D-1 想定） |
 | `.claude/rules/multi-model-review.md` | multi-reviewer 統合 SSOT | 後続 Issue（D-1 想定） |
 | `.claude/skills/review-orchestrator/SKILL.md` | 3 reviewer 並列起動 | 後続 Issue（D-1 想定） |
-| `.claude/skills/receiving-code-review/SKILL.md` | レビュー指摘の受領パターン | 後続 Issue（4-3 想定） |
 | `.claude/skills/ephemeral-session-memory/SKILL.md` | レビュー raw 出力の session memory 退避 | 後続 Slice（未起票） |
 
 Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.
