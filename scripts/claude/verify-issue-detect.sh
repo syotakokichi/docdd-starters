@@ -18,6 +18,10 @@
 #                    Resolution order: VERIFY_BASE_REF -> main -> origin/main.
 #                    All-miss => exit 1 with a clear error.
 #
+# Scope of --git:
+#   Diffs `merge-base..HEAD` only; staged / working-tree / untracked changes
+#   are out of scope. Use --stdin or --files for pre-commit local detection.
+#
 # Output:
 #   --format flat (default): one category per line, deduped, no path context.
 #   --format manifest:       `<path>: <cat1> <cat2> ...` per matched path.
@@ -46,22 +50,26 @@ categorize_path() {
   local re
 
   # 1. backend-unit
-  re='^apps/backend/app/modules/[^/]+/(domain|services)/'
+  # Use `.+` (not `[^/]+`) to match nested modules per the documented `**` glob
+  # (e.g. apps/backend/app/modules/billing/invoices/domain/...).
+  re='^apps/backend/app/modules/.+/(domain|services)/'
   if [[ "$path" =~ $re ]]; then
     echo "backend-unit"
   fi
 
   # 2. backend-integration
-  re='^apps/backend/app/modules/[^/]+/(repositories|infrastructure)/'
+  re='^apps/backend/app/modules/.+/(repositories|infrastructure)/'
   if [[ "$path" =~ $re ]] || [[ "$path" =~ ^apps/backend/app/infrastructure/ ]]; then
     echo "backend-integration"
   fi
 
   # 3. api-route
-  re='^apps/backend/app/modules/[^/]+/(api|presentation)/'
+  # `shared/(.*/)?routes.py$` to also match zero-depth `shared/routes.py`
+  # (the documented `**` glob includes zero or more directories).
+  re='^apps/backend/app/modules/.+/(api|presentation)/'
   if [[ "$path" =~ $re ]] \
     || [[ "$path" =~ ^apps/backend/app/middlewares/ ]] \
-    || [[ "$path" =~ ^apps/backend/app/shared/.*/routes\.py$ ]]; then
+    || [[ "$path" =~ ^apps/backend/app/shared/(.*/)?routes\.py$ ]]; then
     echo "api-route"
   fi
 
