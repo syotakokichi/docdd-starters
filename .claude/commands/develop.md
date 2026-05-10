@@ -32,11 +32,11 @@ GitHub Issue $ARGUMENTS の実装を行ってください。
    | DocDD documents / 7-axis | docdd-workflow | `.claude/skills/docdd-workflow/SKILL.md` |
 
 4. **TDD 証跡を確認する**（`/plan` 検証定義の「TDD 判定」欄）:
-   - `TDD 必須` → RED テストを先行作成して FAILED 結果を確認してから実装へ
+   - `TDD 必須` → RED テストを先行作成して FAILED 結果を確認してから実装へ（`/tdd $ARGUMENTS` を別フェーズで起動するか、本コマンド内で RED → GREEN を進める）
    - `TDD スキップ（理由あり）` → スキップ理由をサマリに転記して実装へ
    - 空欄 → **証跡漏れ** として判断を明示してから実装へ
 
-> 後続 Issue で TDD 専用コマンド `/tdd` および `.claude/rules/tdd-gate.md` を導入予定。本コマンドでは TDD 必須判定の場合も `/develop` 内で RED → GREEN を進める。
+> 判定基準 SSOT: [`.claude/rules/tdd-gate.md`](../rules/tdd-gate.md)。RED-GREEN サイクル・パターン集・証跡フォーマットは [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md) を参照。
 
 ### Phase 2: 実装
 
@@ -105,13 +105,15 @@ Issue #XXX をチームで実装して。
 
 #### 実行ルール
 
-- **Backend を触ったら** `make test-backend` だけで終わらせず、変更したモジュールに紐づく focused pytest（`pytest apps/backend/tests/.../test_xxx.py::test_name`）も実行する
+- **Backend を触ったら** `make test-backend` だけで終わらせず、変更したモジュールに紐づく focused pytest（`PYTHONPATH=apps/backend pytest tests/backend/.../test_xxx.py::test_name -v`）も実行する
 - **API 契約を変えたら**、client / hook / container / 次画面 / callback handler まで追って確認する
 - **DocDD を更新したら** `make traceability` を実行する
 - **`.claude/` の dx-docs を変更したら** `make validate-claude` を実行する
 - ブラウザ結合確認は `/verify` で軽量ヘルスチェック（Console / Network エラーチェック）として実施する
 
 #### 失敗扱いにするもの
+
+完了主張前のゲート（5 ステップ: IDENTIFY / RUN / READ / VERIFY / CLAIM）の SSOT は [`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md)。以下を「成功」扱いにしない:
 
 - `0 selected`
 - `all skipped`
@@ -250,11 +252,7 @@ gh issue edit $ARGUMENTS --body-file /tmp/issue_$ARGUMENTS.md
 
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
-| `/tdd` コマンド | TDD 専用コマンド（RED テスト先行作成） | 後続 Issue（4-2 想定） |
-| `.claude/rules/tdd-gate.md` | TDD 判定の SSOT | 後続 Issue（4-2 想定） |
-| `.claude/skills/tdd-workflow/SKILL.md` | TDD 実行スキル | 後続 Issue（4-2 想定） |
 | `.claude/skills/systematic-debugging/SKILL.md` | バグ修正の体系化スキル | 後続 Issue（4-3 想定） |
-| `.claude/skills/verification-before-completion/SKILL.md` | 完了主張前のゲート | 後続 Issue（4-2 想定） |
 | `make quality-gate` ターゲット | 品質ゲート一括実行 | 後続 Issue（5-1 想定） |
 | `/screen-verify` + TC YAML 自動実行 | post-merge ステージング検証 | 後続 Issue（D-X 想定） |
 

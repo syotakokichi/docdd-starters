@@ -102,14 +102,18 @@ Phase 1.2 の依存先トレースが完了した時点で、変更パスから�
 
 ### Phase 1.3: Critical Path 判定（必須）
 
-変更対象を以下の基準で評価する:
+判定基準・保護レイヤー選択・Coverage expectation の SSOT は [`.claude/skills/test-design/SKILL.md`](../skills/test-design/SKILL.md)。Critical / Mixed と判定した場合は同 skill を **Read** して、保護レイヤーと Focused test commands を Critical Path テーブルへ転記する。
+
+変更対象を以下の基準で評価する（早見表 — 詳細は test-design SKILL）:
 
 - **Critical**: 状態遷移・外部連携・callback・認証・申込導線を含む
 - **Non-critical**: 上記に該当しない（UI 文言、CSS、DX ツーリング等）
 - **Mixed**: Critical と Non-critical が混在
-- **N/A**: `.claude/` / `docs/` のみの変更、文言修正のみ
+
+> **N/A は Critical Path 判定の値ではなく、Coverage expectation の例外**。`.claude/` / `docs/` のみの変更・文言修正のみで実行コードを含まない場合、`Critical Path 判定 = Non-critical` + `Coverage expectation = N/A` と記入する（Critical / Mixed では N/A を選択不可。SSOT: [`.claude/skills/test-design/SKILL.md`](../skills/test-design/SKILL.md) の N/A 条件節）。
 
 判定結果に応じて Coverage expectation・focused test commands を Issue 本文の Critical Path テーブルに記入する。
+TDD 必須 / スキップ判定の SSOT は [`.claude/rules/tdd-gate.md`](../rules/tdd-gate.md)（Critical 領域は原則 TDD 必須）。
 
 ### Phase 1.5: UI 設計の確認（UI 変更を伴う場合）
 
@@ -223,7 +227,7 @@ UI 変更を伴う Issue の場合は、計画前にデザインを検討:
 
 テンプレを反映する際、以下の 3 ロジックで該当セクションを出し分ける:
 
-1. **TDD 判定 row の出し分け**:
+1. **TDD 判定 row の出し分け**（判定 SSOT: [`.claude/rules/tdd-gate.md`](../rules/tdd-gate.md)）:
    - **TDD 必須** の場合: 「想定 RED コマンド」「想定 GREEN コマンド」に focused pytest / vitest コマンドを**具体値**で記入
    - **TDD スキップ** の場合: 同じ row に「該当なし」と記入し、判定欄に `スキップ（理由: <one-liner>）` と記入
    - **空欄禁止**: 必須 / スキップどちらかを必ず記入する。空欄 = 証跡漏れとして扱う
@@ -407,7 +411,5 @@ Issue 本文を仕様固定済み計画に更新し、Codex 計画レビュー�
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
 | `.claude/rules/multi-model-review.md` | Codex + Claude SA × 2 の 3 reviewer 並列レビュー | 後続 Issue（D-1 想定） |
-| `.claude/skills/test-design/SKILL.md` | Critical Path 判定スキル化 | 後続 Issue（4-2 想定） |
-| `.claude/rules/tdd-gate.md` | TDD 判定の SSOT | 後続 Issue（4-2 想定） |
 
 Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.
