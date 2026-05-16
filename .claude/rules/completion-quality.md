@@ -35,7 +35,7 @@
 |---|---|---|---|
 | `/plan` 計画立案 | 繰り返し使われる | [planning-quality.md](./planning-quality.md) | リサーチ必須 |
 | `/develop` 実装完了時 | — | `/verify` に委譲 | 実装自体は可逆 |
-| `/verify` 実装検証 | 取り消せない（PR直前） | [verify.md](../commands/verify.md) | 6ステップ + 8項目チェックリスト |
+| `/verify` 実装検証 | 取り消せない（PR直前） | [verify.md](../commands/verify.md) | 機械ゲート（Step 2-3 `make verify-issue` / rc×JSON 判定）+ Codex Step 5 + 構造化投稿 Step 6 + チェックリスト |
 | `/pr` PR作成 | 取り消せない + 印象に残る | [pr.md](../commands/pr.md) | CI確認 + ドキュメント更新 |
 | `/merge` マージ | 取り消せない | [merge.md](../commands/merge.md) | CI watch で担保 |
 | `/commit-and-push` | 取り消しにくい | [commit-and-push.md](../commands/commit-and-push.md) | 差分確認 |
