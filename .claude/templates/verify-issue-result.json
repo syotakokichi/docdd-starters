@@ -1,0 +1,102 @@
+{
+  "_schema": {
+    "_doc": "Result schema produced by scripts/claude/verify-issue.sh (Wave 5-2). This file is the SSOT contract that Wave 5-3 (/verify structured posting) parses. Field names, types and enum values below are normative; the values are a representative example, not literal output. drift between this template and the orchestrator must be treated as a bug.",
+    "inputs": {
+      "requested_issue": "int — the ISSUE number passed to the orchestrator",
+      "resolved_pr": "int | null — PR number resolved from `gh pr list --head <branch>`; null when no PR exists yet",
+      "issue_pr_match": "bool — true when the resolved PR body/title references #<requested_issue> (Closes/Fixes/Resolves/#N)",
+      "source": "\"pr-diff\" | \"merge-base-fallback\" | null — how the changed paths were obtained; null on prerequisite failure before resolution",
+      "run_id": "string — unique id for this run (pid + epoch)",
+      "pid": "int — orchestrator process id",
+      "output_path": "string — absolute path this JSON was written to",
+      "started_at": "string — ISO8601 UTC (YYYY-MM-DDThh:mm:ssZ)",
+      "finished_at": "string — ISO8601 UTC"
+    },
+    "steps": "array of step objects (see steps[0] below). Same make target is invoked at most once per run (dedup).",
+    "summary": {
+      "pass_count": "int — steps with status == pass",
+      "fail_count": "int — steps with status == fail",
+      "skip_count": "int — steps with status == skip",
+      "manual_required_count": "int — skip steps whose skip_reason == manual_required",
+      "partial_count": "int — steps with partial == true (e.g. migration-safety up/down not validated)",
+      "total_count": "int — total recorded steps"
+    },
+    "error": {
+      "code": "string | null — one of: jq_not_found (stderr-only, no JSON) | gh_pr_lookup_failed | pr_issue_mismatch | detector_failed | unknown_category | null when no prerequisite failure",
+      "message": "string | null — human-readable error message",
+      "detector_stderr": "string | null — captured stderr of verify-issue-detect.sh when error.code == detector_failed"
+    },
+    "warnings": "array of strings — non-fatal observations (e.g. pr_issue_mismatch when VERIFY_REQUIRE_PR_MATCH=0)",
+    "exit_code": "int — the orchestrator's final exit code, also logged inside the JSON (0 pass | 1 step failed | 2 arg invalid | 3 prerequisite failure)"
+  },
+  "inputs": {
+    "requested_issue": 62,
+    "resolved_pr": 100,
+    "issue_pr_match": true,
+    "source": "pr-diff",
+    "run_id": "48213-1747900000",
+    "pid": 48213,
+    "output_path": "/tmp/verify-issue-62.aB3xQ7.json",
+    "started_at": "2026-05-16T04:00:00Z",
+    "finished_at": "2026-05-16T04:03:21Z"
+  },
+  "steps": [
+    {
+      "name": "test-backend",
+      "categories": ["backend-unit", "migration-safety"],
+      "command": "make test-backend",
+      "status": "pass",
+      "exit_code": 0,
+      "stdout_path": "/tmp/verify-issue-62.48213.test-backend.stdout",
+      "stderr_path": "/tmp/verify-issue-62.48213.test-backend.stderr",
+      "skip_reason": null,
+      "partial": true,
+      "notes": "up/down not validated",
+      "started_at": "2026-05-16T04:00:01Z",
+      "finished_at": "2026-05-16T04:02:10Z"
+    },
+    {
+      "name": "traceability",
+      "categories": ["docdd"],
+      "command": "make traceability",
+      "status": "fail",
+      "exit_code": 1,
+      "stdout_path": "/tmp/verify-issue-62.48213.traceability.stdout",
+      "stderr_path": "/tmp/verify-issue-62.48213.traceability.stderr",
+      "skip_reason": null,
+      "partial": false,
+      "notes": null,
+      "started_at": "2026-05-16T04:02:10Z",
+      "finished_at": "2026-05-16T04:02:55Z"
+    },
+    {
+      "name": "frontend-style-manual",
+      "categories": ["frontend-style"],
+      "command": null,
+      "status": "skip",
+      "exit_code": null,
+      "stdout_path": null,
+      "stderr_path": null,
+      "skip_reason": "manual_required",
+      "partial": false,
+      "notes": null,
+      "started_at": "2026-05-16T04:02:55Z",
+      "finished_at": "2026-05-16T04:02:55Z"
+    }
+  ],
+  "summary": {
+    "pass_count": 1,
+    "fail_count": 1,
+    "skip_count": 1,
+    "manual_required_count": 1,
+    "partial_count": 1,
+    "total_count": 3
+  },
+  "error": {
+    "code": null,
+    "message": null,
+    "detector_stderr": null
+  },
+  "warnings": [],
+  "exit_code": 1
+}

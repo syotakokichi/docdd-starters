@@ -31,16 +31,18 @@ Claude Code / DocDD ワークフローを支えるスクリプト群。
 | `detect-capabilities.sh` | gh / codex / pencil / aws 等の利用可否を JSON で出力 | `scripts/bootstrap.sh` |
 | `validate-claude-config.sh` | `.claude/` 配下の構成・命名・frontmatter を検証 | `make validate-claude` |
 | `validate_claude_frontmatter.py` | skill / command の frontmatter スキーマ検証 | `validate-claude-config.sh` 内部 |
-| `verify-issue-detect.sh` | 変更パスから必要証跡カテゴリを列挙する change-aware detector | `make verify-issue-detect`、5-2 / 5-3（後続 Issue） |
+| `verify-issue-detect.sh` | 変更パスから必要証跡カテゴリを列挙する change-aware detector | `make verify-issue-detect`、`verify-issue.sh`（5-2）、5-3（後続 Issue） |
+| `verify-issue.sh` | Issue 番号 → PR 解決 → detector → カテゴリ別検証 → 構造化 JSON 出力の 6 ステップ orchestrator | `make verify-issue`、5-3（後続 Issue） |
 | `test-hooks.bats` | `.claude/hooks/` の bats fixture | `make test-hooks` |
 | `test/verify-issue-detect.bats` | `verify-issue-detect.sh` の bats fixture | `make verify-issue-detect` |
+| `test/verify-issue.bats` | `verify-issue.sh` の bats fixture（25 ケース） | `make verify-issue-fixture` |
 
 ---
 
 ## verify-issue-detect.sh
 
 変更パスを入力に、必要な証跡カテゴリを stdout に列挙する純粋関数。
-`/verify` と `make verify-issue`（5-2 で導入予定）の前段で使う。
+`/verify` と `make verify-issue`（5-2 で導入済み — 下記 `verify-issue.sh` 節）の前段で使う。
 
 ### 使い方
 
@@ -116,9 +118,59 @@ CI shallow checkout / 別名 default branch / worktree 配下のいずれでも�
 
 ---
 
+## verify-issue.sh
+
+Issue 番号を起点に 6 ステップを直列実行する orchestrator（Wave 5-2）。
+`verify-issue-detect.sh`（5-1）を呼び出してカテゴリを検出し、カテゴリごとの検証を実行して構造化 JSON を出力する。
+
+| ステップ | 内容 |
+|---------|------|
+| 0 | 前提チェック（`jq` 存在確認） |
+| 1 | Issue → PR 解決 + ISSUE-PR 紐付け検証（PR 本文/タイトルの `Closes/Fixes/Resolves #<N>` / `#<N>`） |
+| 2 | `verify-issue-detect.sh` でカテゴリ検出（PR あり: `--stdin` / PR なし: `--git` fallback） |
+| 3 | カテゴリ → make target を **dedup** して順次実行（stop-on-fail = 続行） |
+| 4 | 集約（`pass/fail/skip/manual_required/partial/total` の 5+1 統計） |
+| 5 | 構造化 JSON 出力（atomic write + `.latest.json` symlink）+ exit code |
+
+### 使い方
+
+```bash
+# 位置引数（SubsCore 流）
+scripts/claude/verify-issue.sh 62
+# ISSUE env でも可（位置引数が無いとき）
+ISSUE=62 scripts/claude/verify-issue.sh
+# Makefile 経由
+make verify-issue ISSUE=62
+```
+
+### 環境変数
+
+| 環境変数 | 既定値 | 効果 |
+|---------|:----:|------|
+| `VERIFY_ISSUE_OUTPUT` | （mktemp） | 出力 JSON パスを上書き。未指定時は `$(mktemp "$TMPDIR/verify-issue-<N>.XXXXXX").json` |
+| `VERIFY_REQUIRE_PR_MATCH` | `1` | `0` で ISSUE-PR 不一致を warning に降格（exit 3 にしない） |
+| `VERIFY_ISSUE_DETECTOR` | 同階層の `verify-issue-detect.sh` | detector スクリプトパスを上書き（テスト用） |
+
+### 出力 / exit code
+
+- 出力 JSON の schema SSOT は [`.claude/templates/verify-issue-result.json`](../../.claude/templates/verify-issue-result.json)（5-3 との契約）。`.latest.json` symlink で最新 run を辿れる
+- step の stdout/stderr 本文は別ファイルに退避し、JSON には path のみ記録（巨大ログ / 制御文字による JSON 破壊を構造的に回避）
+- exit code: `0` 全 PASS（SKIP のみ含む） / `1` 1 件以上 FAIL / `2` 引数不正（ISSUE 未指定 / 非数字 / `0`） / `3` 前提失敗（`jq` 不在 / detector 不在・異常終了 / unknown_category / `gh pr list` 失敗 / ISSUE-PR 不一致）
+- detector の `exit 1` は orchestrator 側で `exit 3` + `error.code = "detector_failed"` に変換（detector 本体は 5-1 baseline として改変しない）
+
+### Make ターゲット
+
+| ターゲット | 動作 |
+|-----------|------|
+| `make verify-issue ISSUE=<N> [ARGS=...]` | orchestrator を起動。`ARGS` は将来の opt-in 拡張用 pass-through |
+| `make verify-issue-fixture` | bats fixture（25 ケース）を実行。bats 不在時は default で WARN（exit 0）、`CI=true` または `VERIFY_ISSUE_FIXTURE_REQUIRE_BATS=1` 下では fail（exit 1） |
+
+---
+
 ## 関連
 
 - [.claude/templates/issue-implementation-plan.md](../../.claude/templates/issue-implementation-plan.md) — **真の SSOT**
 - [.claude/skills/verify-input-capture/SKILL.md](../../.claude/skills/verify-input-capture/SKILL.md) — `/verify` Step 1 入力固定
 - [.claude/rules/cli-first.md](../../.claude/rules/cli-first.md) — CLI ファースト原則
-- [Makefile](../../Makefile) — `verify-issue-detect` / `shell-lint` / `shell-format-check` / `test-hooks` / `validate-claude` ターゲット
+- [.claude/templates/verify-issue-result.json](../../.claude/templates/verify-issue-result.json) — `verify-issue.sh` 出力 JSON schema SSOT（5-3 契約）
+- [Makefile](../../Makefile) — `verify-issue` / `verify-issue-fixture` / `verify-issue-detect` / `shell-lint` / `shell-format-check` / `test-hooks` / `validate-claude` ターゲット
