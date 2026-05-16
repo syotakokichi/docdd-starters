@@ -35,7 +35,7 @@ Claude Code / DocDD ワークフローを支えるスクリプト群。
 | `verify-issue.sh` | Issue 番号 → PR 解決 → detector → カテゴリ別検証 → 構造化 JSON 出力の 6 ステップ orchestrator | `make verify-issue`、5-3（後続 Issue） |
 | `test-hooks.bats` | `.claude/hooks/` の bats fixture | `make test-hooks` |
 | `test/verify-issue-detect.bats` | `verify-issue-detect.sh` の bats fixture | `make verify-issue-detect` |
-| `test/verify-issue.bats` | `verify-issue.sh` の bats fixture（25 ケース） | `make verify-issue-fixture` |
+| `test/verify-issue.bats` | `verify-issue.sh` の bats fixture（29 ケース） | `make verify-issue-fixture` |
 
 ---
 
@@ -157,13 +157,14 @@ make verify-issue ISSUE=62
 - step の stdout/stderr 本文は別ファイルに退避し、JSON には path のみ記録（巨大ログ / 制御文字による JSON 破壊を構造的に回避）
 - exit code: `0` 全 PASS（SKIP のみ含む） / `1` 1 件以上 FAIL / `2` 引数不正（ISSUE 未指定 / 非数字 / `0`） / `3` 前提失敗（`jq` 不在 / detector 不在・異常終了 / unknown_category / `gh pr list` 失敗 / ISSUE-PR 不一致）
 - detector の `exit 1` は orchestrator 側で `exit 3` + `error.code = "detector_failed"` に変換（detector 本体は 5-1 baseline として改変しない）
+- 手動証跡を要するカテゴリ（api-route / api-contract / backend-core / frontend-ui / frontend-style / docdd / dx-config / dx-docs）は自動 step に **加算** で `<category>-manual` プレースホルダ step（`skip_reason: "manual_required"`）を出力し `summary.manual_required_count` に計上。自動 target が PASS しても手動確認は消えない（5-3 が可視化）。migration-safety のみ例外で partial+notes で表現
 
 ### Make ターゲット
 
 | ターゲット | 動作 |
 |-----------|------|
 | `make verify-issue ISSUE=<N> [ARGS=...]` | orchestrator を起動。`ARGS` は将来の opt-in 拡張用 pass-through |
-| `make verify-issue-fixture` | bats fixture（25 ケース）を実行。bats 不在時は default で WARN（exit 0）、`CI=true` または `VERIFY_ISSUE_FIXTURE_REQUIRE_BATS=1` 下では fail（exit 1） |
+| `make verify-issue-fixture` | bats fixture（29 ケース）を実行。bats 不在時は default で WARN（exit 0）、`CI=true` または `VERIFY_ISSUE_FIXTURE_REQUIRE_BATS=1` 下では fail（exit 1） |
 
 ---
 

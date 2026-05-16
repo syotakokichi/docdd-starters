@@ -12,12 +12,12 @@
       "started_at": "string — ISO8601 UTC (YYYY-MM-DDThh:mm:ssZ)",
       "finished_at": "string — ISO8601 UTC"
     },
-    "steps": "array of step objects (see steps[0] below). Same make target is invoked at most once per run (dedup).",
+    "steps": "array of step objects (see steps[0] below). Same make target is invoked at most once per run (dedup). In ADDITION to automated steps, a manual_required placeholder step (command null, status skip, skip_reason manual_required, name <category>-manual) is appended for every detected category whose SSOT mapping requires manual evidence (api-route, api-contract, backend-core, frontend-ui, frontend-style, docdd, dx-config, dx-docs). These are additive — an automated target passing does NOT clear the category's manual placeholder. migration-safety is the exception: its manual aspect is the partial+notes flag on test-backend, not a separate placeholder.",
     "summary": {
       "pass_count": "int — steps with status == pass",
       "fail_count": "int — steps with status == fail",
       "skip_count": "int — steps with status == skip",
-      "manual_required_count": "int — skip steps whose skip_reason == manual_required",
+      "manual_required_count": "int — skip steps whose skip_reason == manual_required; >0 means 5-3 must surface pending manual evidence even when exit_code == 0",
       "partial_count": "int — steps with partial == true (e.g. migration-safety up/down not validated)",
       "total_count": "int — total recorded steps"
     },
@@ -79,7 +79,21 @@
       "stderr_path": null,
       "skip_reason": "manual_required",
       "partial": false,
-      "notes": null,
+      "notes": "Browser visual check (mandatory)",
+      "started_at": "2026-05-16T04:02:55Z",
+      "finished_at": "2026-05-16T04:02:55Z"
+    },
+    {
+      "name": "docdd-manual",
+      "categories": ["docdd"],
+      "command": null,
+      "status": "skip",
+      "exit_code": null,
+      "stdout_path": null,
+      "stderr_path": null,
+      "skip_reason": "manual_required",
+      "partial": false,
+      "notes": "frontmatter visual check",
       "started_at": "2026-05-16T04:02:55Z",
       "finished_at": "2026-05-16T04:02:55Z"
     }
@@ -87,10 +101,10 @@
   "summary": {
     "pass_count": 1,
     "fail_count": 1,
-    "skip_count": 1,
-    "manual_required_count": 1,
+    "skip_count": 2,
+    "manual_required_count": 2,
     "partial_count": 1,
-    "total_count": 3
+    "total_count": 4
   },
   "error": {
     "code": null,

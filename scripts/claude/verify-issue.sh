@@ -132,7 +132,7 @@ append_step() {
 # prerequisite failures. NOT used for arg errors (exit 2) or jq_not_found.
 finish() {
   local code="$1"
-  local steps_json resolved_pr_json source_json error_json finished_at
+  local steps_json resolved_pr_json source_json error_json finished_at write_rc
   if [[ -s "$STEPS_FILE" ]]; then
     steps_json="$(jq -sc . "$STEPS_FILE")"
   else
@@ -153,7 +153,7 @@ finish() {
     }')"
   finished_at="$(now)"
 
-  mkdir -p "$(dirname "$ABS_OUTPUT")"
+  mkdir -p "$(dirname "$ABS_OUTPUT")" 2>/dev/null || true
   jq -n \
     --argjson requested_issue "$ISSUE" \
     --argjson resolved_pr "$resolved_pr_json" \
@@ -198,9 +198,20 @@ finish() {
       error: $error,
       warnings: $warnings,
       exit_code: $exit_code
-    }' >"${ABS_OUTPUT}.tmp.${PID}"
-  mv -f "${ABS_OUTPUT}.tmp.${PID}" "$ABS_OUTPUT"
-  ln -sf "$ABS_OUTPUT" "$LATEST"
+    }' >"${ABS_OUTPUT}.tmp.${PID}" 2>/dev/null
+  write_rc=$?
+  # The structured JSON is the contract 5-3 consumes. If it cannot be written
+  # (unwritable VERIFY_ISSUE_OUTPUT / invalid TMPDIR / jq build failure), the
+  # run must fail loudly instead of echoing PASSED with the original code —
+  # otherwise downstream reads a stale/absent file and trusts a false "verified".
+  if [[ "$write_rc" -ne 0 ]] || ! mv -f "${ABS_OUTPUT}.tmp.${PID}" "$ABS_OUTPUT" 2>/dev/null; then
+    rm -f "${ABS_OUTPUT}.tmp.${PID}" 2>/dev/null || true
+    printf 'ERROR: output_write_failed — could not write result JSON to %s\n' \
+      "$ABS_OUTPUT" >&2
+    exit 3
+  fi
+  ln -sf "$ABS_OUTPUT" "$LATEST" 2>/dev/null \
+    || printf 'WARN: could not update latest symlink %s\n' "$LATEST" >&2
 
   if [[ "$code" -eq 0 ]]; then
     printf '✅ verify-issue #%s PASSED (pass=%s skip=%s)\n' \
@@ -392,8 +403,15 @@ maybe_step() {
   run_make_step "$name" "$target" "$matched" "$partial" "$notes"
 }
 
+# Emit a manual_required placeholder step for a detected category. This is
+# additive to (not a replacement for) the automated step: 5-3 reads these
+# placeholders to surface "manual evidence still pending" so a PR whose
+# automated targets all pass is NOT reported as fully verified. SSOT for which
+# categories require manual evidence: .claude/templates/issue-implementation-plan.md
+# 「🗺️ 証跡マッピング表」 manual_steps column (migration-safety is the lone
+# exception: its manual aspect is the partial+notes flag on test-backend).
 maybe_manual() {
-  local name="$1" trigger="$2"
+  local name="$1" trigger="$2" notes="${3:-}"
   in_list "$trigger" "$DETECTED" || return 0
   local started cats_json
   started="$(now)"
@@ -402,7 +420,7 @@ maybe_manual() {
   MANUAL_REQUIRED_COUNT=$((MANUAL_REQUIRED_COUNT + 1))
   TOTAL_COUNT=$((TOTAL_COUNT + 1))
   append_step "$name" "" "skip" "null" "" "" \
-    "manual_required" "false" "" "$cats_json" "$started" "$(now)"
+    "manual_required" "false" "$notes" "$cats_json" "$started" "$(now)"
 }
 
 # Canonical order. One step per unique make target => dedup is structural
@@ -416,7 +434,26 @@ maybe_step "traceability" "traceability" "docdd"
 maybe_step "shell-lint" "shell-lint" "dx-config"
 maybe_step "shell-format-check" "shell-format-check" "dx-config"
 maybe_step "validate-claude" "validate-claude" "dx-docs"
-maybe_manual "frontend-style-manual" "frontend-style"
+
+# Manual-required placeholders for every detected category whose SSOT mapping
+# requires manual evidence (canonical order). migration-safety is intentionally
+# absent: its manual aspect is recorded as partial+notes on test-backend.
+maybe_manual "api-route-manual" "api-route" \
+  "6_API yaml updated + all callers reviewed (manual)"
+maybe_manual "api-contract-manual" "api-contract" \
+  "Frontend type parity visual check (mandatory)"
+maybe_manual "backend-core-manual" "backend-core" \
+  "Behavior check (manual)"
+maybe_manual "frontend-ui-manual" "frontend-ui" \
+  "Browser visual check"
+maybe_manual "frontend-style-manual" "frontend-style" \
+  "Browser visual check (mandatory)"
+maybe_manual "docdd-manual" "docdd" \
+  "frontmatter visual check"
+maybe_manual "dx-config-manual" "dx-config" \
+  "Behavior check + existing tests non-regression (manual)"
+maybe_manual "dx-docs-manual" "dx-docs" \
+  "Visual check"
 
 # ─── Step 5-6: exit code + structured JSON output ───
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
