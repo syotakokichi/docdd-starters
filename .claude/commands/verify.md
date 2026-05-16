@@ -144,10 +144,12 @@ JSON 不在（後述 rc=2/3）はここで `test -s` が偽になる。
 | 0 | 全 PASS | あり | JSON 転記。`summary.manual_required_count > 0` なら未消化人手証跡を Step 4 で消化（未消化は `未解消`） |
 | 1 | step FAIL あり | **あり** | **rc に関わらず JSON を読んで FAIL を転記**（FAIL 結果こそ Issue に残す）。Status は「ブロッカーあり」 |
 | 2 | 引数不正 | **なし** | **hard fail**。`verification-result-comment.md`「JSON 不在転記規約」に従い stderr を手動転記。PASS 扱い禁止 |
-| 3 | 前提失敗（jq 不在 / gh 認証 / detector / output 書込失敗 / pr_issue_mismatch） | **なし** | **hard fail**。同上。原因を解消して再実行 |
+| 3-A | 前提失敗（`finish 3` 経路: `gh_pr_lookup_failed` / `pr_issue_mismatch` / `detector_failed` / `unknown_category`） | **あり** | **hard fail だが JSON は書かれている**（`verify-issue.sh` の `finish 3` は JSON 書込後に exit）。**JSON を読んで `error{code,message,detector_stderr}` / `warnings[]` を転記**してから hard fail。原因を解消して再実行 |
+| 3-B | 前提失敗（bare `exit 3` 経路: `jq_not_found` / `output_write_failed`） | **なし** | **hard fail**。`verification-result-comment.md`「JSON 不在転記規約」に従い stderr を手動転記。原因を解消して再実行 |
 
-> **原則**: pin した JSON が存在すれば rc=1 でも解析・投稿する（FAIL を握り潰さない）。
-> JSON が**存在しない**（rc=2 / rc=3）ときのみ `/verify` を hard fail させる。
+> **原則**: pin した JSON が存在すれば rc=1 でも、**rc=3 でも**（3-A）解析・投稿する（FAIL / 構造化 error を握り潰さない）。
+> JSON が**存在しない**（rc=2 / rc=3-B = `jq_not_found` / `output_write_failed`）ときのみ「JSON 不在転記規約」で hard fail させる。
+> rc=3 でも JSON 不在と決めつけない: `finish 3`（gh / detector / pr_issue_mismatch / unknown_category）は JSON を書く（`scripts/claude/verify-issue.sh` の `finish()` は JSON atomic write 後に `exit "$code"`）。Step 2-2 の `test -s "$OUT"` で 3-A / 3-B を機械判別する。
 
 #### Step 3-2: TDD 証跡確認
 
@@ -169,7 +171,8 @@ TDD の RED-GREEN 履歴までは検証しないため、この確認は機械�
 
 完了主張前のゲート（5 ステップ）と禁止表現の SSOT は [`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md)。以下を「成功」扱いにしない:
 
-- pin JSON 不在（rc=2 / rc=3）を PASS 扱いにする
+- pin JSON 不在（rc=2 / rc=3-B = `jq_not_found` / `output_write_failed`）を PASS 扱いにする
+- rc=3-A（`finish 3`: gh / detector / pr_issue_mismatch / unknown_category）で JSON が書かれているのに「JSON 不在」と決めつけ `error`/`warnings` を転記せず hard fail だけする
 - JSON の step `status` に `fail` があるのに転記せず PASS にする
 - `summary.manual_required_count > 0` を Step 4 で消化せず PASS にする
 - `make verify-issue` の rc を capture せず `&&` で握り潰す
@@ -370,7 +373,8 @@ Issue コメントに投稿する。**Issue コメントだけで検証履歴が
   - `error.{code,message,detector_stderr}` / `warnings[]`
   - `manual_required_count > 0` の人手証跡サーフェス（未消化なら `未解消`）
   - 未コミット blind-spot 警告（Step 1 の working-tree/untracked が gate 時に非空だったか）
-- JSON 不在（rc=2 / rc=3）の場合: テンプレートの「JSON 不在転記規約」に従い stderr を手動転記し **hard fail**
+- rc=3-A（`finish 3`: gh / detector / pr_issue_mismatch / unknown_category）の場合: JSON は書かれているので `error.{code,message,detector_stderr}` / `warnings[]` を JSON から転記した上で **hard fail**（Status は「ブロッカーあり」）
+- JSON 不在（rc=2 / rc=3-B = `jq_not_found` / `output_write_failed`）の場合: テンプレートの「JSON 不在転記規約」に従い stderr を手動転記し **hard fail**
 - `ブラウザ確認` を必ず埋める（フロントエンド変更がある Issue は実施、なければ `N/A`）
 - `未解消` が残る場合は理由と対応方針を明記する
 
@@ -391,7 +395,8 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 - [ ] 案1: working-tree/untracked が非空なら機械ゲート前に commit した（gate はコミット済み状態に対して実行）
 - [ ] `VERIFY_ISSUE_OUTPUT` で pin した本実行専用 JSON を読んだ（`.latest.json` 直読していない）
 - [ ] `make verify-issue` の rc を capture した（`&&` で握り潰していない）。rc=1 でも JSON を読んで FAIL を転記した
-- [ ] pin JSON 不在（rc=2 / rc=3）を PASS 扱いにしていない（hard fail させた）
+- [ ] rc=3-A（`finish 3`: gh / detector / pr_issue_mismatch / unknown_category）で JSON が書かれている場合は `error`/`warnings` を JSON から転記した上で hard fail した（「JSON 不在」と決めつけていない）
+- [ ] pin JSON 不在（rc=2 / rc=3-B = `jq_not_found` / `output_write_failed`）を PASS 扱いにしていない（hard fail させた）
 - [ ] `inputs.requested_issue == <N>` / `run_id` の新鮮性を検証した
 - [ ] `summary.manual_required_count > 0` の人手証跡を Step 4 で消化した（未消化は `未解消`）
 - [ ] Step 5 で差分が変わった場合: commit → 機械ゲート再実行（出力 re-pin）→ 最新 JSON を Step 6 に渡した

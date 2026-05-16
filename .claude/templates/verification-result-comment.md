@@ -56,7 +56,8 @@ Wave 5-2（`make verify-issue`）が産出する構造化 JSON（schema SSOT: [`
 | 0 | 全 PASS | あり | 転記して PASS。ただし `manual_required_count > 0` なら下記サーフェスで `未解消` 扱い |
 | 1 | step FAIL あり | **あり** | **JSON を読んで FAIL を転記**（FAIL こそ残す）。Status は「ブロッカーあり」 |
 | 2 | 引数不正 | **なし** | JSON 不在転記規約（下記）。`/verify` は hard fail |
-| 3 | 前提失敗（jq 不在 / gh / detector / output 書込失敗） | **なし** | JSON 不在転記規約（下記）。`/verify` は hard fail |
+| 3-A | 前提失敗（`finish 3`: `gh_pr_lookup_failed` / `pr_issue_mismatch` / `detector_failed` / `unknown_category`） | **あり** | JSON は書かれている（`finish()` は JSON write 後に exit）。下記「error / warnings」欄に JSON から転記してから `/verify` は hard fail |
+| 3-B | 前提失敗（bare `exit 3`: `jq_not_found` / `output_write_failed`） | **なし** | JSON 不在転記規約（下記）。`/verify` は hard fail |
 
 #### 人手証跡サーフェス（manual_required_count > 0 の場合）
 - `skip_reason == manual_required` の step（`<category>-manual`）を列挙する:
@@ -85,17 +86,23 @@ Wave 5-2（`make verify-issue`）が産出する構造化 JSON（schema SSOT: [`
 | `error.detector_stderr` | [null / detector の stderr] |
 | `warnings[]` | [空 / pr_issue_mismatch 等] |
 
-#### JSON 不在転記規約（exit_code 2 / 3 — JSON が書かれないケース）
-JSON が pin した出力ファイルに存在しない場合（rc=2 引数不正 / rc=3 前提失敗。
-`finish` 前の `exit 2/3` 経路）は、JSON を読めないため以下を**手動で**転記し、
-`/verify` を **hard fail**（PASS 扱いにしない）とする:
+#### JSON 不在転記規約（rc=2 / rc=3-B のみ — JSON が書かれないケース）
+JSON が pin した出力ファイルに存在しないのは **`finish` を経由しない bare `exit` 経路のみ**:
+rc=2（引数不正）/ rc=3-B（`jq_not_found` = jq でJSONを組めない / `output_write_failed`
+= JSON write 自体が失敗し `finish()` 内で `exit 3`）。これらは JSON を読めないため
+以下を**手動で**転記し、`/verify` を **hard fail**（PASS 扱いにしない）とする:
 
 | 項目 | 内容 |
 |------|------|
-| 機械ゲート結果 | 未取得（JSON 不在 / rc=[2 or 3]） |
+| 機械ゲート結果 | 未取得（JSON 不在 / rc=[2 or 3-B]） |
 | stderr メッセージ | `make verify-issue` の標準エラー出力を貼る（`ERROR: ...`） |
-| rc | [2 = 引数不正 / 3 = 前提失敗] |
-| 扱い | hard fail。原因（jq 不在 / gh 認証 / detector / 引数）を解消して再実行 |
+| rc | [2 = 引数不正 / 3-B = `jq_not_found` or `output_write_failed`] |
+| 扱い | hard fail。原因（jq 不在 / 出力先書込不可 / 引数）を解消して再実行 |
+
+> **rc=3-A（`finish 3`: gh / detector / pr_issue_mismatch / unknown_category）は JSON が書かれる**ため
+> 本規約の対象外。3-A は通常どおり inputs / steps / summary / **error{code,message,detector_stderr}** /
+> warnings を JSON から転記し、その上で hard fail（Status「ブロッカーあり」）とする。
+> 3-A / 3-B の機械判別は pin 出力に対する `test -s "$OUT"`（JSON 実在判定）で行う。
 
 ### Status
 - [完了 / 継続 / ブロッカーあり] — 1 行で記載
