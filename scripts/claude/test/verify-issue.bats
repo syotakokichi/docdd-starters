@@ -45,12 +45,18 @@
 #     api-contract                          → + make test-frontend
 #     frontend-{ui,logic,shared}            → make test-frontend
 #     frontend-style                        → no automated step; always SKIP
-#                                             (step name frontend-style-manual,
-#                                              skip_reason manual_required)
 #     docdd                                 → make traceability
 #     dx-config                             → make shell-lint + shell-format-check
 #     dx-docs                               → make validate-claude
 #   Same make target is invoked AT MOST ONCE per run (dedup).
+#
+#   Manual-required placeholders (ADDITIVE to automated steps): every detected
+#   category whose SSOT mapping requires manual evidence also emits a separate
+#   skip step named <category>-manual (skip_reason manual_required, command
+#   null), counted in summary.manual_required_count. Applies to api-route,
+#   api-contract, backend-core, frontend-ui, frontend-style, docdd, dx-config,
+#   dx-docs. migration-safety is the lone exception: its manual aspect is the
+#   partial+notes flag on test-backend, NOT a separate placeholder.
 #
 # 真の SSOT: .claude/templates/issue-implementation-plan.md「🗺️ 証跡マッピング表」
 
@@ -418,4 +424,63 @@ EOF
   run "$ORCH"
   [ "$status" -eq 0 ]
   [ "$(jq -r '.inputs.requested_issue' "$VERIFY_ISSUE_OUTPUT")" -eq 62 ]
+}
+
+# ─── 12. manual_required placeholders are additive to automated steps ───
+# A category that also has an automated make target must STILL emit a
+# <category>-manual skip step so 5-3 surfaces pending manual evidence even
+# when the automated target passes (exit 0).
+
+@test "manual: backend-core passes automated step AND emits backend-core-manual" {
+  export FAKE_GH_PR_NUMBER=62
+  export FAKE_GH_PR_BODY="Closes #62"
+  export FAKE_DETECTOR_CATEGORIES="backend-core"
+  run "$ORCH" 62
+  [ "$status" -eq 0 ]
+  grep -q "test-backend" "$MAKE_LOG"
+  [ "$(jq -r '.summary.pass_count' "$VERIFY_ISSUE_OUTPUT")" -ge 1 ]
+  jq -e '.steps[] | select(.name == "backend-core-manual") | .status == "skip" and .skip_reason == "manual_required" and .command == null' "$VERIFY_ISSUE_OUTPUT"
+  [ "$(jq -r '.summary.manual_required_count' "$VERIFY_ISSUE_OUTPUT")" -ge 1 ]
+}
+
+@test "manual: manual_required_count counts every manual-bearing category" {
+  export FAKE_GH_PR_NUMBER=62
+  export FAKE_GH_PR_BODY="Closes #62"
+  export FAKE_DETECTOR_CATEGORIES="api-route dx-docs"
+  run "$ORCH" 62
+  [ "$status" -eq 0 ]
+  jq -e '.steps[] | select(.name == "api-route-manual") | .skip_reason == "manual_required"' "$VERIFY_ISSUE_OUTPUT"
+  jq -e '.steps[] | select(.name == "dx-docs-manual") | .skip_reason == "manual_required"' "$VERIFY_ISSUE_OUTPUT"
+  [ "$(jq -r '.summary.manual_required_count' "$VERIFY_ISSUE_OUTPUT")" -eq 2 ]
+}
+
+@test "manual: migration-safety does NOT emit a separate manual placeholder (partial only)" {
+  export FAKE_GH_PR_NUMBER=62
+  export FAKE_GH_PR_BODY="Closes #62"
+  export FAKE_DETECTOR_CATEGORIES="migration-safety"
+  run "$ORCH" 62
+  [ "$status" -eq 0 ]
+  jq -e '[.steps[] | select(.name == "migration-safety-manual")] | length == 0' "$VERIFY_ISSUE_OUTPUT"
+  jq -e '.steps[] | select(.name == "test-backend") | .partial == true' "$VERIFY_ISSUE_OUTPUT"
+}
+
+# ─── 13. result-JSON write failure must fail loudly (Codex /review P2) ───
+# The result JSON is the contract 5-3 consumes. An unwritable
+# VERIFY_ISSUE_OUTPUT location must yield exit 3 (not a PASSED echo with the
+# original success code) so downstream never trusts a stale/absent file.
+# Assumes the suite runs as a NON-root user: root bypasses the read-only dir;
+# both GH Actions runners and local macOS dev run non-root.
+
+@test "output: unwritable VERIFY_ISSUE_OUTPUT -> exit 3, not PASSED" {
+  mkdir -p "$TMPDIR_BATS/ro"
+  chmod 500 "$TMPDIR_BATS/ro"
+  export VERIFY_ISSUE_OUTPUT="$TMPDIR_BATS/ro/out.json"
+  export FAKE_GH_PR_NUMBER=62
+  export FAKE_GH_PR_BODY="Closes #62"
+  export FAKE_DETECTOR_CATEGORIES="dx-docs"
+  run "$ORCH" 62
+  chmod 700 "$TMPDIR_BATS/ro"
+  [ "$status" -eq 3 ]
+  [[ "$output" == *"output_write_failed"* ]]
+  [[ "$output" != *"PASSED"* ]]
 }
