@@ -3,7 +3,7 @@
 .PHONY: tf-init tf-plan tf-apply tf-destroy tf-output
 .PHONY: deploy-backend-stg deploy-frontend-stg deploy-stg deploy-backend-prod deploy-frontend-prod deploy-prod
 .PHONY: ecs-status ecs-logs-backend ecs-logs-frontend ecs-sh
-.PHONY: shell-lint shell-format-check test-hooks verify-issue-detect
+.PHONY: shell-lint shell-format-check test-hooks verify-issue-detect verify-issue verify-issue-fixture
 .PHONY: validate-claude
 
 PYTHON ?= python3
@@ -61,6 +61,7 @@ SHELL_FILES := .claude/hooks/block-dangerous.sh \
 	scripts/claude/detect-capabilities.sh \
 	scripts/claude/validate-claude-config.sh \
 	scripts/claude/verify-issue-detect.sh \
+	scripts/claude/verify-issue.sh \
 	scripts/deploy/terraform.sh \
 	scripts/deploy/build-and-deploy.sh \
 	scripts/github/bootstrap-labels.sh
@@ -94,6 +95,19 @@ verify-issue-detect:
 		exit 1; \
 	else \
 		echo "WARN: bats not found, skipping verify-issue-detect"; \
+	fi
+
+verify-issue:
+	@scripts/claude/verify-issue.sh $(ISSUE) $(ARGS)
+
+verify-issue-fixture:
+	@if command -v bats >/dev/null 2>&1; then \
+		bats scripts/claude/test/verify-issue.bats; \
+	elif [ "$$CI" = "true" ] || [ "$$VERIFY_ISSUE_FIXTURE_REQUIRE_BATS" = "1" ]; then \
+		echo "ERROR: bats not found (required when CI=true or VERIFY_ISSUE_FIXTURE_REQUIRE_BATS=1)"; \
+		exit 1; \
+	else \
+		echo "WARN: bats not found, skipping verify-issue-fixture"; \
 	fi
 
 # ─── Terraform ───────────────────────────────────────────
