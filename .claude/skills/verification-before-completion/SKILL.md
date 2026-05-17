@@ -27,7 +27,7 @@ description: |
 以下の場面で本スキルが適用される:
 
 - `/develop` Phase 3（品質チェック）で検証コマンドを実行するとき
-- `/verify` で証跡を確認するとき
+- `/verify` で証跡を確認するとき（Step 2-3 の機械ゲート `make verify-issue` が変更パスに応じ `test-backend` / `test-frontend` / `validate-claude` / `traceability` を内包し、Step 6 で `verification-result-comment.md` に構造化転記する — [`.claude/commands/verify.md`](../../commands/verify.md)）
 - `/pr` で完了ゲートを通すとき
 - コミット・プッシュ前に状態を主張するとき
 - エージェントチームのメンバーが完了報告するとき
@@ -66,7 +66,7 @@ description: |
 | エージェントが完了した | VCS diff で変更を確認 | エージェントの「成功」報告 |
 | 要件を満たしている | 受け入れ条件の 1 行ずつチェック | テストがパスしたから完了 |
 
-> 補足: `make quality-gate` などの統合ターゲットは本リポジトリには **存在しない**（後続 Issue 5-1 想定）。上記 4 ターゲット（`test-backend` / `test-frontend` / `validate-claude` / `traceability`）の **組み合わせ** で品質を主張する。
+> 補足: Wave 5-2 で **`make verify-issue ISSUE=<N>`** が導入済み。これは変更パスから必要証跡カテゴリを検出し、上記 4 ターゲット（`test-backend` / `test-frontend` / `validate-claude` / `traceability`）+ `shell-lint` / `shell-format-check` を dedup 実行し、構造化 JSON（schema SSOT: [`.claude/templates/verify-issue-result.json`](../../templates/verify-issue-result.json)）を産出する。`/verify` Step 2-3 はこれを単一の品質ゲートとして使い、Step 6 で [`.claude/templates/verification-result-comment.md`](../../templates/verification-result-comment.md) に構造化転記する（**Issue コメントだけで検証履歴が再現できる** = Phase 5 のゴール）。なお `make quality-gate` 名のターゲット自体は未導入（Epic #23 後続）。検出されないターゲットは実行されないため、`make verify-issue` の `steps[]` で実際に走ったターゲットを確認する。
 
 ---
 
@@ -170,6 +170,9 @@ make validate-claude → exit 0 確認 → 完了主張
 ### プロジェクト内参照
 
 - [rules/completion-quality.md](../../rules/completion-quality.md) - いつ止まるか（棲み分け対象）
+- [commands/verify.md](../../commands/verify.md) - `/verify` 機械ゲート（`make verify-issue`）+ Step 6 構造化投稿（Wave 5-2/5-3）
+- [templates/verify-issue-result.json](../../templates/verify-issue-result.json) - `make verify-issue` JSON schema 契約 SSOT
+- [templates/verification-result-comment.md](../../templates/verification-result-comment.md) - `/verify` 結果コメント記法 SSOT
 - [skills/tdd-workflow/SKILL.md](../tdd-workflow/SKILL.md) - TDD 証跡チェーン・RED-GREEN サイクル
 - [skills/test-design/SKILL.md](../test-design/SKILL.md) - Critical Path 判定・Coverage expectation
 - [rules/tdd-gate.md](../../rules/tdd-gate.md) - TDD 判断基準（必須 / スキップ）

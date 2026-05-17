@@ -14,10 +14,19 @@ Issue #$ARGUMENTS の実装検証を行ってください。
 `/verify` は、実装内容の **事実確認と証跡作成** を担当します。
 ここでは「何を実行し、何を確認し、何が未確認か」を揃えます。
 
-> **責任分離**: `/verify` は機械的な事実確認、後続の独立レビュー（後続 Issue で `/review` として整備予定）は実装者文脈を外した見落とし検出。本コマンドでは Codex 単独レビュー（Step 5）まで実施する。
+検証の中核は **`make verify-issue ISSUE=<N>`（Wave 5-2 / 機械ゲート）** です。
+変更パスから必要証跡カテゴリを検出し、対応する品質ターゲットを実行して
+構造化 JSON を産出します。`/verify` はその JSON を読み取り、Step 6 で
+Issue コメントに構造化転記します（**Issue コメントだけで検証履歴が再現できる**
+SSOT の成立 = Phase 5 のゴール）。手順 SSOT の二重化（人手で品質ターゲットを
+並べる）を排し、機械ゲートを単一の真実の源とします。
+
+> **責任分離**: `/verify` は機械的な事実確認、後続の独立レビュー（`/review` = 別コマンド）は実装者文脈を外した見落とし検出。本コマンドでは Codex 単独レビュー（Step 5）まで実施する。
 
 **フロー**:
-`/verify`（Step 1〜4: 検証）→ Step 5: Codex コード差分レビュー → Step 6: Issue コメント記録
+`/verify` Step 1（入力固定）→ Step 2-3（機械ゲート `make verify-issue` 実行 + rc×JSON 判定）→ Step 4（挙動・契約・導線の人手確認）→ Step 4.5（エージェントチーム検証 / 2 レイヤー以上）→ Step 5（Codex コード差分レビュー）→ Step 6（構造化コメント記録）
+
+> **機械ゲートに吸収されない直交関心**: Step 1（入力固定 / `verify-input-capture` SKILL）・Step 4（人手導線確認）・Step 4.5（agent-teams context-fresh）・Step 5（Codex `--base main`）は `make verify-issue` に吸収されない。集約対象は機械的 Step 2-3 のみ。Step 番号アンカー（1 / 4 / 5 / 6 + 4.5）は外部参照（`develop.md` / `tdd.md` / `agent-teams` / `verify-input-capture`）のため温存する。
 
 ---
 
@@ -62,47 +71,98 @@ git ls-files --others --exclude-standard
 
 > **未コミットで `/verify` する場合**: ワーキングツリー差分と untracked が空でないことを確認してから次ステップへ。両方が空なら「実装が見えていない」状態のため、`/develop` に戻るか、コミットしてから再実行する。
 
-### Step 2: 構成・配置チェック
+#### 🔴 案1: commit-before-gate 契約（必読）
 
-新規ファイル・変更ファイルが正しいディレクトリ構成と命名規則に従っているか確認する。
-ルール参照: `.claude/rules/file-naming.md`
+`make verify-issue`（Step 2-3 の機械ゲート）の変更検出は **コミット済み差分のみ**:
 
-| チェック | 確認内容 |
-|---------|---------|
-| ディレクトリ構成 | Backend: `kernel/`, `modules/<domain>/{domain,infrastructure,presentation}/` の分離 |
-| ファイル配置 | 正しいレイヤーに配置されているか（例: ビジネスロジックが `presentation/` に漏れていないか） |
-| 命名規則 | Python: snake_case、TS: kebab-case（ファイル）/ PascalCase（コンポーネント）、ドキュメント: kebab-case |
-| 重複チェック | 同じロジック・定義が複数箇所に存在しないか |
-| import 整理 | 不要な import、循環参照がないか |
+- PR 未作成時: detector `--git` ＝ `merge-base..HEAD`（`scripts/claude/verify-issue-detect.sh:21-22`「staged / working-tree / untracked changes are out of scope」）
+- PR 作成後: `gh pr diff`（`verify-issue.sh:326`。**PR ＝ remote ブランチ**の差分。**未 push のローカル commit は検出しない**）
 
-問題があれば修正してから次のステップへ。
+いずれも **未コミット変更を検出しない**。さらに PR 作成後（`inputs.source == pr-diff`）は
+**未 push のローカル commit も検出しない**（`gh pr diff` は remote を見る）。
+したがって `/verify` は機械ゲートを **コミット済み（PR がある場合は push 済み）状態に対して**
+実行する契約とする:
 
-### Step 3: 品質ゲート再実行（必須）
+1. 上記の working-tree 差分 / untracked が **非空** なら、機械ゲート（Step 2）に進む前に
+   ブランチ内へ commit する（`/pr` 前なので可逆・benign）。コミット対象は本 Issue の実装差分。
+2. **PR が既に存在する場合（`inputs.source == pr-diff`）は commit だけでは不十分**。
+   `gh pr diff` は remote ブランチを見るため、`git push` してから Step 2 の機械ゲートを
+   実行する（未 push だと gate は **古い remote PR 内容**を検証し、ローカル修正が未検証のまま
+   PASS と誤認する）。canonical フロー（`/verify` → `/review` → `/pr`）では PR 未作成
+   （`merge-base-fallback`）が通常で commit のみで足りるが、`/pr` 後の再 `/verify` や
+   レビュー反映ループでは push 必須。
+3. commit（PR 作成後は push）後に Step 2 の機械ゲートを実行する。
+4. それでも gate 実行時点で working-tree/untracked が非空のまま残った場合は、
+   Step 6 の構造化コメント「未コミット blind-spot 警告」欄に
+   **非空のファイル一覧 + Step 4 人手確認で補完したか** を必ず記録する
+   （機械検出外であることを明示し、PASS の射程を誤認させない）。
 
-`/develop` で実行した品質チェックが、**実際に成立しているか** を改めて実行・確認する。
+> Step 1 の人手 working-tree/untracked 捕捉は維持する（案1 でも放棄しない）。
+> 機械ゲートが見ない領域を人手で可視化し続けることが blind-spot 警告の前提。
 
-#### Step 3-1: 変更レイヤーごとの品質チェック
+### Step 2: 機械ゲート実行（make verify-issue）
+
+> **このステップが品質ゲートの単一の真実の源**。`/develop` で実行した品質チェックが
+> 実際に成立しているかを、人手でターゲットを並べず `make verify-issue` に集約して再確認する。
+> `make verify-issue` は変更パスから必要証跡カテゴリを検出し、対応する
+> `make test-backend` / `make test-frontend` / `make traceability` / `make validate-claude` /
+> `make shell-lint` / `make shell-format-check` を dedup 実行し、`*-manual` placeholder を加えて
+> 構造化 JSON を産出する（schema SSOT: `.claude/templates/verify-issue-result.json`）。
+
+#### Step 2-1: 本実行専用の出力を pin して実行
+
+`.latest.json` symlink の直読は **stale read 危険**（rc=2/3 で JSON 未書込時に過去 run を読む）。
+`VERIFY_ISSUE_OUTPUT` で **本実行専用の出力先を pin** し、そのファイルだけを読む。
+`make verify-issue` は step FAIL（rc=1）でも JSON を書く（`scripts/claude/verify-issue.sh:459-462`）ため、
+`&&` で繋ぐと rc=1 で JSON を読まず停止する。**rc を capture** して分岐する。
 
 ```bash
-# Backend のみ
-make test-backend
-
-# Frontend のみ
-make test-frontend
-
-# 両方変更
-make test
-
-# .claude/ の dx-docs 変更時
-make validate-claude
-
-# DocDD 変更時
-make traceability
+OUT="$(mktemp "${TMPDIR:-/tmp}/verify-issue-$ARGUMENTS.pinned.XXXXXX").json"
+set +e
+VERIFY_ISSUE_OUTPUT="$OUT" make verify-issue ISSUE=$ARGUMENTS
+rc=$?
+set -e
+echo "make verify-issue rc=$rc / pinned output=$OUT"
 ```
+
+> **注意**: `make verify-issue` は変更レイヤーに応じて `make test-backend` 等を内包する。
+> 単独で `make test-backend` 等を別途叩く必要はない（人手並列化の余地を排除）。
+
+#### Step 2-2: 出力の新鮮性を検証
+
+pin したファイルが**本実行の・本 Issue の**ものであることを確認する:
+
+```bash
+test -s "$OUT" && jq -e \
+  --argjson n "$ARGUMENTS" \
+  '.inputs.requested_issue == $n and (.inputs.run_id | length > 0)' "$OUT" \
+  && echo "fresh: requested_issue/run_id OK" \
+  || echo "JSON 不在 or 新鮮性 NG（rc=$rc を Step 3 で判定）"
+```
+
+`inputs.requested_issue == $ARGUMENTS` 不一致、または `run_id` 空なら stale read。
+JSON 不在（後述 rc=2/3）はここで `test -s` が偽になる。
+
+### Step 3: rc×JSON マトリクス判定 + 証跡確認
+
+#### Step 3-1: rc×JSON マトリクス（🔴 Codex #2/#3/#4）
+
+| `rc` | 意味 | pin JSON | 取扱 |
+|:----:|------|:--------:|------|
+| 0 | 全 PASS | あり | JSON 転記。`summary.manual_required_count > 0` なら未消化人手証跡を Step 4 で消化（未消化は `未解消`） |
+| 1 | step FAIL あり | **あり** | **rc に関わらず JSON を読んで FAIL を転記**（FAIL 結果こそ Issue に残す）。Status は「ブロッカーあり」 |
+| 2 | 引数不正 | **なし** | **hard fail**。`verification-result-comment.md`「JSON 不在転記規約」に従い stderr を手動転記。PASS 扱い禁止 |
+| 3-A | 前提失敗（`finish 3` 経路: `gh_pr_lookup_failed` / `pr_issue_mismatch` / `detector_failed` / `unknown_category`） | **あり** | **hard fail だが JSON は書かれている**（`verify-issue.sh` の `finish 3` は JSON 書込後に exit）。**JSON を読んで `error{code,message,detector_stderr}` / `warnings[]` を転記**してから hard fail。原因を解消して再実行 |
+| 3-B | 前提失敗（bare `exit 3` 経路: `jq_not_found` / `output_write_failed`） | **なし** | **hard fail**。`verification-result-comment.md`「JSON 不在転記規約」に従い stderr を手動転記。原因を解消して再実行 |
+
+> **原則**: pin した JSON が存在すれば rc=1 でも、**rc=3 でも**（3-A）解析・投稿する（FAIL / 構造化 error を握り潰さない）。
+> JSON が**存在しない**（rc=2 / rc=3-B = `jq_not_found` / `output_write_failed`）ときのみ「JSON 不在転記規約」で hard fail させる。
+> rc=3 でも JSON 不在と決めつけない: `finish 3`（gh / detector / pr_issue_mismatch / unknown_category）は JSON を書く（`scripts/claude/verify-issue.sh` の `finish()` は JSON atomic write 後に `exit "$code"`）。Step 2-2 の `test -s "$OUT"` で 3-A / 3-B を機械判別する。
 
 #### Step 3-2: TDD 証跡確認
 
-`/develop` の実装サマリーの「TDD 証跡」テーブルを確認する。
+`/develop` の実装サマリーの「TDD 証跡」テーブルを確認する（`make verify-issue` は
+TDD の RED-GREEN 履歴までは検証しないため、この確認は機械ゲートに吸収されない）。
 判定基準 SSOT: [`.claude/rules/tdd-gate.md`](../rules/tdd-gate.md) / RED-GREEN 証跡フォーマット SSOT: [`.claude/skills/tdd-workflow/SKILL.md`](../skills/tdd-workflow/SKILL.md)。
 
 | 確認項目 | PASS 条件 |
@@ -119,12 +179,48 @@ make traceability
 
 完了主張前のゲート（5 ステップ）と禁止表現の SSOT は [`.claude/skills/verification-before-completion/SKILL.md`](../skills/verification-before-completion/SKILL.md)。以下を「成功」扱いにしない:
 
-- `pytest` が path / pattern 指定ミスで全 deselect（`0 selected`）
-- `npm run xxx` が script 不在で失敗
-- `make test-backend` / `make test-frontend` / `make validate-claude` / `make traceability` が FAIL
-- 実行したと書いてあるが結果が残っていない
+- pin JSON 不在（rc=2 / rc=3-B = `jq_not_found` / `output_write_failed`）を PASS 扱いにする
+- rc=3-A（`finish 3`: gh / detector / pr_issue_mismatch / unknown_category）で JSON が書かれているのに「JSON 不在」と決めつけ `error`/`warnings` を転記せず hard fail だけする
+- JSON の step `status` に `fail` があるのに転記せず PASS にする
+- `summary.manual_required_count > 0` を Step 4 で消化せず PASS にする
+- `make verify-issue` の rc を capture せず `&&` で握り潰す
+- 実行したと書いてあるが pin した JSON / stderr が残っていない
+
+#### Step 3-4: 構成・配置の確認（機械ゲートの補完）
+
+**Step 1 で固定した全変更ファイル（コミット済み + working-tree + untracked の合算）**を
+起点に、ディレクトリ構成・命名規則を人手確認する。ルール参照: `.claude/rules/file-naming.md`
+
+> ⚠️ **manual placeholder 起点にしない（旧 Step 2 構成チェックの coverage を維持）**:
+> `make verify-issue` は `backend-unit` / `backend-integration` / `frontend-logic` /
+> `frontend-shared` のような **code-only カテゴリには `<category>-manual` placeholder を
+> 立てない**（`verify-issue.sh:429-455` — 自動 step のみ生成）。placeholder の有無を
+> トリガーにすると、最も頻出する純粋なバックエンド service / フロントエンド logic 変更で
+> 構成・命名・import 循環チェックが**丸ごとスキップ**される（旧 Step 2 は全変更ファイルに
+> 無条件適用していた）。本チェックは **変更パス / 検出カテゴリ全件に対して無条件**で行う。
+> JSON の `<category>-manual` placeholder は確認の**追加サーフェス**であって唯一のトリガーではない。
+
+| チェック | 確認内容 |
+|---------|---------|
+| ディレクトリ構成 | Backend: `kernel/`, `modules/<domain>/{domain,infrastructure,presentation}/` の分離 |
+| ファイル配置 | 正しいレイヤーに配置されているか（ビジネスロジックが `presentation/` に漏れていないか） |
+| 命名規則 | Python: snake_case、TS: kebab-case（ファイル）/ PascalCase（コンポーネント）、ドキュメント: kebab-case |
+| 重複チェック | 同じロジック・定義が複数箇所に存在しないか |
+| import 整理 | 不要な import、循環参照がないか |
+
+問題があれば修正し、差分が変わったら **commit → Step 2 の機械ゲートを再実行**（出力を re-pin）する。
 
 ### Step 4: 挙動・契約・導線の確認
+
+> **JSON の `manual_required` step を起点にする**: Step 2 で pin した JSON の
+> `steps[]` から `skip_reason == manual_required` の placeholder（`<category>-manual`）を
+> 抽出し、その category に対応する人手確認を行う。`summary.manual_required_count > 0` は
+> **`exit_code == 0` でも人手証跡が未消化**を意味する（additive セマンティクス）。
+> ここで消化できなければ Step 6 の該当証跡欄を `未解消` とする。
+>
+> ```bash
+> jq -r '.steps[] | select(.skip_reason=="manual_required") | "\(.name): \(.notes)"' "$OUT"
+> ```
 
 変更種別に応じて、**最短導線** で挙動を確認する。
 
@@ -257,26 +353,54 @@ codex review --base main
    - 🟢 参考: 記録のみ
    - ❌ 却下: 理由を付けて却下
 
-2. **必要な修正を本セッション内で即適用**: 🔴 / 🟡 で actionable な修正案は、ユーザー承認を待たずにその場で修正し、Step 3 の品質チェックを再実行する。
+2. **必要な修正を本セッション内で即適用**: 🔴 / 🟡 で actionable な修正案は、ユーザー承認を待たずにその場で修正する。
 
 > **逃げない**: 🔴 / 🟡 で actionable な指摘を後回しにしない。`/verify` は実装検証の最後の関門。本セッション内で修正完了できない場合（`receiving-code-review/SKILL.md` の「ユーザー判断を仰ぐ 4 例外」に該当する場合）は **ユーザー判断待ちに切り替える** — `/review` への bypass は 4 例外でも非該当でも認めない（同 SKILL `/verify` Step 5 節）。
 
-3. **差分があれば Issue 本文を更新**: `gh issue edit $ARGUMENTS --body-file ...` または `/update-issue` を実行
+3. **🔴 Codex #4 契約: Step 5 後に差分が変わったら機械ゲートを再実行する**:
+   Step 5 の actionable 修正で差分が変化したら、Step 2 で pin した JSON は **stale** になる。
+   必ず以下を行ってから Step 6 に進む:
+   1. 修正を **commit**（案1: 機械検出はコミット済み差分のみ）。
+      **PR が既に存在する場合（`inputs.source == pr-diff`）は `git push` も必須** —
+      `gh pr diff` は remote を見るため未 push だと再 gate が古い remote 内容を検証する（案1 step 2）
+   2. **Step 2 の機械ゲートを再実行**（`VERIFY_ISSUE_OUTPUT` で出力を **re-pin**）
+   3. 新しい JSON を再取得し、Step 3 の rc×JSON 判定を再評価
+   4. **最新 JSON** を Step 6 に渡す（修正前の古い結果を SSOT 化しない）
+
+   修正なし（指摘が全て 🟢 / ❌、または差分非発生）なら再実行不要。
+
+4. **差分があれば Issue 本文を更新**: `gh issue edit $ARGUMENTS --body-file ...` または `/update-issue` を実行
 
 > **後続 Issue で Codex + Claude SA × 2 の 3 reviewer 並列レビュー（multi-model-review）を導入予定**。本コマンドでは Codex 単独レビューに留める。
 
-### Step 6: Issue コメントに記録
+### Step 6: 構造化コメント投稿
 
-検証結果全体（Step 1〜4 の結果 + Step 5 の Codex レビュー結果）をまとめて記録する。
+Step 2 で **pin した JSON**（Step 5 で差分が変わった場合は **再 pin した最新 JSON**）を
+`jq` で読み、`.claude/templates/verification-result-comment.md` の各欄に転記して
+Issue コメントに投稿する。**Issue コメントだけで検証履歴が再現できる**ことが本ステップの要件。
 
 - 構成は `.claude/templates/verification-result-comment.md` に従う（**見出し・TDD 判定行・Coverage 結果行の記法を厳守**）
   - 見出し: `## 実装検証結果（/verify）` をそのまま使う（`/develop 完了時点` suffix を付けない）
+  - 直下に `### 機械検証サマリー（make verify-issue）` を置き、pin JSON を転記する（既存記法は破壊しない）
   - TDD 判定行: スキップ時は `スキップ（理由: ...）` と同一セル内に書く
   - Coverage 結果行: `PASS` / `N/A` / `未解消` のみ（装飾なし）
+- 機械検証サマリーへの転記内容（pin JSON → 欄）:
+  - `inputs.{requested_issue, resolved_pr, issue_pr_match, source, run_id, output_path, started_at, finished_at}`
+  - `steps[]` の `name / categories / command / status / exit_code / skip_reason / partial / notes`
+  - `summary.{pass,fail,skip,manual_required,partial,total}_count` と `exit_code`（rc×JSON 取扱表）
+  - `error.{code,message,detector_stderr}` / `warnings[]`
+  - `manual_required_count > 0` の人手証跡サーフェス（未消化なら `未解消`）
+  - 未コミット blind-spot 警告（Step 1 の working-tree/untracked が gate 時に非空だったか）
+- rc=3-A（`finish 3`: gh / detector / pr_issue_mismatch / unknown_category）の場合: JSON は書かれているので `error.{code,message,detector_stderr}` / `warnings[]` を JSON から転記した上で **hard fail**（Status は「ブロッカーあり」）
+- JSON 不在（rc=2 / rc=3-B = `jq_not_found` / `output_write_failed`）の場合: テンプレートの「JSON 不在転記規約」に従い stderr を手動転記し **hard fail**
 - `ブラウザ確認` を必ず埋める（フロントエンド変更がある Issue は実施、なければ `N/A`）
 - `未解消` が残る場合は理由と対応方針を明記する
 
 ```bash
+# pin JSON の主要フィールドを確認してから転記する（例）
+jq '{inputs, summary, exit_code, steps: [.steps[] | {name, status, skip_reason}]}' "$OUT"
+
+# テンプレートに転記した本文を投稿
 gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 ```
 
@@ -286,10 +410,16 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 
 `/pr`（PR 作成）に渡す前に確認:
 
-- [ ] 変更レイヤーに対応する `make test-backend` / `make test-frontend` / `make test` のいずれかを再実行した
-- [ ] `.claude/` の dx-docs を変更した場合は `make validate-claude` を再実行した
-- [ ] DocDD を更新した場合は `make traceability` を再実行した
-- [ ] 実行した品質チェックと結果が残っている
+- [ ] 案1: working-tree/untracked が非空なら機械ゲート前に commit した（gate はコミット済み状態に対して実行）
+- [ ] PR が既に存在する（`inputs.source == pr-diff`）場合は commit に加え `git push` してから機械ゲートを実行/再実行した（`gh pr diff` は remote を見るため未 push だと古い内容を検証する）
+- [ ] Step 3-4 の構成・配置・命名チェックを **全変更ファイルに無条件で**実施した（manual placeholder の有無をトリガーにしていない＝旧 Step 2 coverage 維持）
+- [ ] `VERIFY_ISSUE_OUTPUT` で pin した本実行専用 JSON を読んだ（`.latest.json` 直読していない）
+- [ ] `make verify-issue` の rc を capture した（`&&` で握り潰していない）。rc=1 でも JSON を読んで FAIL を転記した
+- [ ] rc=3-A（`finish 3`: gh / detector / pr_issue_mismatch / unknown_category）で JSON が書かれている場合は `error`/`warnings` を JSON から転記した上で hard fail した（「JSON 不在」と決めつけていない）
+- [ ] pin JSON 不在（rc=2 / rc=3-B = `jq_not_found` / `output_write_failed`）を PASS 扱いにしていない（hard fail させた）
+- [ ] `inputs.requested_issue == <N>` / `run_id` の新鮮性を検証した
+- [ ] `summary.manual_required_count > 0` の人手証跡を Step 4 で消化した（未消化は `未解消`）
+- [ ] Step 5 で差分が変わった場合: commit → 機械ゲート再実行（出力 re-pin）→ 最新 JSON を Step 6 に渡した
 - [ ] `0 selected` / `all skipped` / `script not found` を成功扱いにしていない
 - [ ] **TDD 証跡が `verification-result-comment.md` に転記されている**（必須 / スキップ（理由）のいずれか）
 - [ ] **TDD 必須の場合: RED / GREEN コマンドの両方が確認・転記されている**
@@ -297,7 +427,7 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 - [ ] DocDD / TC / traceability map の更新要否を確認した
 - [ ] フロントエンド変更がある場合は軽量ブラウザヘルスチェック（Console / Network）を実施した
 - [ ] Codex コード差分レビュー（`codex review --base main`）を実施した
-- [ ] 検証結果を Issue コメントに記録した
+- [ ] 検証結果（機械検証サマリー + 既存証跡欄）を Issue コメントに構造化記録した
 
 ---
 
@@ -308,9 +438,9 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 ```
 ---
 ✨ **このセッションで進んだこと**
-- 品質ゲート再実行 PASS（`make test-backend` / `make test-frontend` / `make validate-claude` のうち該当）
+- 機械ゲート `make verify-issue ISSUE=<N>` 実行（pin JSON: rc=<0/1> / pass=<P> fail=<F> skip=<S> / manual_required=<M>）
 - ブラウザヘルスチェック: PASS / N/A / Console / Network 0 件
-- TDD 証跡確認: PASS / Codex レビュー: 🔴 必須 <X> 件（解消 <Y>） / 未解消 0 件
+- TDD 証跡確認: PASS / Codex レビュー: 🔴 必須 <X> 件（解消 <Y>） / 未解消 0 件 / 構造化コメント投稿済
 
 🎯 **これによって変わること**
 - DocDD 7軸: BR=<…> / UC=<…> / DM=<…> / SR=<…> / EXT=<…> / API=<…> / TC=<…>（整合性検証結果）
@@ -343,12 +473,13 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 
 ## 📋 後続 Issue で導入予定（forward reference の隔離）
 
+> 本 Issue（Phase 5 / Wave 5-3）では作らない。Epic #23 後続 Wave で管理する。
+> `/review` コマンド・`scripts/claude/verify-issue.sh` は既に存在するため本表から除外済（accuracy reconcile）。
+
 | 参照先（未存在） | 用途 | 予定 Issue |
 |--------------|------|----------|
-| `/review` コマンド | 独立レビュー（実装者文脈を外した見落とし検出） | 後続 Issue（2-2 想定） |
-| `.claude/rules/multi-model-review.md` | Codex + Claude SA × 2 の 3 reviewer 並列レビュー | 後続 Issue（D-1 想定） |
-| `scripts/claude/verify-issue.sh` / `quality-gate.sh` | Issue 単位の品質ゲート自動化 | 後続 Issue（5-1 想定） |
-| `make quality-gate` ターゲット | 品質ゲート一括実行 | 後続 Issue（5-1 想定） |
-| `/screen-verify` + TC YAML 自動実行 | post-merge ステージング検証 | 後続 Issue（D-X 想定） |
+| `.claude/rules/multi-model-review.md` | Codex + Claude SA × 2 の 3 reviewer 並列レビュー | Epic #23 後続（D-1 想定） |
+| `make quality-gate` ターゲット | 品質ゲート一括実行（注: `make verify-issue` が 5-2 で実質代替済。`quality-gate` 名のターゲット自体は未導入） | Epic #23 後続（D-X 想定） |
+| `/screen-verify` + TC YAML 自動実行 | post-merge ステージング検証 | Epic #23 後続（D-X 想定） |
 
 Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.
