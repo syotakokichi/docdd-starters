@@ -1,3 +1,12 @@
+---
+name: backend-patterns
+description: |
+  FastAPI モジュラーモノリスのバックエンド実装パターン。
+  API 設計（レイヤー分離）、DDD パターン（Entity / Repository / Service）、
+  依存性注入、エラーハンドリング、ミドルウェア、pytest テスト戦略を提供。
+  バックエンド実装時（`/develop` 等）に参照される。
+---
+
 # Backend Patterns - FastAPI モジュラーモノリス
 
 ## 概要

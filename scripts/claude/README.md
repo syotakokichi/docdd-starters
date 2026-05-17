@@ -29,13 +29,14 @@ Claude Code / DocDD ワークフローを支えるスクリプト群。
 | ファイル | 役割 | 呼び出し元 |
 |---------|------|-----------|
 | `detect-capabilities.sh` | gh / codex / pencil / aws 等の利用可否を JSON で出力 | `scripts/bootstrap.sh` |
-| `validate-claude-config.sh` | `.claude/` 配下の構成・命名・frontmatter を検証 | `make validate-claude` |
-| `validate_claude_frontmatter.py` | skill / command の frontmatter スキーマ検証 | `validate-claude-config.sh` 内部 |
+| `validate-claude-config.sh` | `.claude/` 配下の構成・命名・frontmatter を検証（baseline / `--strict`） | `make validate-claude`、`make validate-claude-strict` |
+| `validate_claude_frontmatter.py` | skill / command の frontmatter スキーマ検証（`--strict` / `--dir`） | `validate-claude-config.sh` 内部 |
 | `verify-issue-detect.sh` | 変更パスから必要証跡カテゴリを列挙する change-aware detector | `make verify-issue-detect`、`verify-issue.sh`（5-2）、5-3（後続 Issue） |
 | `verify-issue.sh` | Issue 番号 → PR 解決 → detector → カテゴリ別検証 → 構造化 JSON 出力の 6 ステップ orchestrator | `make verify-issue`、5-3（後続 Issue） |
 | `test-hooks.bats` | `.claude/hooks/` の bats fixture | `make test-hooks` |
 | `test/verify-issue-detect.bats` | `verify-issue-detect.sh` の bats fixture | `make verify-issue-detect` |
 | `test/verify-issue.bats` | `verify-issue.sh` の bats fixture（29 ケース） | `make verify-issue-fixture` |
+| `test/harness-regression.bats` | `.claude/` harness 不変条件の回帰スイート（V6 カタログ 1〜10） | `make test-harness` |
 
 ---
 
@@ -168,10 +169,84 @@ make verify-issue ISSUE=62
 
 ---
 
+## validate-claude-config.sh — strict モード / harness 回帰スイート（Wave 6-1）
+
+### strict モード運用
+
+`validate-claude-config.sh` は 2 モードで動作する。
+
+| モード | 起動 | 挙動 | exit |
+|--------|------|------|:----:|
+| baseline（既定） | `make validate-claude` | frontmatter 欠落 = warning | warning があっても 0 |
+| strict | `make validate-claude-strict`（`validate-claude-config.sh --strict`） | 構造/必須不変条件の欠落（frontmatter 欠落 / settings.json 不正 / hook 実行不可 等）を **failure に昇格** | 昇格対象が 1 件でもあれば 1 |
+
+strict 昇格の対象は **構造・必須不変条件**（SKILL.md の `name`/`description` frontmatter 欠落、settings.json の JSON 構造、hook 実行可能性）に限る。
+
+### `args` 警告の正当化（DoD #4 — 仕様であり昇格しない）
+
+`make validate-claude-strict` は現状の `.claude/` 構成で **exit 0（warnings 16 件）** になる。
+
+この 16 件は `commands/*.md: missing recommended fields: args` であり、**strict でも failure に昇格しない**。
+理由: `args` は **recommended（informational）field** であり、`validate_claude_frontmatter.py` 内で `record` を経由せず警告カウントに直加算されるため、strict 昇格パス（`record WARN → FAIL (strict)`）を通らない設計になっている。
+
+これは**見落としではなく仕様**である。recommended field の不足は情報提供に留め、strict が fail させるのは「構造/必須不変条件の破壊」のみとする（baseline のチェック内容は再設計しない）。
+
+### harness 回帰スイート
+
+`scripts/claude/test/harness-regression.bats` は `.claude/` harness の **不変条件**を継続的に検証する回帰スイート。
+
+```bash
+make test-harness                       # bats 経由で全 11 ケース実行
+bats scripts/claude/test/harness-regression.bats   # 直接実行
+```
+
+検証する不変条件カタログ（V6 1〜10）:
+
+1. `.claude/commands/*.md` が strict frontmatter を通過
+2. `.claude/skills/**/SKILL.md` が strict 通過（`name` == 親ディレクトリ名）
+3. `validate-claude-config.sh --strict` の e2e（現状 `.claude/` 全体が strict 通過）
+4. `make validate-claude-strict` が存在し exit 0 かつ STRICT モードで実行
+5. `settings.json` が valid JSON + `permissions`/`hooks` が配列
+6. settings.json の全 hook script が存在し実行可能
+7. 必須 hook binding（Bash PreToolUse / Write\|Edit PostToolUse）
+8. strict 昇格 false-GREEN ガード（(a) python `--dir` fixture / (b) temp `.claude/` skeleton + `cd`）
+9. prompt files に suspicious invisible Unicode 無し
+10. `terminology.md` の canonical `/<cmd>` に対応する `commands/<cmd>.md` が存在
+
+> **false-GREEN ガード**（上流 #347/#349 の学び）: strict FAIL を「exit code ≠ 0」だけで判定しない。
+> helper / python 不在の異常終了も非 0 で終わるため、それを GREEN と誤認しないよう
+> 出力マーカー（`no frontmatter` / `FAIL (strict)`）も併せて grep する。
+
+### bats 不在時の挙動
+
+`make test-harness` は既存 `verify-issue-fixture` パターンに準拠する。
+
+| 環境 | 挙動 |
+|------|------|
+| bats あり | `harness-regression.bats` を実行 |
+| bats なし・ローカル | WARN を出して skip（exit 0） |
+| bats なし・`CI=true` または `HARNESS_REQUIRE_BATS=1` | ERROR で fail（exit 1） |
+
+### strict は CI 安全網（backstop）— ローカル baseline 経路は意図的に非変更
+
+本 Issue（Wave 6-1）の strict 配線は **CI（PR マージ境界）側の安全網**であり、ローカルの proof 経路は **意図的に baseline のまま**にしている。
+
+| 経路 | モード | 理由 |
+|------|--------|------|
+| CI `docdd-validation` job | strict（`make validate-claude-strict`）+ baseline | PR マージ境界の authoritative gate |
+| ローカル `make verify-issue` の dx-docs 経路 / `/develop` `/verify` `/pr` | baseline（`make validate-claude`） | verify-issue 本体ロジックの改変は本 Issue の Out-of-scope |
+
+ローカルで strict を事前確認したい場合は **`make validate-claude-strict` を手動実行**する。
+
+> これは「見落とした gap」ではなく**設計上の意図的境界**である。ローカル proof command の universal strict 化は
+> 安全網完成後の独立改善であり、Core Track 完了をブロックしない（後続 Issue 候補・Core Track 外）。
+
+---
+
 ## 関連
 
 - [.claude/templates/issue-implementation-plan.md](../../.claude/templates/issue-implementation-plan.md) — **真の SSOT**
 - [.claude/skills/verify-input-capture/SKILL.md](../../.claude/skills/verify-input-capture/SKILL.md) — `/verify` Step 1 入力固定
 - [.claude/rules/cli-first.md](../../.claude/rules/cli-first.md) — CLI ファースト原則
 - [.claude/templates/verify-issue-result.json](../../.claude/templates/verify-issue-result.json) — `verify-issue.sh` 出力 JSON schema SSOT（5-3 契約）
-- [Makefile](../../Makefile) — `verify-issue` / `verify-issue-fixture` / `verify-issue-detect` / `shell-lint` / `shell-format-check` / `test-hooks` / `validate-claude` ターゲット
+- [Makefile](../../Makefile) — `verify-issue` / `verify-issue-fixture` / `verify-issue-detect` / `shell-lint` / `shell-format-check` / `test-hooks` / `test-harness` / `validate-claude` / `validate-claude-strict` ターゲット
