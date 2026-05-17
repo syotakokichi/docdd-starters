@@ -1,3 +1,11 @@
+---
+name: docdd-workflow
+description: |
+  DocDD（Doc Driven Development）7軸トレーサビリティの運用ルール。
+  BR→UC→DM→SR/NSR→EXT→API→TC の追跡構造、frontmatter 規約、
+  traceability map 検証の運用を提供。DocDD ドキュメント更新時に参照される。
+---
+
 # DocDD Workflow - 7軸トレーサビリティ運用スキル
 
 ## 概要

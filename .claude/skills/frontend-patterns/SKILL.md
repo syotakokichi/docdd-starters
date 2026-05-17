@@ -1,3 +1,12 @@
+---
+name: frontend-patterns
+description: |
+  Next.js App Router のフロントエンド実装パターン。
+  データフェッチ（Server Components / Colocation）、Container/Presentational、
+  キャッシュ・レンダリング戦略、Private Folder、認証・エラーハンドリングを提供。
+  フロントエンド実装時（`/develop` 等）に参照される。
+---
+
 # Frontend Patterns - Next.js App Router
 
 ## 概要
