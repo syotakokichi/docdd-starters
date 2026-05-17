@@ -76,15 +76,23 @@ git ls-files --others --exclude-standard
 `make verify-issue`（Step 2-3 の機械ゲート）の変更検出は **コミット済み差分のみ**:
 
 - PR 未作成時: detector `--git` ＝ `merge-base..HEAD`（`scripts/claude/verify-issue-detect.sh:21-22`「staged / working-tree / untracked changes are out of scope」）
-- PR 作成後: `gh pr diff`（PR = コミット済み）
+- PR 作成後: `gh pr diff`（`verify-issue.sh:326`。**PR ＝ remote ブランチ**の差分。**未 push のローカル commit は検出しない**）
 
-いずれも **未コミット変更を検出しない**。したがって `/verify` は機械ゲートを
-**コミット済み状態に対して**実行する契約とする:
+いずれも **未コミット変更を検出しない**。さらに PR 作成後（`inputs.source == pr-diff`）は
+**未 push のローカル commit も検出しない**（`gh pr diff` は remote を見る）。
+したがって `/verify` は機械ゲートを **コミット済み（PR がある場合は push 済み）状態に対して**
+実行する契約とする:
 
 1. 上記の working-tree 差分 / untracked が **非空** なら、機械ゲート（Step 2）に進む前に
    ブランチ内へ commit する（`/pr` 前なので可逆・benign）。コミット対象は本 Issue の実装差分。
-2. commit 後に Step 2 の機械ゲートを実行する。
-3. それでも gate 実行時点で working-tree/untracked が非空のまま残った場合は、
+2. **PR が既に存在する場合（`inputs.source == pr-diff`）は commit だけでは不十分**。
+   `gh pr diff` は remote ブランチを見るため、`git push` してから Step 2 の機械ゲートを
+   実行する（未 push だと gate は **古い remote PR 内容**を検証し、ローカル修正が未検証のまま
+   PASS と誤認する）。canonical フロー（`/verify` → `/review` → `/pr`）では PR 未作成
+   （`merge-base-fallback`）が通常で commit のみで足りるが、`/pr` 後の再 `/verify` や
+   レビュー反映ループでは push 必須。
+3. commit（PR 作成後は push）後に Step 2 の機械ゲートを実行する。
+4. それでも gate 実行時点で working-tree/untracked が非空のまま残った場合は、
    Step 6 の構造化コメント「未コミット blind-spot 警告」欄に
    **非空のファイル一覧 + Step 4 人手確認で補完したか** を必ず記録する
    （機械検出外であることを明示し、PASS の射程を誤認させない）。
@@ -180,9 +188,17 @@ TDD の RED-GREEN 履歴までは検証しないため、この確認は機械�
 
 #### Step 3-4: 構成・配置の確認（機械ゲートの補完）
 
-`make verify-issue` が JSON に立てた `<category>-manual` placeholder（`status: skip` /
-`skip_reason: manual_required`）を起点に、ディレクトリ構成・命名規則を人手確認する。
-ルール参照: `.claude/rules/file-naming.md`
+**Step 1 で固定した全変更ファイル（コミット済み + working-tree + untracked の合算）**を
+起点に、ディレクトリ構成・命名規則を人手確認する。ルール参照: `.claude/rules/file-naming.md`
+
+> ⚠️ **manual placeholder 起点にしない（旧 Step 2 構成チェックの coverage を維持）**:
+> `make verify-issue` は `backend-unit` / `backend-integration` / `frontend-logic` /
+> `frontend-shared` のような **code-only カテゴリには `<category>-manual` placeholder を
+> 立てない**（`verify-issue.sh:429-455` — 自動 step のみ生成）。placeholder の有無を
+> トリガーにすると、最も頻出する純粋なバックエンド service / フロントエンド logic 変更で
+> 構成・命名・import 循環チェックが**丸ごとスキップ**される（旧 Step 2 は全変更ファイルに
+> 無条件適用していた）。本チェックは **変更パス / 検出カテゴリ全件に対して無条件**で行う。
+> JSON の `<category>-manual` placeholder は確認の**追加サーフェス**であって唯一のトリガーではない。
 
 | チェック | 確認内容 |
 |---------|---------|
@@ -344,7 +360,9 @@ codex review --base main
 3. **🔴 Codex #4 契約: Step 5 後に差分が変わったら機械ゲートを再実行する**:
    Step 5 の actionable 修正で差分が変化したら、Step 2 で pin した JSON は **stale** になる。
    必ず以下を行ってから Step 6 に進む:
-   1. 修正を **commit**（案1: 機械検出はコミット済み差分のみ）
+   1. 修正を **commit**（案1: 機械検出はコミット済み差分のみ）。
+      **PR が既に存在する場合（`inputs.source == pr-diff`）は `git push` も必須** —
+      `gh pr diff` は remote を見るため未 push だと再 gate が古い remote 内容を検証する（案1 step 2）
    2. **Step 2 の機械ゲートを再実行**（`VERIFY_ISSUE_OUTPUT` で出力を **re-pin**）
    3. 新しい JSON を再取得し、Step 3 の rc×JSON 判定を再評価
    4. **最新 JSON** を Step 6 に渡す（修正前の古い結果を SSOT 化しない）
@@ -393,6 +411,8 @@ gh issue comment $ARGUMENTS --body-file /tmp/verify_result_$ARGUMENTS.md
 `/pr`（PR 作成）に渡す前に確認:
 
 - [ ] 案1: working-tree/untracked が非空なら機械ゲート前に commit した（gate はコミット済み状態に対して実行）
+- [ ] PR が既に存在する（`inputs.source == pr-diff`）場合は commit に加え `git push` してから機械ゲートを実行/再実行した（`gh pr diff` は remote を見るため未 push だと古い内容を検証する）
+- [ ] Step 3-4 の構成・配置・命名チェックを **全変更ファイルに無条件で**実施した（manual placeholder の有無をトリガーにしていない＝旧 Step 2 coverage 維持）
 - [ ] `VERIFY_ISSUE_OUTPUT` で pin した本実行専用 JSON を読んだ（`.latest.json` 直読していない）
 - [ ] `make verify-issue` の rc を capture した（`&&` で握り潰していない）。rc=1 でも JSON を読んで FAIL を転記した
 - [ ] rc=3-A（`finish 3`: gh / detector / pr_issue_mismatch / unknown_category）で JSON が書かれている場合は `error`/`warnings` を JSON から転記した上で hard fail した（「JSON 不在」と決めつけていない）
