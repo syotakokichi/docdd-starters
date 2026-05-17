@@ -1,3 +1,11 @@
+---
+name: testing-patterns
+description: |
+  pytest（バックエンド）/ Vitest（フロントエンド）のテスト戦略。
+  Unit / Integration / E2E のテスト分類、ディレクトリ構造、フィクスチャ、
+  CI 戦略を提供。テスト追加・修正時（`/develop` `/tdd` `/verify`）に参照される。
+---
+
 # Testing Patterns - テスト戦略
 
 ## 概要

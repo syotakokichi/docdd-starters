@@ -3,8 +3,8 @@
 .PHONY: tf-init tf-plan tf-apply tf-destroy tf-output
 .PHONY: deploy-backend-stg deploy-frontend-stg deploy-stg deploy-backend-prod deploy-frontend-prod deploy-prod
 .PHONY: ecs-status ecs-logs-backend ecs-logs-frontend ecs-sh
-.PHONY: shell-lint shell-format-check test-hooks verify-issue-detect verify-issue verify-issue-fixture
-.PHONY: validate-claude
+.PHONY: shell-lint shell-format-check test-hooks verify-issue-detect verify-issue verify-issue-fixture test-harness
+.PHONY: validate-claude validate-claude-strict
 
 PYTHON ?= python3
 
@@ -31,6 +31,12 @@ traceability:
 
 validate-claude:
 	./scripts/claude/validate-claude-config.sh
+
+# strict mode: warnings (missing frontmatter etc.) are promoted to failures.
+# CI safety-net (backstop); local proof paths intentionally stay on baseline
+# (see scripts/claude/README.md "strict モード運用").
+validate-claude-strict:
+	./scripts/claude/validate-claude-config.sh --strict
 
 test-backend:
 	PYTHONPATH=apps/backend pytest tests/backend
@@ -108,6 +114,18 @@ verify-issue-fixture:
 		exit 1; \
 	else \
 		echo "WARN: bats not found, skipping verify-issue-fixture"; \
+	fi
+
+# Harness regression suite: asserts .claude/ configuration invariants
+# (frontmatter strict, settings.json shape, hook bindings, terminology drift).
+test-harness:
+	@if command -v bats >/dev/null 2>&1; then \
+		bats scripts/claude/test/harness-regression.bats; \
+	elif [ "$$CI" = "true" ] || [ "$$HARNESS_REQUIRE_BATS" = "1" ]; then \
+		echo "ERROR: bats not found (required when CI=true or HARNESS_REQUIRE_BATS=1)"; \
+		exit 1; \
+	else \
+		echo "WARN: bats not found, skipping test-harness"; \
 	fi
 
 # ─── Terraform ───────────────────────────────────────────
