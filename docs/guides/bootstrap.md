@@ -126,6 +126,9 @@ make bootstrap 2>&1 | less
 bootstrap 完了後は、以下の流れで開発を開始できます:
 
 ```bash
+# Issue 作成前の discovery（必須）
+/brainstorm
+
 # Issue 作成（Claude Code スラッシュコマンド）
 /issue
 

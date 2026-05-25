@@ -54,12 +54,13 @@ Phase F-1（Issue #45）で旧コマンド体系を物理削除し、SubsCore �
 ### canonical フロー
 
 ```
-/issue → /plan → /worktree → /develop → /verify → /review → /pr → /merge
-                                                                     ↑
-                                              /discard-worktree     ←
+/brainstorm → /issue → /plan → /worktree → /develop → /verify → /review → /pr → /merge
+                                                                                  ↑
+                                                           /discard-worktree     ←
 ```
 
 主な改善点:
+- **`/brainstorm` を必須化**: 新規 Issue の前に Goal / Non-goals / Options / Risks / Issue split を固定し、Issue 本文に保存。
 - **`/worktree` がブランチ作成を統合**: 旧 `/3`（ブランチ作成）と `/a`（worktree 作成）を 1 コマンドに集約。
 - **`/review` を独立コマンド化**: `/verify`（実装者主体の検証）と `/review`（実装文脈外からの独立レビュー）を分離。
 - **`/merge` がマージ + cleanup を統合**: 旧 `/7` の責務を引き継ぎ、worktree 削除まで一括で実行。

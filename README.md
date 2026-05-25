@@ -40,7 +40,7 @@ graph LR
 - **FastAPI + モジュラーモノリス** - 非同期処理・APIドキュメント自動生成・AI/データ分析ライブラリとの高い親和性
 - **Next.js App Router** - Server Components / Server Actions 対応。shadcn/ui・Biome 等のエコシステム活用
 - **Pencil.dev デザイン連携** - AI デザインツールと Claude Code を直結。デザインからコード生成まで一気通貫
-- **Claude Code 統合** - Issue 駆動開発をスラッシュコマンド（`/issue` → `/plan` → `/develop` → `/verify` → `/pr` → `/merge`）で自動化
+- **Claude Code 統合** - Issue 駆動開発をスラッシュコマンド（`/brainstorm` → `/issue` → `/plan` → `/develop` → `/verify` → `/pr` → `/merge`）で自動化
 - **Marp スライド生成** - 開発成果や設計を `/slide` コマンドで即プレゼン資料化
 - **CI/CD** - GitHub Actions によるテスト・リント・デプロイ自動化
 - **Terraform** - AWS ECS Fargate によるインフラ構成管理
@@ -125,7 +125,7 @@ tests/                  # バックエンド・フロントエンドテスト
 
 ## Claude Code 開発フロー
 
-Issue 作成から PR マージまでを `/issue` → `/plan` → `/develop` → `/verify` → `/pr` → `/merge` のスラッシュコマンドで一気通貫。`/worktree` による複数 Issue の並列開発にも対応しています（旧コマンドからの移行は [docs/guides/migration-from-legacy-commands.md](docs/guides/migration-from-legacy-commands.md) 参照）。
+Issue 作成前の discovery から PR マージまでを `/brainstorm` → `/issue` → `/plan` → `/develop` → `/verify` → `/pr` → `/merge` のスラッシュコマンドで一気通貫。`/worktree` による複数 Issue の並列開発にも対応しています（旧コマンドからの移行は [docs/guides/migration-from-legacy-commands.md](docs/guides/migration-from-legacy-commands.md) 参照）。
 
 `/slide` コマンドで Marp 形式のプレゼン資料を生成でき、開発成果や技術選定の共有にそのまま活用できます。
 

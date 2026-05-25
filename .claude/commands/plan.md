@@ -71,6 +71,20 @@ gh issue view $ARGUMENTS --json title,body,labels,state
 - `[実装計画]` がタイトルに既に付いている場合は再計画として扱い、既存の計画と差分を取る
 - ラベルに `status:todo` / `status:in-progress` のいずれかがあるか確認（なければ Phase 4 で `status:todo` を付与）
 
+### Phase 0.5: Brainstorm 結論ゲート（必須）
+
+Issue 本文に `## Brainstorm 結論` セクションがあり、以下の必須項目が埋まっているか確認する。
+
+- Goal
+- Non-goals
+- Options（検討した選択肢）
+- Chosen direction
+- Risks
+- Scope（1 Issue で扱う範囲）
+- Issue split（必要な場合）
+
+不足している場合は `/plan` を中断し、`/brainstorm` → `/issue` または `/update-issue` で Brainstorm 結論を Issue 本文へ追記してから再実行する。
+
 ### Phase 1: 理解
 
 1. `gh issue view $ARGUMENTS --comments` で Issue の内容と既存コメントを確認

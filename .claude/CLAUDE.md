@@ -70,7 +70,8 @@ docdd-starters/
 
 | コマンド | 説明 |
 |---------|------|
-| `/issue` | Issue作成 |
+| `/brainstorm` | Issue 作成前の必須 discovery |
+| `/issue` | Brainstorm 結論から Issue 作成 |
 | `/plan` | 実装計画を立案してIssue本文に追記（エージェントチーム活用可） |
 | `/worktree` | Issue 用 worktree 作成 + ブランチ命名（並列開発の起点） |
 | `/develop` | 実装フェーズ開始（進行中ラベル設定 + 実装） |
@@ -135,14 +136,15 @@ docdd-starters/
 ### Issue駆動開発フロー
 
 ```
-1. /issue            → タスクをIssue化
-2. /plan <N>         → Issue に実装計画を追記（エージェントチーム活用可）
-3. /worktree <N>     → worktree 作成 + ブランチ命名（並列開発の起点）
-4. /develop <N>      → 実装フェーズ（進行中ラベル設定 + コード実装）
-5. /verify <N>       → 実装検証（品質ゲート + Codex 差分レビュー）
-6. /review <N>       → 独立レビュー（実装文脈外からの見落とし検出）
-7. /pr <N>           → PR 作成
-8. /merge <N>        → マージ + worktree クリーンアップ
+1. /brainstorm       → Goal / Scope / Risks を整理
+2. /issue            → Brainstorm 結論からタスクをIssue化
+3. /plan <N>         → Issue に実装計画を追記（エージェントチーム活用可）
+4. /worktree <N>     → worktree 作成 + ブランチ命名（並列開発の起点）
+5. /develop <N>      → 実装フェーズ（進行中ラベル設定 + コード実装）
+6. /verify <N>       → 実装検証（品質ゲート + Codex 差分レビュー）
+7. /review <N>       → 独立レビュー（実装文脈外からの見落とし検出）
+8. /pr <N>           → PR 作成
+9. /merge <N>        → マージ + worktree クリーンアップ
 ```
 
 ### 並列開発（Worktree）

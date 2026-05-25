@@ -249,9 +249,9 @@ Issue #XXX のフロントエンド実装をチームで検証して。
 
 ---
 
-### Canonical 7 verb フェーズ別チーム活用ガイド
+### Canonical コマンド別チーム活用ガイド
 
-docdd-starters の canonical コマンド（`/issue` → `/plan` → `/worktree` → `/develop` → `/verify` → `/review` → `/pr` → `/merge`）に対応。
+docdd-starters の canonical コマンド（`/brainstorm` → `/issue` → `/plan` → `/worktree` → `/develop` → `/verify` → `/review` → `/pr` → `/merge`）に対応。
 
 #### `/plan`: 計画立案フェーズ
 

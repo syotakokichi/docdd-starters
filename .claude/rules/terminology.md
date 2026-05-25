@@ -27,7 +27,7 @@ DocDD Starter Kit における **canonical な用語の単一の真実の源（S
 
 | canonical | 役割 | 実体ファイル |
 |-----------|------|-------------|
-| `/brainstorm` | 早期段階の壁打ち / アイデア整理 | [.claude/commands/brainstorm.md](../commands/brainstorm.md) |
+| `/brainstorm` | Issue 作成前の必須 discovery | [.claude/commands/brainstorm.md](../commands/brainstorm.md) |
 | `/discuss` | 実装・設計の壁打ちセッション | [.claude/commands/discuss.md](../commands/discuss.md) |
 | `/update-issue` | Issue 本文を実装変更に合わせて更新 | [.claude/commands/update-issue.md](../commands/update-issue.md) |
 | `/skill-create` | 新しい skill を作成 | [.claude/commands/skill-create.md](../commands/skill-create.md) |

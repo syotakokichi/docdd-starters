@@ -1,10 +1,12 @@
 ---
-description: 要件発見・アイデア出しの構造化壁打ち（Issue 化前のフェーズ）。
+description: Issue 作成前に必ず実施する discovery phase。
 disable-model-invocation: true
 ---
-要件発見・アイデア出しの壁打ちを行ってください。
+Issue 作成前の discovery phase を実施してください。
 
-`/brainstorm` は **Issue を起票する前の探索フェーズ** に使うコマンドです。Goal / Non-goals / Options / Risks の構造で議論を整理し、最終的に `/issue` での起票につなげます。
+`/brainstorm` は **すべての新規 Issue の前に必ず実施する必須ステップ** です。
+やることが明確に見える場合でも、Goal / Non-goals / Options / Risks を明示してから `/issue` に進みます。
+これは「曖昧なときだけ使う壁打ち」ではなく、Issue に入る前の discovery gate です。
 
 ---
 
@@ -12,19 +14,19 @@ disable-model-invocation: true
 
 | 観点 | `/brainstorm` | `/discuss` |
 |------|--------------|-----------|
-| **タイミング** | Issue 起票前（要件・スコープがまだ固まっていない） | 開発中（実装方針に迷ったとき） |
-| **目的** | アイデア発散 → スコープ絞り込み → Issue 化準備 | 既存方針の壁打ち・選択肢比較 |
+| **タイミング** | Issue 起票前（必須） | 開発中（既存 Issue の方針相談） |
+| **目的** | discovery → スコープ固定 → Issue 化準備 | 既存方針の壁打ち・選択肢比較 |
 | **出力** | Goal / Non-goals / Options / Chosen direction / Risks / Issue split | 選択肢の比較・推奨方針・抜け漏れチェック |
 | **次のステップ** | `/issue`（起票） | `/develop`（実装続行）/ `/update-issue`（既存 Issue 更新） |
 | **ユーザー発話例** | 「〇〇したいんだけど、どこから手を付ければ？」 | 「〇〇方式と××方式、どっちが良い？」 |
 
-> **迷ったら**: 「Issue がまだない / スコープが見えない」状態なら `/brainstorm`。「既に Issue がある / 実装中」なら `/discuss`。
+> **迷ったら**: Issue がまだないなら `/brainstorm`。既に Issue があり、実装中の判断相談なら `/discuss`。
 
 ---
 
 ## 目的
 
-- 曖昧な要望から **Goal / Non-goals** を分離する
+- 新規 Issue の前に **Goal / Non-goals** を分離する
 - 複数の選択肢（**Options**）を整理し、**Chosen direction** を決める
 - **Risks / Scope** を明示する
 - 必要なら 1 Issue で扱えるサイズに **分割（Issue split）** する
@@ -33,8 +35,8 @@ disable-model-invocation: true
 ## 標準フロー
 
 ```
-/brainstorm        # 本コマンド（要件発見）
-/issue             # 起票（Goal / Non-goals / 受け入れ条件をもとに作成）
+/brainstorm        # 本コマンド（必須 discovery）
+/issue             # 起票（Brainstorm 結論を Issue 本文に保存）
 /worktree <N>      # 起票後の作業ブランチ作成
 ```
 
@@ -116,6 +118,7 @@ EOF
 ### Step 5: 結論まとめ（Brainstorm 結論テンプレ）
 
 議論の結論を以下のテンプレートで整理する。**そのまま `/issue` で起票できる粒度** に揃える。
+`/issue` はこの `## Brainstorm 結論` を Issue 本文へ保存するため、空欄のまま終わらない。
 
 ```markdown
 ## Brainstorm 結論
@@ -192,7 +195,8 @@ Brainstorm 結論まとめ完了。`/issue` で起票に渡す。
 
 ## 注意事項
 
-- `/brainstorm` は **Issue 起票前** に使うコマンド。既存 Issue の議論なら `/discuss` を使う
+- `/brainstorm` は **Issue 起票前に必須** のコマンド。既存 Issue の議論なら `/discuss` を使う
+- `/issue` に進むには `## Brainstorm 結論` が必要。ない場合は `/issue` 側で hard-stop する
 - Goal と Non-goals を必ず分ける（混ざるとスコープが膨張する）
 - サイズ上限を超えそうなら必ず Issue split する
 - 結論は `/issue` で再利用できる粒度にまとめる
@@ -209,13 +213,5 @@ Brainstorm 結論まとめ完了。`/issue` で起票に渡す。
 | 結論が出ない | 一度持ち帰る判断も OK。「現時点の暫定案 + 次の調査ポイント」をまとめて終わる |
 
 ---
-
-## 📋 後続 Issue で導入予定（forward reference の隔離）
-
-| 参照先（未存在） | 用途 | 予定 Issue |
-|--------------|------|----------|
-| Tier-2 escalation（複数 LLM の議論） | Codex + Claude SA 等での多視点比較 | 後続 Issue（D-1 想定） |
-| `.claude/skills/llm-debate/SKILL.md` | tier-2 escalation の運用スキル | 後続 Issue（D-1 想定） |
-| Umbrella judgment（親 Epic 自動切り出し判定） | サイズ超過時の Epic 化判断 | 後続 Issue（D-1 想定） |
 
 Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.
