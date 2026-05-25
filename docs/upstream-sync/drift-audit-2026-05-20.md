@@ -375,9 +375,9 @@ git -C /tmp/<上流参照> fetch origin $REMOTE_SHA --depth 1
 rm -rf /tmp/<上流参照>/.claude
 git -C /tmp/<上流参照> checkout FETCH_HEAD -- .claude/
 
-# 2) 両側 manifest
+# 2) 両側 manifest（local 側は untracked file による bogus removed drift を防ぐため git ls-files で tracked に限定）
 (cd /tmp/<上流参照>/.claude && find . -type f -exec shasum -a 256 {} \;) | sort > /tmp/upstream_manifest.txt
-(cd .claude && find . -type f -exec shasum -a 256 {} \;) | sort > /tmp/local_manifest.txt
+(cd .claude && git ls-files . | xargs -I{} shasum -a 256 ./{}) | sort > /tmp/local_manifest.txt
 
 # 3) drift 集計（added/removed/modified）— Python で path-key join
 # scripts/upstream-sync/ 配下に audit script を Wave 4 で配置予定
