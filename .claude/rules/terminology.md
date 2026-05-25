@@ -62,17 +62,23 @@ DocDD Starter Kit における **canonical な用語の単一の真実の源（S
 
 ## Wave / Phase 名
 
-Wave / Phase は Epic #23（DocDD Starter Kit のロードマップ）における作業区分。
+Wave / Phase は Epic #23（DocDD Starter Kit のロードマップ、CLOSED/COMPLETED）+ Epic #69（上流参照ハーネス追従、進行中）における作業区分。Epic 番号で disambiguate して両方の Wave / Phase を併存させる。
 
 | 名称 | 意味 |
 |------|------|
-| **Wave 1: Bootstrap & Capability** | Phase 0（preflight + capability detection）。fork 直後のセットアップ |
-| **Wave 2: Canonical Commands** | Phase 1〜2（Issue 駆動コマンドの canonical 化、ラベル整備） |
-| **Wave 3: Traceability & Quality** | Phase 3〜4（7 軸 traceability 検証 + agent teams） |
-| **Wave 4: Optional Integrations** | Optional A/B/C（Pencil / Computer Use / 追加 MCP） |
-| **Phase F: Finalization** | リリース前最終チェック（E2E 検証 + cutover） |
+| **Wave 1 (Epic #23): Bootstrap & Capability** | Phase 0（preflight + capability detection）。fork 直後のセットアップ |
+| **Wave 2 (Epic #23): Canonical Commands** | Phase 1〜2（Issue 駆動コマンドの canonical 化、ラベル整備） |
+| **Wave 3 (Epic #23): Traceability & Quality** | Phase 3〜4（7 軸 traceability 検証 + agent teams） |
+| **Wave 4 (Epic #23): Optional Integrations** | Optional A/B/C（Pencil / Computer Use / 追加 MCP） |
+| **Phase F (Epic #23): Finalization** | リリース前最終チェック（E2E 検証 + cutover） |
+| **Wave 0 (Epic #69): Re-baseline Audit** | 上流参照ハーネス baseline SHA `501049a` の drift 全件を 4 区分分類 + 採否台帳 v0.1 起票 |
+| **Wave 1 (Epic #69): 安全 hardening クラスタ** | hooks 強化（block-dangerous / protect-files / validate-merge-cwd / develop-precommit-gate / gh-safe-comment）+ non-negotiable-gates rule |
+| **Wave 2 (Epic #69): agents / references 再ベースライン** | 汎用化可能な agents 移植 + AskUserQuestion / 3-layer-architecture / agent-essence 等 references 反映 |
+| **Wave 3 (Epic #69): multi-model-review 拡張 + MCP setup** | review-orchestrator / llm-debate / multi-model-review rule + mcp-setup reference |
+| **Wave 4 (Epic #69): 定常追従ツール化** | manifest-diff / `make audit-upstream` / capability-matrix Phase G / skill-registry 自動生成 |
+| **Finish (Epic #69): E-1** | README / CLAUDE.md / quickstart / customization 仕上げ（W1 + 採用済み Optional Wave 確定後） |
 
-> Phase 細分（例: Phase F-1 = legacy shim 物理削除）は Epic 本文を参照。
+> Phase 細分（例: Phase F-1 = legacy shim 物理削除 [Epic #23] / Wave 0 = audit-only [Epic #69]）は各 Epic 本文を参照。新規参照は必ず Epic 番号で disambiguate して書く（書式は上表の `Wave N + 半角スペース + ASCII paren + Epic #番号 + ASCII paren` を踏襲）。
 
 ---
 
