@@ -19,12 +19,16 @@ git -C /tmp/<上流参照> fetch origin "$REMOTE_SHA" --depth 1
 LOCAL_SHA=$(git -C /tmp/<上流参照> rev-parse FETCH_HEAD)
 test "$REMOTE_SHA" = "$LOCAL_SHA" || { echo "SHA mismatch"; exit 1; }
 git -C /tmp/<上流参照> reset HEAD
+# 既存 clone を再利用する場合、`checkout -- .claude/` は overlay のため
+# 上流で削除/リネームされた path が stale として残る。manifest 前に明示掃除する。
+rm -rf /tmp/<上流参照>/.claude
 git -C /tmp/<上流参照> checkout FETCH_HEAD -- .claude/
 ```
 
 判定:
 - `SHA mismatch` が出たら fetch 失敗（network / repo 権限）。内部の上流参照手順メモを再確認
 - 直前 baseline と SHA が同一なら audit スキップ可（drift 0 件想定）
+- **`.claude/` を `rm -rf` してから checkout する**ことで、上流で削除/リネームされた path が manifest に残らない（reuse clone での drift 誤検出を防ぐ）
 
 ### Step 2 — drift 列挙（両側 sha256 manifest を path-key join）
 
