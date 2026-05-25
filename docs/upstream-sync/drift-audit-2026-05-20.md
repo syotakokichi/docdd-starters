@@ -371,6 +371,8 @@
 # 1) baseline SHA を取得・固定
 REMOTE_SHA=$(git ls-remote <上流参照ハーネス URL> refs/heads/main | awk '{print $1}')
 git -C /tmp/<上流参照> fetch origin $REMOTE_SHA --depth 1
+# overlay 防止: 上流で削除/リネームされた path が manifest に残らないよう .claude/ を毎回掃除する
+rm -rf /tmp/<上流参照>/.claude
 git -C /tmp/<上流参照> checkout FETCH_HEAD -- .claude/
 
 # 2) 両側 manifest
