@@ -33,8 +33,12 @@ git -C /tmp/<上流参照> checkout FETCH_HEAD -- .claude/
 ### Step 2 — drift 列挙（両側 sha256 manifest を path-key join）
 
 ```bash
+# 上流側は Step 1 の `rm -rf` + `git checkout` で tracked file のみの clean state を保証済 → find で OK
 (cd /tmp/<上流参照>/.claude && find . -type f -exec shasum -a 256 {} \;) | sort > /tmp/upstream_manifest.txt
-(cd .claude && find . -type f -exec shasum -a 256 {} \;) | sort > /tmp/local_manifest.txt
+# ローカル側は untracked file（.DS_Store / editor swap / 検証中の一時生成物）が混入すると
+# 「local-only=removed」として bogus drift が ledger に append されるため、必ず `git ls-files` で
+# tracked file に限定する（重要: dirty checkout 上で月次 audit を流しても ledger を汚染しない契約）
+(cd .claude && git ls-files . | xargs -I{} shasum -a 256 ./{}) | sort > /tmp/local_manifest.txt
 wc -l /tmp/upstream_manifest.txt /tmp/local_manifest.txt
 ```
 
