@@ -11,7 +11,8 @@
 Issue 駆動開発の標準フローです。
 
 ```bash
-/issue                # Issue作成 - 新しい GitHub Issue を作成
+/brainstorm           # 必須 discovery - Issue 化前に Goal / Scope / Risks を整理
+/issue                # Issue作成 - Brainstorm 結論から新しい GitHub Issue を作成
 /plan <N>             # 計画立案 - 実装計画を Issue 本文に追記
 /worktree <N>         # worktree 作成 + ブランチ命名（並列開発の起点）
 /develop <N>          # 実装 - 進行中ラベル設定 + 実装
@@ -54,7 +55,8 @@ Issue 駆動開発の標準フローです。
 
 | コマンド | 説明 | ファイル |
 |---------|------|----------|
-| `/issue` | 新しい GitHub Issue を作成 | issue.md |
+| `/brainstorm` | Issue 作成前の必須 discovery | brainstorm.md |
+| `/issue` | Brainstorm 結論から新しい GitHub Issue を作成 | issue.md |
 | `/plan` | GitHub Issue から実装計画を立案 | plan.md |
 | `/worktree` | Issue 用の worktree 環境を作成 | worktree.md |
 | `/develop` | 実装フェーズ開始（進行中ラベル設定） | develop.md |
@@ -74,7 +76,6 @@ Issue 駆動開発の標準フローです。
 
 | コマンド | 説明 | ファイル |
 |---------|------|----------|
-| `/brainstorm` | 早期段階の壁打ち / アイデア整理 | brainstorm.md |
 | `/discuss` | 実装・設計の壁打ちセッション | discuss.md |
 | `/skill-create` | 新しいスキルを作成 | skill-create.md |
 | `/update-issue` | Issue 本文を実装変更に合わせて更新 | update-issue.md |

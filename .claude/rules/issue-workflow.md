@@ -22,12 +22,13 @@ gh issue edit <issue_number> --title "[実装計画] 元のタイトル"
 ### 3. コマンドフロー
 
 ```
-/issue → /plan → /worktree → /develop → /verify → /review → /pr → /merge
-   ↓       ↓         ↓          ↓         ↓         ↓        ↓      ↓
- 作成    計画    ブランチ     実装      検証     独立     PR    マージ
-                + worktree                       レビュー  作成   + cleanup
+/brainstorm → /issue → /plan → /worktree → /develop → /verify → /review → /pr → /merge
+     ↓          ↓       ↓         ↓          ↓         ↓         ↓        ↓      ↓
+  発見・整理    作成    計画    ブランチ     実装      検証     独立     PR    マージ
+                            + worktree                       レビュー  作成   + cleanup
 ```
 
+- `/brainstorm`: Issue 作成前の必須 discovery。Goal / Non-goals / Options / Risks / Issue split を固定
 - `/issue`: Issue作成
 - `/plan`: 計画立案 → Issue本文更新（エージェントチーム活用可）
 - `/worktree`: worktree 作成 + ブランチ命名（並列開発の起点）
@@ -37,6 +38,13 @@ gh issue edit <issue_number> --title "[実装計画] 元のタイトル"
 - `/pr`: PR作成
 - `/merge`: マージ + worktree クリーンアップ
 - `/discard-worktree`: 未マージ worktree の破棄
+
+### 4. Brainstorm 必須化
+
+- 新規 Issue は必ず `/brainstorm` の `## Brainstorm 結論` を入力にして作成する
+- `/issue` は Brainstorm 結論がない場合に hard-stop し、Issue を作成しない
+- `/plan` は Issue 本文に `## Brainstorm 結論` がない場合に hard-stop する
+- 既存 Issue の方針相談は `/discuss`、本文更新は `/update-issue` を使う
 
 > コマンド名 SSOT: [.claude/rules/terminology.md](./terminology.md)
 > 旧コマンドからの移行: [docs/guides/migration-from-legacy-commands.md](../../docs/guides/migration-from-legacy-commands.md)

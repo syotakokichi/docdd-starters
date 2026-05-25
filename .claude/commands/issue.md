@@ -11,26 +11,30 @@ disable-model-invocation: true
 ## 役割
 
 - 新しい GitHub Issue を作成する
+- `/brainstorm` の結論が提示済みか確認し、未提示なら hard-stop する
+- Brainstorm 結論を Issue 本文に保存する
 - サイズチェックでスコープが適切に切れているか確認する
 - 次に進むべきフェーズ（`/worktree` → `/plan`）を案内する
 
 ## 使い方
 
-- 新規作業を起票する場合は `/issue`
-- やりたいことが曖昧なら `/discuss` で壁打ちしてから `/issue`
+- 新規作業を起票する場合は `/brainstorm` → `/issue`
+- `/issue` は `## Brainstorm 結論` を受け取ってから Issue を作成する
+- Brainstorm 結論がない場合は `/brainstorm` へ差し戻す
 - 既存 Issue の本文更新は `/update-issue` を使用する
 
 タスクの内容を伝えてください。以下の情報があると良いです:
 
-- 何を実現したいか
-- 背景や理由
-- 完了条件
+- `/brainstorm` の `## Brainstorm 結論`
+- 起票したい Issue split の対象（複数候補がある場合）
 
 ## 標準フロー
 
-Issue 作成後の正規フロー:
+Issue 作成前後の正規フロー:
 
 ```
+/brainstorm        # 必須 discovery。Goal / Non-goals / Options / Risks / Issue split を固定
+/issue             # Brainstorm 結論を Issue 本文に保存して起票
 /worktree <N>     # worktree 作成 + ブランチ命名（推奨。詳細は parallel-development スキル参照）
 /plan <N>         # Issue 本文に仕様固定済みの計画を反映
 ```
@@ -39,9 +43,31 @@ Issue 作成後の正規フロー:
 
 ## 手順
 
+### Step 0: Brainstorm 結論ゲート（hard-stop）
+
+`/brainstorm` の `## Brainstorm 結論` が、この `/issue` セッションに提示されているか確認する。
+
+必須項目:
+
+- Goal
+- Non-goals
+- Options（検討した選択肢）
+- Chosen direction
+- Risks
+- Scope（1 Issue で扱う範囲）
+- Issue split（必要な場合）
+
+未提示、または上記の必須項目が空欄の場合は Issue を作成しない。以下を案内して終了する:
+
+```bash
+/brainstorm
+```
+
+既存 Issue の単純な本文修正は `/update-issue` の責務であり、このゲートの例外にしない。
+
 ### Step 1: サイズチェック
 
-Issue の概要から影響範囲を概算し、[`.claude/skills/issue-sizing/SKILL.md`](../skills/issue-sizing/SKILL.md) に照らす（適用スキル選択は [`.claude/references/applicable-skills.md`](../references/applicable-skills.md) を参照）:
+Brainstorm 結論の Scope / Issue split から影響範囲を概算し、[`.claude/skills/issue-sizing/SKILL.md`](../skills/issue-sizing/SKILL.md) に照らす（適用スキル選択は [`.claude/references/applicable-skills.md`](../references/applicable-skills.md) を参照）:
 
 | 指標 | 上限 |
 |------|:----:|
@@ -64,6 +90,35 @@ gh issue create --title "[タイトル]" --body "$(cat <<'EOF'
 
 ## 目的
 [何を実現したいか]
+
+## Brainstorm 結論
+
+### Goal
+[brainstorm の Goal]
+
+### Non-goals
+- [brainstorm の Non-goals]
+
+### Options（検討した選択肢）
+| 案 | 内容 | メリット | デメリット |
+|:--:|------|---------|-----------|
+| A | ... | ... | ... |
+
+### Chosen direction
+[採用案と理由]
+
+### Risks
+- [リスクと対応]
+
+### Scope（1 Issue で扱う範囲）
+- 含める: [変更範囲]
+- 含めない: [Non-goals / 後続 Issue]
+
+### Issue split
+[分割方針。単一 Issue なら「なし」]
+
+### References
+- [参照したドキュメント / Issue / コードパス]
 
 ## 受け入れ条件
 - [ ] [どうなれば完了か]
@@ -120,6 +175,7 @@ Issue 番号を控えて、`## 次のステップ` セクションの ✨/🎯/�
 ## 注意事項
 
 - Issue 作成後、`/plan` で実装計画を立案して Issue 本文に追記する
+- Issue 本文には `## Brainstorm 結論` を必ず含める。`/plan` はこのセクションを前提にする
 - 並列開発する場合は `/worktree <N>` を先に実行し、worktree 内で `/plan` 〜 `/pr` を進める
 - 単独 sequential で進める場合は `/plan` 直後に `/develop` でも可（`.claude/skills/parallel-development/SKILL.md` 参照）
 
@@ -133,6 +189,7 @@ Issue 起票完了。並列開発するなら `/worktree` を先に、単独 seq
 ---
 ✨ **このセッションで進んだこと**
 - Issue #<N> 作成（labels: <優先度> / <領域> / status:todo）
+- Brainstorm 結論を Issue 本文へ保存
 - サイズチェック PASS（変更ファイル <M> 件想定 / 実装タスク <K> 件想定）
 
 🎯 **これによって変わること**
@@ -150,13 +207,5 @@ Issue 起票完了。並列開発するなら `/worktree` を先に、単独 seq
 ```bash
 /worktree <N>
 ```
-
----
-
-## 📋 後続 Issue で導入予定（forward reference の隔離）
-
-| 参照先（未存在） | 用途 | 予定 Issue |
-|--------------|------|----------|
-| `/brainstorm` コマンド | 曖昧な要望から Issue 化前のアイデア出し | 後続 Issue（2-2 想定） |
 
 Remember to use the GitHub CLI (`gh`) for all GitHub-related tasks.

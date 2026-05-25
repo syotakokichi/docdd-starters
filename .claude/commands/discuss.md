@@ -12,13 +12,13 @@ disable-model-invocation: true
 
 | 観点 | `/discuss` | `/brainstorm` |
 |------|-----------|--------------|
-| **タイミング** | 開発中（実装方針に迷ったとき） | Issue 起票前（要件・スコープがまだ固まっていない） |
+| **タイミング** | 開発中（実装方針に迷ったとき） | Issue 起票前（必須 discovery） |
 | **目的** | 既存方針の壁打ち・選択肢比較 | アイデア発散 → スコープ絞り込み → Issue 化準備 |
 | **出力** | 選択肢の比較・推奨方針・抜け漏れチェック | Goal / Non-goals / Options / Chosen direction / Risks / Issue split |
 | **次のステップ** | `/develop`（実装続行）/ `/update-issue`（既存 Issue 更新） | `/issue`（起票） |
 | **ユーザー発話例** | 「〇〇方式と××方式、どっちが良い？」 | 「〇〇したいんだけど、どこから手を付ければ？」 |
 
-> **迷ったら**: 「既に Issue がある / 実装中」なら `/discuss`。「Issue がまだない / スコープが見えない」状態なら `/brainstorm`。
+> **迷ったら**: 「既に Issue がある / 実装中」なら `/discuss`。Issue がまだないなら、スコープが明確でも `/brainstorm`。
 
 ---
 
