@@ -284,6 +284,16 @@ assert_allow() {
   assert_allow
 }
 
+@test "block-dangerous: .codex config read chained with unrelated auth.json is allowed" {
+  run_hook block-dangerous.sh "cat ~/.codex/config.toml && cat apps/backend/tests/fixtures/oauth/auth.json"
+  assert_allow
+}
+
+@test "block-dangerous: transferring a single non-auth file in .codex is allowed" {
+  run_hook block-dangerous.sh "rsync ~/.codex/config.toml remote:/tmp/"
+  assert_allow
+}
+
 @test "block-dangerous: git add -f of non-auth file (authors.txt) is allowed" {
   run_hook block-dangerous.sh "git add -f authors.txt"
   assert_allow
