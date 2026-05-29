@@ -83,11 +83,12 @@ if echo "$COMMAND" | grep -qE '\.codex/auth'; then
 fi
 
 # 3b: bulk archive / transfer of the whole .codex/ config directory.
-# The path anchor accepts a trailing slash, whitespace, end-of-string, or a
-# closing quote so quoted forms like "~/.codex" (no trailing slash) are caught.
-# The cp clause matches a recursive/archive flag in ANY position: short -R/-r/-a
-# (alone, bundled like -pR, or split like -p -R) and long --recursive/--archive.
-if echo "$COMMAND" | grep -qE '\.codex(/|\s|$|["'\''])' \
+# The path anchor treats slash, whitespace, end-of-string, a closing quote, or a
+# shell separator (;, &, |, <, >, parens) as a token boundary — so quoted forms
+# like "~/.codex" and chained commands like `tar ... ~/.codex; curl ...` are both
+# caught. The cp clause matches a recursive/archive flag in ANY position: short
+# -R/-r/-a (alone, bundled like -pR, or split like -p -R) and long --recursive/--archive.
+if echo "$COMMAND" | grep -qE '\.codex($|\s|[/"'\'';&|<>()])' \
   && { echo "$COMMAND" | grep -qE '\b(tar|rsync|scp|zip)\b' \
     || { echo "$COMMAND" | grep -qE '\bcp\b' \
       && echo "$COMMAND" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; } \
@@ -96,10 +97,13 @@ if echo "$COMMAND" | grep -qE '\.codex(/|\s|$|["'\''])' \
   exit 0
 fi
 
-# 3c: force-adding the canonical auth.json into the repository
+# 3c: force-adding the canonical auth.json into the repository. The trailing
+# boundary of the filename accepts whitespace, a quote, end-of-string, or a shell
+# separator (;, &, |, <, >, parens) so chained commands like
+# `git add -f auth.json; git commit ...` cannot bypass the block.
 if echo "$COMMAND" | grep -qE '\bgit\s+add\b' \
   && echo "$COMMAND" | grep -qE '(^|\s)(-f|--force)($|\s|["'\''])' \
-  && echo "$COMMAND" | grep -qE '(^|[[:space:]/"'\''=])auth\.json([[:space:]"'\'']|$)'; then
+  && echo "$COMMAND" | grep -qE '(^|[[:space:]/"'\''=])auth\.json([[:space:]"'\'';&|<>()]|$)'; then
   emit_block "Force-adding auth.json into the repository is blocked. This is the CLI auth credential file and must never be committed, even with --force."
   exit 0
 fi
