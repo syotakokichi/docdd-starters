@@ -274,6 +274,16 @@ assert_allow() {
   assert_allow
 }
 
+@test "block-dangerous: reading auth-prefixed non-credential file in .codex (author.py) is allowed" {
+  run_hook block-dangerous.sh "cat ~/.codex/author.py"
+  assert_allow
+}
+
+@test "block-dangerous: reading authors.txt in .codex is allowed" {
+  run_hook block-dangerous.sh "cp ~/.codex/authors.txt /tmp/x"
+  assert_allow
+}
+
 @test "block-dangerous: git add -f of non-auth file (authors.txt) is allowed" {
   run_hook block-dangerous.sh "git add -f authors.txt"
   assert_allow
