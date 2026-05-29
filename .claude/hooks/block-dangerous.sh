@@ -81,10 +81,14 @@ fi
 #   3c anchors on the canonical `auth.json` basename so a force-add of unrelated
 #   files (e.g. authors.txt) is not falsely blocked.
 
-# 3a: read / copy / move of a .codex/auth* credential file. Tolerate redundant
-# path noise (.codex//auth, .codex/./auth) that the shell resolves to the same
-# credential file.
-if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth'; then
+# 3a: read / copy / move of a .codex/auth* credential file. Two forms:
+#   - a contiguous path, tolerating redundant noise (.codex//auth, .codex/./auth);
+#   - a .codex directory reference plus a bare auth.<ext> token, which catches the
+#     change-then-relative form `cd ~/.codex && cat auth.json`. The bare token
+#     requires a dot after `auth` so unrelated names (author.py) are not matched.
+if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth' \
+  || { echo "$COMMAND" | grep -qiE '\.codex($|\s|[/"'\'';&|<>()])' \
+    && echo "$COMMAND" | grep -qiE '(^|[[:space:]/"'\''=])auth\.[a-z]'; }; then
   emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
   exit 0
 fi
@@ -95,11 +99,15 @@ fi
 # like "~/.codex" and chained commands like `tar ... ~/.codex; curl ...` are both
 # caught. The cp clause matches a recursive/archive flag in ANY position: short
 # -R/-r/-a (alone, bundled like -pR, or split like -p -R) and long --recursive/--archive.
+# The mv clause targets the directory ITSELF (.codex with an optional trailing
+# slash then a boundary), so renaming a single non-auth file inside the directory
+# (mv ~/.codex/config.toml ~/.codex/config.bak) is not blocked here.
 if echo "$COMMAND" | grep -qiE '\.codex($|\s|[/"'\'';&|<>()])' \
   && { echo "$COMMAND" | grep -qE '\b(tar|rsync|scp|zip)\b' \
     || { echo "$COMMAND" | grep -qE '\bcp\b' \
       && echo "$COMMAND" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; } \
-    || echo "$COMMAND" | grep -qE '\bmv\s'; }; then
+    || { echo "$COMMAND" | grep -qE '\bmv\b' \
+      && echo "$COMMAND" | grep -qiE '\.codex/?($|\s|["'\'';&|<>()])'; }; }; then
   emit_block "Archiving or transferring the .codex/ directory is blocked. It contains local CLI auth credentials that must not be bundled, copied recursively, or sent off-host."
   exit 0
 fi

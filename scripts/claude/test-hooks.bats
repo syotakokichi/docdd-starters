@@ -112,6 +112,11 @@ assert_allow() {
   assert_block
 }
 
+@test "block-dangerous: Codex auth read via cd-then-relative (cd ~/.codex && cat auth.json) is blocked" {
+  run_hook block-dangerous.sh "cd ~/.codex && cat auth.json"
+  assert_block
+}
+
 # Layer 3b — directory archive / transfer
 @test "block-dangerous: Codex dir archive (tar czf ... ~/.codex/) is blocked" {
   run_hook block-dangerous.sh "tar czf /tmp/x.tgz ~/.codex/"
@@ -167,6 +172,11 @@ assert_allow() {
 
 @test "block-dangerous: Codex dir archive chained with && (zip ~/.codex&&...) is blocked" {
   run_hook block-dangerous.sh "zip -r /tmp/x.zip ~/.codex&&echo done"
+  assert_block
+}
+
+@test "block-dangerous: Codex whole-dir move (mv ~/.codex /tmp) is blocked" {
+  run_hook block-dangerous.sh "mv ~/.codex /tmp/leak"
   assert_block
 }
 
@@ -251,6 +261,16 @@ assert_allow() {
 
 @test "block-dangerous: reading a .codex.* dotfile (not the dir) is allowed" {
   run_hook block-dangerous.sh "cat ~/.codex.authnotes"
+  assert_allow
+}
+
+@test "block-dangerous: renaming a non-auth file inside .codex is allowed" {
+  run_hook block-dangerous.sh "mv ~/.codex/config.toml ~/.codex/config.bak"
+  assert_allow
+}
+
+@test "block-dangerous: cd into .codex then non-auth file (author.py) is allowed" {
+  run_hook block-dangerous.sh "cd ~/.codex && vim author.py"
   assert_allow
 }
 
