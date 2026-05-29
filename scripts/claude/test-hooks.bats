@@ -180,6 +180,16 @@ assert_allow() {
   assert_block
 }
 
+@test "block-dangerous: Codex dir-contents glob (cp -R ~/.codex/*) is blocked" {
+  run_hook block-dangerous.sh "cp -R ~/.codex/* /tmp/leak"
+  assert_block
+}
+
+@test "block-dangerous: Codex dir-self archive (tar ... ~/.codex/.) is blocked" {
+  run_hook block-dangerous.sh "tar czf /tmp/x.tgz ~/.codex/."
+  assert_block
+}
+
 # Layer 3c — force-add canonical auth.json (quoted / ./ / post-flag variants)
 @test "block-dangerous: Codex force-add (git add -f auth.json) is blocked" {
   run_hook block-dangerous.sh "git add -f auth.json"
@@ -213,6 +223,11 @@ assert_allow() {
 
 @test "block-dangerous: Codex force-add uppercase filename (git add -f AUTH.JSON) is blocked" {
   run_hook block-dangerous.sh "git add -f AUTH.JSON"
+  assert_block
+}
+
+@test "block-dangerous: Codex force-add with git global option (git -C . add -f auth.json) is blocked" {
+  run_hook block-dangerous.sh "git -C . add -f auth.json"
   assert_block
 }
 
@@ -291,6 +306,11 @@ assert_allow() {
 
 @test "block-dangerous: transferring a single non-auth file in .codex is allowed" {
   run_hook block-dangerous.sh "rsync ~/.codex/config.toml remote:/tmp/"
+  assert_allow
+}
+
+@test "block-dangerous: git commit mentioning auth.json in message is allowed" {
+  run_hook block-dangerous.sh 'git commit -m "add auth.json to ignore list"'
   assert_allow
 }
 
