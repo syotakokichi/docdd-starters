@@ -89,28 +89,42 @@ fi
 #   3c anchors on the canonical `auth.json` basename so a force-add of unrelated
 #   files (e.g. authors.txt) is not falsely blocked.
 
-# 3a: read / copy / move of a .codex/auth* credential file. Two forms:
-#   - a contiguous path, tolerating redundant noise (.codex//auth, .codex/./auth);
-#   - cd/pushd INTO the .codex directory, then a bare auth.<ext> token — this
-#     catches the change-then-relative form `cd ~/.codex && cat auth.json`.
-# The bare-token branch is tied to a cd into .codex (not just any .codex mention)
-# so an unrelated auth.<ext> elsewhere in the command is not falsely blocked.
-# Both forms require a boundary after `auth` (a non-letter or end) so unrelated
-# names that merely start with auth (author.py, authors.txt) are not blocked.
-if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth([^a-zA-Z]|$)' \
-  || { echo "$COMMAND" | grep -qiE '\b(cd|pushd)\s+[^;|&]*\.codex' \
-    && echo "$COMMAND" | grep -qiE '(^|[[:space:]/"'\''=])auth\.[a-z]'; }; then
+# 3a (contiguous path): read / copy / move of a .codex/auth* credential file named
+# directly, tolerating redundant noise (.codex//auth, .codex/./auth). Verb- and
+# segment-independent — a literal .codex/auth path IS the credential. The boundary
+# after `auth` (a non-letter or end) keeps names that merely start with auth
+# (author.py, authors.txt) from matching. The change-then-relative form
+# (`cd ~/.codex && cat auth.json`) is handled order-aware inside the segment loop below.
+if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth([^a-zA-Z]|$)'; then
   emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
   exit 0
 fi
 
-# 3b / 3c are evaluated PER COMMAND SEGMENT. The command is split on shell control
-# operators (; && || | &) so an operation in one segment is not matched against a
-# .codex / auth.json reference in another — e.g. `echo ~/.codex && mv foo bar` and
-# `git add -f README.md && cat x/auth.json` are NOT blocked. (3a above is checked
-# on the whole command because its cd-into-.codex branch intentionally spans
-# segments: the cd changes the directory the next segment runs in.)
+# 3a-ii / 3b / 3c are evaluated PER COMMAND SEGMENT. The command is split on shell
+# control operators (; && || | &) so an operation in one segment is not matched
+# against a .codex / auth.json reference in another — e.g. `echo ~/.codex && mv foo
+# bar` and `git add -f README.md && cat x/auth.json` are NOT blocked. The 3a-ii
+# cd-then-relative check is ORDER-AWARE: a cd/pushd into .codex sets a flag that only
+# blocks a bare auth.<ext> read in a LATER segment, so `cat auth.json && cd ~/.codex`
+# (read happens before the cd) stays allowed. (The 3a contiguous-path check above is
+# whole-command: a literal .codex/auth path is the credential regardless of segment.)
+cd_into_codex=0
 while IFS= read -r segment || [ -n "$segment" ]; do
+  # 3a-ii (cd-then-relative): a cd/pushd INTO .codex in an earlier segment changes the
+  # directory the following segments run in, so a later bare auth.<ext> token reads the
+  # credential by relative name (`cd ~/.codex && cat auth.json`). The boundary after
+  # `.codex` enforces directory identity, so a different dir whose name merely contains
+  # ".codex" (.codex-backup, .codexfoo) does NOT set the flag; the boundary after
+  # `auth` excludes author.py / authors.txt.
+  if [ "$cd_into_codex" = "1" ] \
+    && echo "$segment" | grep -qiE '(^|[[:space:]/"'\''=])auth\.[a-z]'; then
+    emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
+    exit 0
+  fi
+  if echo "$segment" | grep -qiE '\b(cd|pushd)\s+[^;|&]*\.codex(/|$|[[:space:]"'\''])'; then
+    cd_into_codex=1
+  fi
+
   # 3b: exposure of the WHOLE .codex directory, which contains the credential.
   # Triggered by either:
   #   (i)  a glob or dir-self reference — .codex/* (any) or .codex/. at a boundary.

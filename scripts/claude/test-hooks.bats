@@ -270,6 +270,23 @@ assert_allow() {
   assert_allow
 }
 
+# cd-then-relative is ORDER-AWARE and boundary-anchored: only a bare auth read in a
+# segment AFTER a cd INTO the exact .codex dir blocks. The following must stay allowed.
+@test "block-dangerous: cd into a .codex-substring dir (.codex-backup) then auth.json is allowed" {
+  run_hook block-dangerous.sh "cd ~/.codex-backup && cat auth.json"
+  assert_allow
+}
+
+@test "block-dangerous: cd into a .codex-prefixed dir (.codexfoo) then auth.json is allowed" {
+  run_hook block-dangerous.sh "cd ~/.codexfoo && cat auth.json"
+  assert_allow
+}
+
+@test "block-dangerous: reading auth.json before cd into .codex (read precedes cd) is allowed" {
+  run_hook block-dangerous.sh "cat auth.json && cd ~/.codex"
+  assert_allow
+}
+
 @test "block-dangerous: reading ~/.codex/config.toml (non-auth) is allowed" {
   run_hook block-dangerous.sh "ls ~/.codex/config.toml"
   assert_allow
