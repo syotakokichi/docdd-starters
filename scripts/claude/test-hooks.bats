@@ -96,6 +96,17 @@ assert_allow() {
   assert_block
 }
 
+# Layer 3a — redundant path noise the shell collapses to the same file
+@test "block-dangerous: Codex auth read with double slash (.codex//auth.json) is blocked" {
+  run_hook block-dangerous.sh "cat ~/.codex//auth.json"
+  assert_block
+}
+
+@test "block-dangerous: Codex auth read with dot segment (.codex/./auth.toml) is blocked" {
+  run_hook block-dangerous.sh "cat ~/.codex/./auth.toml"
+  assert_block
+}
+
 # Layer 3b — directory archive / transfer
 @test "block-dangerous: Codex dir archive (tar czf ... ~/.codex/) is blocked" {
   run_hook block-dangerous.sh "tar czf /tmp/x.tgz ~/.codex/"
@@ -180,6 +191,11 @@ assert_allow() {
   assert_block
 }
 
+@test "block-dangerous: Codex force-add bundled short flags (git add -Af auth.json) is blocked" {
+  run_hook block-dangerous.sh "git add -Af auth.json"
+  assert_block
+}
+
 # ─── block-dangerous.sh: 誤検知防止（negative / over-block guard） ─────
 # 正当操作を block すると開発が止まる。以下はすべて allow（空出力）で固定する。
 
@@ -215,6 +231,16 @@ assert_allow() {
 
 @test "block-dangerous: git add without -f (auth.json) is allowed" {
   run_hook block-dangerous.sh "git add path/auth.json"
+  assert_allow
+}
+
+@test "block-dangerous: git add with non-force short flag (-v auth.json) is allowed" {
+  run_hook block-dangerous.sh "git add -v auth.json"
+  assert_allow
+}
+
+@test "block-dangerous: reading a .codex.* dotfile (not the dir) is allowed" {
+  run_hook block-dangerous.sh "cat ~/.codex.authnotes"
   assert_allow
 }
 
