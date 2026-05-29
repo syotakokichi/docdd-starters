@@ -84,9 +84,10 @@ fi
 # 3a: read / copy / move of a .codex/auth* credential file. Two forms:
 #   - a contiguous path, tolerating redundant noise (.codex//auth, .codex/./auth);
 #   - a .codex directory reference plus a bare auth.<ext> token, which catches the
-#     change-then-relative form `cd ~/.codex && cat auth.json`. The bare token
-#     requires a dot after `auth` so unrelated names (author.py) are not matched.
-if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth' \
+#     change-then-relative form `cd ~/.codex && cat auth.json`.
+# Both forms require a boundary after `auth` (a non-letter or end) so unrelated
+# names that merely start with auth (author.py, authors.txt) are not blocked.
+if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth([^a-zA-Z]|$)' \
   || { echo "$COMMAND" | grep -qiE '\.codex($|\s|[/"'\'';&|<>()])' \
     && echo "$COMMAND" | grep -qiE '(^|[[:space:]/"'\''=])auth\.[a-z]'; }; then
   emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
