@@ -83,11 +83,14 @@ if echo "$COMMAND" | grep -qE '\.codex/auth'; then
 fi
 
 # 3b: bulk archive / transfer of the whole .codex/ config directory.
-# The cp clause matches any flag bundle containing r/R (recursive) or a (archive
-# mode, which implies recursive on both macOS and Linux): cp -R / -r / -a / -pR.
-if echo "$COMMAND" | grep -qE '\.codex(/|\s|$)' \
+# The path anchor accepts a trailing slash, whitespace, end-of-string, or a
+# closing quote so quoted forms like "~/.codex" (no trailing slash) are caught.
+# The cp clause matches a recursive/archive flag in ANY position: short -R/-r/-a
+# (alone, bundled like -pR, or split like -p -R) and long --recursive/--archive.
+if echo "$COMMAND" | grep -qE '\.codex(/|\s|$|["'\''])' \
   && { echo "$COMMAND" | grep -qE '\b(tar|rsync|scp|zip)\b' \
-    || echo "$COMMAND" | grep -qE '\bcp\s+-[a-zA-Z]*[rRa]' \
+    || { echo "$COMMAND" | grep -qE '\bcp\b' \
+      && echo "$COMMAND" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; } \
     || echo "$COMMAND" | grep -qE '\bmv\s'; }; then
   emit_block "Archiving or transferring the .codex/ directory is blocked. It contains local CLI auth credentials that must not be bundled, copied recursively, or sent off-host."
   exit 0

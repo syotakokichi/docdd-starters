@@ -117,6 +117,32 @@ assert_allow() {
   assert_block
 }
 
+# Layer 3b — quoted-path / long-flag / split-flag variants (no trailing slash)
+@test "block-dangerous: Codex dir quoted archive (tar ... \"~/.codex\") is blocked" {
+  run_hook block-dangerous.sh 'tar czf /tmp/x.tgz "~/.codex"'
+  assert_block
+}
+
+@test "block-dangerous: Codex dir quoted copy (cp -R \"~/.codex\") is blocked" {
+  run_hook block-dangerous.sh 'cp -R "~/.codex" /tmp/leak'
+  assert_block
+}
+
+@test "block-dangerous: Codex dir split-flag copy (cp -p -R ~/.codex) is blocked" {
+  run_hook block-dangerous.sh "cp -p -R ~/.codex /tmp/leak"
+  assert_block
+}
+
+@test "block-dangerous: Codex dir long-flag copy (cp --recursive ~/.codex) is blocked" {
+  run_hook block-dangerous.sh "cp --recursive ~/.codex /tmp/leak"
+  assert_block
+}
+
+@test "block-dangerous: Codex dir archive long-flag copy (cp --archive ~/.codex) is blocked" {
+  run_hook block-dangerous.sh "cp --archive ~/.codex /tmp/leak"
+  assert_block
+}
+
 # Layer 3c — force-add canonical auth.json (quoted / ./ / post-flag variants)
 @test "block-dangerous: Codex force-add (git add -f auth.json) is blocked" {
   run_hook block-dangerous.sh "git add -f auth.json"
@@ -148,6 +174,11 @@ assert_allow() {
 
 @test "block-dangerous: reading ~/.codex/config.toml (non-auth) is allowed" {
   run_hook block-dangerous.sh "ls ~/.codex/config.toml"
+  assert_allow
+}
+
+@test "block-dangerous: non-recursive cp of ~/.codex/config.toml is allowed" {
+  run_hook block-dangerous.sh "cp -p ~/.codex/config.toml /tmp/x"
   assert_allow
 }
 
