@@ -9,6 +9,17 @@
 
 set -euo pipefail
 
+# ─── Output helpers ──────────────────────────────────────────
+# Build the block/ask JSON via jq so multi-line reasons are escaped safely.
+# -n: no input, -c: compact (keeps the legacy `"decision":"block"` shape intact).
+emit_block() {
+  jq -nc --arg reason "$1" '{decision:"block",reason:$reason}'
+}
+emit_ask() {
+  jq -nc --arg reason "$1" \
+    '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"ask",permissionDecisionReason:$reason}}'
+}
+
 # Read tool input from stdin
 INPUT=$(cat)
 
@@ -51,6 +62,42 @@ fi
 # gh api (arbitrary API calls)
 if echo "$COMMAND" | grep -qE '(^|[;&|]\s*)gh\s+api\b'; then
   echo '{"decision":"block","reason":"gh api is blocked. Use specific gh subcommands (gh issue, gh pr, etc.) instead."}'
+  exit 0
+fi
+
+# ─── Codex auth credential protection (3 layers) ─────────────
+# Blocks attempts to exfiltrate the local CLI auth credential. This guards the
+# raw command string only: variable expansion, string concatenation, aliases and
+# obfuscation (base64 etc.) are out of scope by design. Read-tool access to the
+# credential file is also out of scope (this hook binds the Bash matcher only).
+#
+# The detection is intentionally asymmetric:
+#   3a/3b anchor on the `.codex/` directory and `auth*` glob (auth.json/.toml/...).
+#   3c anchors on the canonical `auth.json` basename so a force-add of unrelated
+#   files (e.g. authors.txt) is not falsely blocked.
+
+# 3a: read / copy / move of a .codex/auth* credential file
+if echo "$COMMAND" | grep -qE '\.codex/auth'; then
+  emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
+  exit 0
+fi
+
+# 3b: bulk archive / transfer of the whole .codex/ config directory.
+# The cp clause matches any flag bundle containing r/R (recursive) or a (archive
+# mode, which implies recursive on both macOS and Linux): cp -R / -r / -a / -pR.
+if echo "$COMMAND" | grep -qE '\.codex(/|\s|$)' \
+  && { echo "$COMMAND" | grep -qE '\b(tar|rsync|scp|zip)\b' \
+    || echo "$COMMAND" | grep -qE '\bcp\s+-[a-zA-Z]*[rRa]' \
+    || echo "$COMMAND" | grep -qE '\bmv\s'; }; then
+  emit_block "Archiving or transferring the .codex/ directory is blocked. It contains local CLI auth credentials that must not be bundled, copied recursively, or sent off-host."
+  exit 0
+fi
+
+# 3c: force-adding the canonical auth.json into the repository
+if echo "$COMMAND" | grep -qE '\bgit\s+add\b' \
+  && echo "$COMMAND" | grep -qE '(^|\s)(-f|--force)($|\s|["'\''])' \
+  && echo "$COMMAND" | grep -qE '(^|[[:space:]/"'\''=])auth\.json([[:space:]"'\'']|$)'; then
+  emit_block "Force-adding auth.json into the repository is blocked. This is the CLI auth credential file and must never be committed, even with --force."
   exit 0
 fi
 
