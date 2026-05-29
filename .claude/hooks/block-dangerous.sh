@@ -67,9 +67,14 @@ fi
 
 # ─── Codex auth credential protection (3 layers) ─────────────
 # Blocks attempts to exfiltrate the local CLI auth credential. This guards the
-# raw command string only: variable expansion, string concatenation, aliases and
-# obfuscation (base64 etc.) are out of scope by design. Read-tool access to the
-# credential file is also out of scope (this hook binds the Bash matcher only).
+# raw command string only and matches case-insensitively (case-insensitive
+# filesystems resolve .CODEX to the same directory). The following are out of
+# scope BY DESIGN — they need runtime resolution a static string match cannot do:
+#   - variable expansion / command substitution ($HOME, $(...), `...`)
+#   - string concatenation, aliases, and obfuscation (base64 etc.)
+#   - parent-directory traversal that cancels out (e.g. .codex/sub/../auth.json)
+# Read-tool access to the credential file is likewise out of scope (this hook
+# binds the Bash matcher only). File-level protection is handled separately.
 #
 # The detection is intentionally asymmetric:
 #   3a/3b anchor on the `.codex/` directory and `auth*` glob (auth.json/.toml/...).
@@ -79,7 +84,7 @@ fi
 # 3a: read / copy / move of a .codex/auth* credential file. Tolerate redundant
 # path noise (.codex//auth, .codex/./auth) that the shell resolves to the same
 # credential file.
-if echo "$COMMAND" | grep -qE '\.codex/+(\./+)*auth'; then
+if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth'; then
   emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
   exit 0
 fi
@@ -90,7 +95,7 @@ fi
 # like "~/.codex" and chained commands like `tar ... ~/.codex; curl ...` are both
 # caught. The cp clause matches a recursive/archive flag in ANY position: short
 # -R/-r/-a (alone, bundled like -pR, or split like -p -R) and long --recursive/--archive.
-if echo "$COMMAND" | grep -qE '\.codex($|\s|[/"'\'';&|<>()])' \
+if echo "$COMMAND" | grep -qiE '\.codex($|\s|[/"'\'';&|<>()])' \
   && { echo "$COMMAND" | grep -qE '\b(tar|rsync|scp|zip)\b' \
     || { echo "$COMMAND" | grep -qE '\bcp\b' \
       && echo "$COMMAND" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; } \
@@ -106,7 +111,7 @@ fi
 # like `git add -f auth.json; git commit ...` cannot bypass the block.
 if echo "$COMMAND" | grep -qE '\bgit\s+add\b' \
   && echo "$COMMAND" | grep -qE '(^|\s)(-[a-zA-Z]*f[a-zA-Z]*|--force)($|\s|["'\''])' \
-  && echo "$COMMAND" | grep -qE '(^|[[:space:]/"'\''=])auth\.json([[:space:]"'\'';&|<>()]|$)'; then
+  && echo "$COMMAND" | grep -qiE '(^|[[:space:]/"'\''=])auth\.json([[:space:]"'\'';&|<>()]|$)'; then
   emit_block "Force-adding auth.json into the repository is blocked. This is the CLI auth credential file and must never be committed, even with --force."
   exit 0
 fi

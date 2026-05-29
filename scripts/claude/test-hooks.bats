@@ -107,6 +107,11 @@ assert_allow() {
   assert_block
 }
 
+@test "block-dangerous: Codex auth read with uppercase dir (.CODEX/auth.json) is blocked" {
+  run_hook block-dangerous.sh "cat ~/.CODEX/auth.json"
+  assert_block
+}
+
 # Layer 3b — directory archive / transfer
 @test "block-dangerous: Codex dir archive (tar czf ... ~/.codex/) is blocked" {
   run_hook block-dangerous.sh "tar czf /tmp/x.tgz ~/.codex/"
@@ -193,6 +198,11 @@ assert_allow() {
 
 @test "block-dangerous: Codex force-add bundled short flags (git add -Af auth.json) is blocked" {
   run_hook block-dangerous.sh "git add -Af auth.json"
+  assert_block
+}
+
+@test "block-dangerous: Codex force-add uppercase filename (git add -f AUTH.JSON) is blocked" {
+  run_hook block-dangerous.sh "git add -f AUTH.JSON"
   assert_block
 }
 
