@@ -7,6 +7,41 @@
 
 HOOKS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/../../.claude/hooks" && pwd)"
 
+# ─── Reusable hook-test helpers (copy-and-grow これをコピーして育てる) ──────
+# Wave 1 の後続クラスタ（protect-files / validate-merge-cwd / audit-bash-writes /
+# develop-precommit-gate 等）はこのブロックをまるごとコピーして、自分の hook 用に
+# 育てることを想定した共通パターン。単体ファイル内で完結し、外部 helper に依存しない。
+#
+# 設計ノート:
+#   - run_hook <script> <command>: tool_input.command に <command> を埋めた JSON
+#     payload を hook に pipe し、stdout をグローバル $HOOK_OUTPUT へ格納する。
+#     payload は jq -nc --arg で生成するため、クォート/特殊文字を安全に通せる。
+#   - assert_block / assert_ask: jq -e で JSON 契約を検証する（生 grep より堅い）。
+#       block: .decision == "block"
+#       ask:   .hookSpecificOutput.permissionDecision == "ask"
+#   - assert_allow: hook が空出力（= allow）であることを確認する。
+#   - 実ファイル fixture の罠: 本ファイルのテストは COMMAND 文字列の正規表現判定のみで
+#     実ファイル参照は不要。だが実 fixture を作る後続クラスタでは、macOS の `mktemp -d`
+#     が /var/folders/...（/private/var に正規化）を返すため、パス同一性の assert は
+#     文字列比較ではなく `[ "$a" -ef "$b" ]`（device+inode 比較）を使うこと。
+run_hook() {
+  local hook="$1" command="$2" payload
+  payload=$(jq -nc --arg cmd "$command" '{tool_name:"Bash",tool_input:{command:$cmd}}')
+  HOOK_OUTPUT=$(printf '%s' "$payload" | "$HOOKS_DIR/$hook")
+}
+
+assert_block() {
+  echo "$HOOK_OUTPUT" | jq -e '.decision=="block"' >/dev/null
+}
+
+assert_ask() {
+  echo "$HOOK_OUTPUT" | jq -e '.hookSpecificOutput.permissionDecision=="ask"' >/dev/null
+}
+
+assert_allow() {
+  [ -z "$HOOK_OUTPUT" ]
+}
+
 # ─── block-dangerous.sh ──────────────────────────────────
 
 @test "block-dangerous: sudo rm -rf / is blocked" {
@@ -31,6 +66,109 @@ HOOKS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/../../.claude/hooks" && pwd)"
   input='{"tool_name":"Bash","tool_input":{"command":"git status"}}'
   result=$(echo "$input" | "$HOOKS_DIR/block-dangerous.sh")
   [ -z "$result" ]
+}
+
+# ─── block-dangerous.sh: Codex auth credential 3層防御 ──────────────
+# 3a: file access (read/copy/move) of .codex/auth*
+# 3b: directory archive/transfer of .codex/
+# 3c: force-add of canonical auth.json into the repo
+# Bash コマンド文字列に直書きされた参照を block する（変数展開・難読化は対象外）。
+
+# Layer 3a — read
+@test "block-dangerous: Codex auth read (cat ~/.codex/auth.json) is blocked" {
+  run_hook block-dangerous.sh "cat ~/.codex/auth.json"
+  assert_block
+}
+
+@test "block-dangerous: Codex auth read (.codex/auth.toml glob) is blocked" {
+  run_hook block-dangerous.sh "cat ~/.codex/auth.toml"
+  assert_block
+}
+
+# Layer 3a — copy / move
+@test "block-dangerous: Codex auth copy (cp ~/.codex/auth.json /tmp/x) is blocked" {
+  run_hook block-dangerous.sh "cp ~/.codex/auth.json /tmp/x"
+  assert_block
+}
+
+@test "block-dangerous: Codex auth move (mv .codex/auth.backup) is blocked" {
+  run_hook block-dangerous.sh "mv .codex/auth.backup /tmp/leak"
+  assert_block
+}
+
+# Layer 3b — directory archive / transfer
+@test "block-dangerous: Codex dir archive (tar czf ... ~/.codex/) is blocked" {
+  run_hook block-dangerous.sh "tar czf /tmp/x.tgz ~/.codex/"
+  assert_block
+}
+
+@test "block-dangerous: Codex dir transfer (rsync ~/.codex/) is blocked" {
+  run_hook block-dangerous.sh "rsync -a ~/.codex/ remote:/tmp/"
+  assert_block
+}
+
+@test "block-dangerous: Codex dir recursive copy (cp -R ~/.codex /tmp) is blocked" {
+  run_hook block-dangerous.sh "cp -R ~/.codex /tmp/leak"
+  assert_block
+}
+
+@test "block-dangerous: Codex dir archive-mode copy (cp -a ~/.codex /tmp) is blocked" {
+  run_hook block-dangerous.sh "cp -a ~/.codex /tmp/leak"
+  assert_block
+}
+
+# Layer 3c — force-add canonical auth.json (quoted / ./ / post-flag variants)
+@test "block-dangerous: Codex force-add (git add -f auth.json) is blocked" {
+  run_hook block-dangerous.sh "git add -f auth.json"
+  assert_block
+}
+
+@test "block-dangerous: Codex force-add (git add --force \"auth.json\") is blocked" {
+  run_hook block-dangerous.sh 'git add --force "auth.json"'
+  assert_block
+}
+
+@test "block-dangerous: Codex force-add (git add ./auth.json -f) is blocked" {
+  run_hook block-dangerous.sh "git add ./auth.json -f"
+  assert_block
+}
+
+# ─── block-dangerous.sh: 誤検知防止（negative / over-block guard） ─────
+# 正当操作を block すると開発が止まる。以下はすべて allow（空出力）で固定する。
+
+@test "block-dangerous: non-.codex auth.json read is allowed" {
+  run_hook block-dangerous.sh "cat apps/backend/tests/fixtures/oauth/auth.json"
+  assert_allow
+}
+
+@test "block-dangerous: cd into ~/.codex is allowed" {
+  run_hook block-dangerous.sh "cd ~/.codex/"
+  assert_allow
+}
+
+@test "block-dangerous: reading ~/.codex/config.toml (non-auth) is allowed" {
+  run_hook block-dangerous.sh "ls ~/.codex/config.toml"
+  assert_allow
+}
+
+@test "block-dangerous: git add without -f (auth.json) is allowed" {
+  run_hook block-dangerous.sh "git add path/auth.json"
+  assert_allow
+}
+
+@test "block-dangerous: git add -f of non-auth file (authors.txt) is allowed" {
+  run_hook block-dangerous.sh "git add -f authors.txt"
+  assert_allow
+}
+
+@test "block-dangerous: codex exec subcommand is allowed" {
+  run_hook block-dangerous.sh "codex exec \"review this plan\""
+  assert_allow
+}
+
+@test "block-dangerous: codex review subcommand is allowed" {
+  run_hook block-dangerous.sh "codex review --base main"
+  assert_allow
 }
 
 # ─── protect-files.sh ────────────────────────────────────
