@@ -190,6 +190,11 @@ assert_allow() {
   assert_block
 }
 
+@test "block-dangerous: Codex dir archive in a later command segment is blocked" {
+  run_hook block-dangerous.sh "echo start && tar czf /tmp/x.tgz ~/.codex/"
+  assert_block
+}
+
 # Layer 3c — force-add canonical auth.json (quoted / ./ / post-flag variants)
 @test "block-dangerous: Codex force-add (git add -f auth.json) is blocked" {
   run_hook block-dangerous.sh "git add -f auth.json"
@@ -311,6 +316,16 @@ assert_allow() {
 
 @test "block-dangerous: git commit mentioning auth.json in message is allowed" {
   run_hook block-dangerous.sh 'git commit -m "add auth.json to ignore list"'
+  assert_allow
+}
+
+@test "block-dangerous: .codex mentioned in one segment, mv in another, is allowed" {
+  run_hook block-dangerous.sh "echo ~/.codex && mv foo bar"
+  assert_allow
+}
+
+@test "block-dangerous: force-add of non-auth file chained with auth.json read is allowed" {
+  run_hook block-dangerous.sh "git add -f README.md && cat apps/backend/tests/fixtures/oauth/auth.json"
   assert_allow
 }
 

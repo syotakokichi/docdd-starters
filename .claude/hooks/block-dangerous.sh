@@ -96,37 +96,41 @@ if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth([^a-zA-Z]|$)' \
   exit 0
 fi
 
-# 3b: bulk archive / transfer / move of the WHOLE .codex directory. The operation
-# must target the directory itself or its whole contents — .codex optionally
-# followed by a slash and then a glob (*) or dot (.), then a boundary (whitespace,
-# end, quote, or a shell separator ;, &, |, <, >, parens). So `~/.codex`,
-# `~/.codex/`, `~/.codex/*`, and `~/.codex/.` are caught, but transferring or
-# renaming a single named non-auth child file (e.g. .codex/config.toml) is NOT
-# blocked here; the credential file itself is covered by 3a. Quoted forms
-# ("~/.codex") and chained commands (tar ... ~/.codex; curl ...) are caught. The cp
-# clause matches a recursive/archive flag in ANY position: short -R/-r/-a (alone,
-# bundled like -pR, or split like -p -R) and long --recursive/--archive.
-if echo "$COMMAND" | grep -qiE '\.codex(/(\*|\.)?)?($|\s|["'\'';&|<>()])' \
-  && { echo "$COMMAND" | grep -qE '\b(tar|rsync|scp|zip|mv)\b' \
-    || { echo "$COMMAND" | grep -qE '\bcp\b' \
-      && echo "$COMMAND" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; }; }; then
-  emit_block "Archiving or transferring the .codex/ directory is blocked. It contains local CLI auth credentials that must not be bundled, copied recursively, or sent off-host."
-  exit 0
-fi
+# 3b / 3c are evaluated PER COMMAND SEGMENT. The command is split on shell control
+# operators (; && || | &) so an operation in one segment is not matched against a
+# .codex / auth.json reference in another — e.g. `echo ~/.codex && mv foo bar` and
+# `git add -f README.md && cat x/auth.json` are NOT blocked. (3a above is checked
+# on the whole command because its cd-into-.codex branch intentionally spans
+# segments: the cd changes the directory the next segment runs in.)
+while IFS= read -r segment || [ -n "$segment" ]; do
+  # 3b: bulk archive / transfer / move of the WHOLE .codex directory. The operation
+  # must target the directory itself or its whole contents — .codex optionally
+  # followed by a slash and then a glob (*) or dot (.), then a boundary. So
+  # `~/.codex`, `~/.codex/`, `~/.codex/*`, and `~/.codex/.` are caught, but moving
+  # or transferring a single named non-auth child file (e.g. .codex/config.toml) is
+  # NOT blocked here; the credential file itself is covered by 3a. The cp clause
+  # matches a recursive/archive flag in ANY position: short -R/-r/-a (alone, bundled
+  # like -pR, or split like -p -R) and long --recursive/--archive.
+  if echo "$segment" | grep -qiE '\.codex(/(\*|\.)?)?($|\s|["'\''<>()])' \
+    && { echo "$segment" | grep -qE '\b(tar|rsync|scp|zip|mv)\b' \
+      || { echo "$segment" | grep -qE '\bcp\b' \
+        && echo "$segment" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; }; }; then
+    emit_block "Archiving or transferring the .codex/ directory is blocked. It contains local CLI auth credentials that must not be bundled, copied recursively, or sent off-host."
+    exit 0
+  fi
 
-# 3c: force-adding the canonical auth.json into the repository. The `git ... add`
-# match tolerates global options between `git` and `add` (e.g. `git -C . add`,
-# `git -c k=v add`, `git --git-dir=... add`). The force flag matches a standalone
-# -f, a bundled short-option group containing f (e.g. -Af), or --force. The
-# trailing boundary of the filename accepts whitespace, a quote, end-of-string, or
-# a shell separator (;, &, |, <, >, parens) so chained commands like
-# `git add -f auth.json; git commit ...` cannot bypass the block.
-if echo "$COMMAND" | grep -qE '\bgit\s+((-[Cc]\s+\S+|--?[A-Za-z]\S*|[A-Za-z][A-Za-z0-9_.-]*=\S+)\s+)*add\b' \
-  && echo "$COMMAND" | grep -qE '(^|\s)(-[a-zA-Z]*f[a-zA-Z]*|--force)($|\s|["'\''])' \
-  && echo "$COMMAND" | grep -qiE '(^|[[:space:]/"'\''=])auth\.json([[:space:]"'\'';&|<>()]|$)'; then
-  emit_block "Force-adding auth.json into the repository is blocked. This is the CLI auth credential file and must never be committed, even with --force."
-  exit 0
-fi
+  # 3c: force-adding the canonical auth.json into the repository. The `git ... add`
+  # match tolerates global options between `git` and `add` (e.g. `git -C . add`,
+  # `git -c k=v add`, `git --git-dir=... add`). The force flag matches a standalone
+  # -f, a bundled short-option group containing f (e.g. -Af), or --force. The
+  # filename, force flag, and `git add` must all be in this same segment.
+  if echo "$segment" | grep -qE '\bgit\s+((-[Cc]\s+\S+|--?[A-Za-z]\S*|[A-Za-z][A-Za-z0-9_.-]*=\S+)\s+)*add\b' \
+    && echo "$segment" | grep -qE '(^|\s)(-[a-zA-Z]*f[a-zA-Z]*|--force)($|\s|["'\''])' \
+    && echo "$segment" | grep -qiE '(^|[[:space:]/"'\''=])auth\.json([[:space:]"'\''<>()]|$)'; then
+    emit_block "Force-adding auth.json into the repository is blocked. This is the CLI auth credential file and must never be committed, even with --force."
+    exit 0
+  fi
+done < <(printf '%s\n' "$COMMAND" | sed -E 's/(&&|\|\||[;&|])/\n/g')
 
 # ─── Ask Escalation ──────────────────────────────────────────
 # These require user confirmation before proceeding.
