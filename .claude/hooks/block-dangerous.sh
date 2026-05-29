@@ -103,19 +103,23 @@ fi
 # on the whole command because its cd-into-.codex branch intentionally spans
 # segments: the cd changes the directory the next segment runs in.)
 while IFS= read -r segment || [ -n "$segment" ]; do
-  # 3b: bulk archive / transfer / move of the WHOLE .codex directory. The operation
-  # must target the directory itself or its whole contents — .codex optionally
-  # followed by a slash and then a glob (*) or dot (.), then a boundary. So
-  # `~/.codex`, `~/.codex/`, `~/.codex/*`, and `~/.codex/.` are caught, but moving
-  # or transferring a single named non-auth child file (e.g. .codex/config.toml) is
-  # NOT blocked here; the credential file itself is covered by 3a. The cp clause
-  # matches a recursive/archive flag in ANY position: short -R/-r/-a (alone, bundled
-  # like -pR, or split like -p -R) and long --recursive/--archive.
-  if echo "$segment" | grep -qiE '\.codex(/(\*|\.)?)?($|\s|["'\''<>()])' \
-    && { echo "$segment" | grep -qE '\b(tar|rsync|scp|zip|mv)\b' \
-      || { echo "$segment" | grep -qE '\bcp\b' \
-        && echo "$segment" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; }; }; then
-    emit_block "Archiving or transferring the .codex/ directory is blocked. It contains local CLI auth credentials that must not be bundled, copied recursively, or sent off-host."
+  # 3b: exposure of the WHOLE .codex directory, which contains the credential.
+  # Triggered by either:
+  #   (i)  a glob or dir-self reference — .codex/* (any) or .codex/. at a boundary.
+  #        The shell expands these to every file incl auth.json, so ANY consuming
+  #        command (cat / grep / cp / tar / ...) exposes the credential; block
+  #        regardless of the verb. A single named dotfile (.codex/.config) is not
+  #        matched. OR
+  #   (ii) the .codex directory itself (optional trailing slash then a boundary)
+  #        targeted by a recursive flag (-R/-r/-a/--recursive/--archive) or a bulk
+  #        verb (tar/rsync/scp/zip/mv) — e.g. `grep -R . ~/.codex/`, `tar ~/.codex`.
+  # A single named non-auth child file (.codex/config.toml) is NOT matched here;
+  # the credential file itself is covered by 3a.
+  if echo "$segment" | grep -qiE '\.codex/(\*|\.($|\s|["'\''<>()]))' \
+    || { echo "$segment" | grep -qiE '\.codex/?($|\s|["'\''<>()])' \
+      && { echo "$segment" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)' \
+        || echo "$segment" | grep -qE '\b(tar|rsync|scp|zip|mv)\b'; }; }; then
+    emit_block "Reading, archiving, or transferring the whole .codex/ directory is blocked. It contains the local CLI auth credential, which must not be exposed, bundled, copied recursively, or sent off-host."
     exit 0
   fi
 
