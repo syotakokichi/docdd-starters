@@ -83,32 +83,31 @@ fi
 
 # 3a: read / copy / move of a .codex/auth* credential file. Two forms:
 #   - a contiguous path, tolerating redundant noise (.codex//auth, .codex/./auth);
-#   - a .codex directory reference plus a bare auth.<ext> token, which catches the
-#     change-then-relative form `cd ~/.codex && cat auth.json`.
+#   - cd/pushd INTO the .codex directory, then a bare auth.<ext> token — this
+#     catches the change-then-relative form `cd ~/.codex && cat auth.json`.
+# The bare-token branch is tied to a cd into .codex (not just any .codex mention)
+# so an unrelated auth.<ext> elsewhere in the command is not falsely blocked.
 # Both forms require a boundary after `auth` (a non-letter or end) so unrelated
 # names that merely start with auth (author.py, authors.txt) are not blocked.
 if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth([^a-zA-Z]|$)' \
-  || { echo "$COMMAND" | grep -qiE '\.codex($|\s|[/"'\'';&|<>()])' \
+  || { echo "$COMMAND" | grep -qiE '\b(cd|pushd)\s+[^;|&]*\.codex' \
     && echo "$COMMAND" | grep -qiE '(^|[[:space:]/"'\''=])auth\.[a-z]'; }; then
   emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
   exit 0
 fi
 
-# 3b: bulk archive / transfer of the whole .codex/ config directory.
-# The path anchor treats slash, whitespace, end-of-string, a closing quote, or a
-# shell separator (;, &, |, <, >, parens) as a token boundary — so quoted forms
-# like "~/.codex" and chained commands like `tar ... ~/.codex; curl ...` are both
+# 3b: bulk archive / transfer / move of the WHOLE .codex directory. The operation
+# must target the directory itself — .codex with an optional trailing slash then a
+# boundary (whitespace, end, quote, or a shell separator ;, &, |, <, >, parens) —
+# so transferring or renaming a single non-auth child file (e.g.
+# .codex/config.toml) is NOT blocked here; the credential file is covered by 3a.
+# Quoted forms ("~/.codex") and chained commands (tar ... ~/.codex; curl ...) are
 # caught. The cp clause matches a recursive/archive flag in ANY position: short
 # -R/-r/-a (alone, bundled like -pR, or split like -p -R) and long --recursive/--archive.
-# The mv clause targets the directory ITSELF (.codex with an optional trailing
-# slash then a boundary), so renaming a single non-auth file inside the directory
-# (mv ~/.codex/config.toml ~/.codex/config.bak) is not blocked here.
-if echo "$COMMAND" | grep -qiE '\.codex($|\s|[/"'\'';&|<>()])' \
-  && { echo "$COMMAND" | grep -qE '\b(tar|rsync|scp|zip)\b' \
+if echo "$COMMAND" | grep -qiE '\.codex/?($|\s|["'\'';&|<>()])' \
+  && { echo "$COMMAND" | grep -qE '\b(tar|rsync|scp|zip|mv)\b' \
     || { echo "$COMMAND" | grep -qE '\bcp\b' \
-      && echo "$COMMAND" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; } \
-    || { echo "$COMMAND" | grep -qE '\bmv\b' \
-      && echo "$COMMAND" | grep -qiE '\.codex/?($|\s|["'\'';&|<>()])'; }; }; then
+      && echo "$COMMAND" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)'; }; }; then
   emit_block "Archiving or transferring the .codex/ directory is blocked. It contains local CLI auth credentials that must not be bundled, copied recursively, or sent off-host."
   exit 0
 fi
