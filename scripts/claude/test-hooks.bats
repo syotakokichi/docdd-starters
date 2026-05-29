@@ -211,6 +211,11 @@ assert_allow() {
   assert_block
 }
 
+@test "block-dangerous: Codex dir traversal (find ~/.codex -exec cat) is blocked" {
+  run_hook block-dangerous.sh "find ~/.codex -type f -exec cat {} +"
+  assert_block
+}
+
 # Layer 3c — force-add canonical auth.json (quoted / ./ / post-flag variants)
 @test "block-dangerous: Codex force-add (git add -f auth.json) is blocked" {
   run_hook block-dangerous.sh "git add -f auth.json"

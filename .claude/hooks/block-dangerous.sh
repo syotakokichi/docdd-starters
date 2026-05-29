@@ -73,6 +73,9 @@ fi
 #   - variable expansion / command substitution ($HOME, $(...), `...`)
 #   - string concatenation, aliases, and obfuscation (base64 etc.)
 #   - parent-directory traversal that cancels out (e.g. .codex/sub/../auth.json)
+#   - arbitrary readers/interpreters that walk the directory (awk, python, a
+#     custom script): the read/transfer verb list in 3b is best-effort, not
+#     exhaustive.
 # Read-tool access to the credential file is likewise out of scope (this hook
 # binds the Bash matcher only). File-level protection is handled separately.
 #
@@ -111,14 +114,17 @@ while IFS= read -r segment || [ -n "$segment" ]; do
   #        regardless of the verb. A single named dotfile (.codex/.config) is not
   #        matched. OR
   #   (ii) the .codex directory itself (optional trailing slash then a boundary)
-  #        targeted by a recursive flag (-R/-r/-a/--recursive/--archive) or a bulk
-  #        verb (tar/rsync/scp/zip/mv) — e.g. `grep -R . ~/.codex/`, `tar ~/.codex`.
+  #        targeted by a recursive flag (-R/-r/-a/--recursive/--archive) or a
+  #        recursive/bulk verb (tar/rsync/scp/zip/mv/find) — e.g.
+  #        `grep -R . ~/.codex/`, `tar ~/.codex`, `find ~/.codex -exec cat {} +`.
   # A single named non-auth child file (.codex/config.toml) is NOT matched here;
-  # the credential file itself is covered by 3a.
+  # the credential file itself is covered by 3a. The verb list is best-effort:
+  # arbitrary readers/interpreters that walk the directory (awk, python, custom
+  # scripts) and runtime indirection are out of scope (see the header note).
   if echo "$segment" | grep -qiE '\.codex/(\*|\.($|\s|["'\''<>()]))' \
     || { echo "$segment" | grep -qiE '\.codex/?($|\s|["'\''<>()])' \
       && { echo "$segment" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)' \
-        || echo "$segment" | grep -qE '\b(tar|rsync|scp|zip|mv)\b'; }; }; then
+        || echo "$segment" | grep -qE '\b(tar|rsync|scp|zip|mv|find)\b'; }; }; then
     emit_block "Reading, archiving, or transferring the whole .codex/ directory is blocked. It contains the local CLI auth credential, which must not be exposed, bundled, copied recursively, or sent off-host."
     exit 0
   fi
