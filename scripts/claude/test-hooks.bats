@@ -195,6 +195,22 @@ assert_allow() {
   assert_block
 }
 
+# Layer 3b — whole-directory READ exposure (glob / recursive), not just transfer
+@test "block-dangerous: Codex dir glob read (cat ~/.codex/*) is blocked" {
+  run_hook block-dangerous.sh "cat ~/.codex/*"
+  assert_block
+}
+
+@test "block-dangerous: Codex dir recursive grep (grep -R . ~/.codex/) is blocked" {
+  run_hook block-dangerous.sh "grep -R . ~/.codex/"
+  assert_block
+}
+
+@test "block-dangerous: Codex dir-self read (cat ~/.codex/.) is blocked" {
+  run_hook block-dangerous.sh "cat ~/.codex/."
+  assert_block
+}
+
 # Layer 3c — force-add canonical auth.json (quoted / ./ / post-flag variants)
 @test "block-dangerous: Codex force-add (git add -f auth.json) is blocked" {
   run_hook block-dangerous.sh "git add -f auth.json"
@@ -281,6 +297,16 @@ assert_allow() {
 
 @test "block-dangerous: reading a .codex.* dotfile (not the dir) is allowed" {
   run_hook block-dangerous.sh "cat ~/.codex.authnotes"
+  assert_allow
+}
+
+@test "block-dangerous: listing the .codex directory (ls ~/.codex/) is allowed" {
+  run_hook block-dangerous.sh "ls ~/.codex/"
+  assert_allow
+}
+
+@test "block-dangerous: reading a single .codex dotfile (.codex/.config) is allowed" {
+  run_hook block-dangerous.sh "cat ~/.codex/.config"
   assert_allow
 }
 
