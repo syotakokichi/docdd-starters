@@ -76,6 +76,11 @@ fi
 #   - arbitrary readers/interpreters that walk the directory (awk, python, a
 #     custom script): the read/transfer verb list in 3b is best-effort, not
 #     exhaustive.
+# Conversely, 3b errs toward blocking: it does not distinguish .codex as a command
+# SOURCE from .codex as a DESTINATION (operand position is command-specific — last
+# is the destination for cp/mv but the source for tar — so it cannot be resolved
+# statically). A bulk op writing INTO .codex (e.g. `cp -R tmpl ~/.codex/`) may
+# therefore be blocked; for credential protection, a false block is the safe side.
 # Read-tool access to the credential file is likewise out of scope (this hook
 # binds the Bash matcher only). File-level protection is handled separately.
 #
