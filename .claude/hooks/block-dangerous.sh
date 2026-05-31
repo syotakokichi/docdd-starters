@@ -9,6 +9,17 @@
 
 set -euo pipefail
 
+# ─── Output helpers ──────────────────────────────────────────
+# Build the block/ask JSON via jq so multi-line reasons are escaped safely.
+# -n: no input, -c: compact (keeps the legacy `"decision":"block"` shape intact).
+emit_block() {
+  jq -nc --arg reason "$1" '{decision:"block",reason:$reason}'
+}
+emit_ask() {
+  jq -nc --arg reason "$1" \
+    '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"ask",permissionDecisionReason:$reason}}'
+}
+
 # Read tool input from stdin
 INPUT=$(cat)
 
@@ -53,6 +64,102 @@ if echo "$COMMAND" | grep -qE '(^|[;&|]\s*)gh\s+api\b'; then
   echo '{"decision":"block","reason":"gh api is blocked. Use specific gh subcommands (gh issue, gh pr, etc.) instead."}'
   exit 0
 fi
+
+# ─── Codex auth credential protection (3 layers) ─────────────
+# Blocks attempts to exfiltrate the local CLI auth credential. This guards the
+# raw command string only and matches case-insensitively (case-insensitive
+# filesystems resolve .CODEX to the same directory). The following are out of
+# scope BY DESIGN — they need runtime resolution a static string match cannot do:
+#   - variable expansion / command substitution ($HOME, $(...), `...`)
+#   - string concatenation, aliases, and obfuscation (base64 etc.)
+#   - parent-directory traversal that cancels out (e.g. .codex/sub/../auth.json)
+#   - arbitrary readers/interpreters that walk the directory (awk, python, a
+#     custom script): the read/transfer verb list in 3b is best-effort, not
+#     exhaustive.
+# Conversely, 3b errs toward blocking: it does not distinguish .codex as a command
+# SOURCE from .codex as a DESTINATION (operand position is command-specific — last
+# is the destination for cp/mv but the source for tar — so it cannot be resolved
+# statically). A bulk op writing INTO .codex (e.g. `cp -R tmpl ~/.codex/`) may
+# therefore be blocked; for credential protection, a false block is the safe side.
+# Read-tool access to the credential file is likewise out of scope (this hook
+# binds the Bash matcher only). File-level protection is handled separately.
+#
+# The detection is intentionally asymmetric:
+#   3a/3b anchor on the `.codex/` directory and `auth*` glob (auth.json/.toml/...).
+#   3c anchors on the canonical `auth.json` basename so a force-add of unrelated
+#   files (e.g. authors.txt) is not falsely blocked.
+
+# 3a (contiguous path): read / copy / move of a .codex/auth* credential file named
+# directly, tolerating redundant noise (.codex//auth, .codex/./auth). Verb- and
+# segment-independent — a literal .codex/auth path IS the credential. The boundary
+# after `auth` (a non-letter or end) keeps names that merely start with auth
+# (author.py, authors.txt) from matching. The change-then-relative form
+# (`cd ~/.codex && cat auth.json`) is handled order-aware inside the segment loop below.
+if echo "$COMMAND" | grep -qiE '\.codex/+(\./+)*auth([^a-zA-Z]|$)'; then
+  emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
+  exit 0
+fi
+
+# 3a-ii / 3b / 3c are evaluated PER COMMAND SEGMENT. The command is split on shell
+# control operators (; && || | &) so an operation in one segment is not matched
+# against a .codex / auth.json reference in another — e.g. `echo ~/.codex && mv foo
+# bar` and `git add -f README.md && cat x/auth.json` are NOT blocked. The 3a-ii
+# cd-then-relative check is ORDER-AWARE: a cd/pushd into .codex sets a flag that only
+# blocks a bare auth.<ext> read in a LATER segment, so `cat auth.json && cd ~/.codex`
+# (read happens before the cd) stays allowed. (The 3a contiguous-path check above is
+# whole-command: a literal .codex/auth path is the credential regardless of segment.)
+cd_into_codex=0
+while IFS= read -r segment || [ -n "$segment" ]; do
+  # 3a-ii (cd-then-relative): a cd/pushd INTO .codex in an earlier segment changes the
+  # directory the following segments run in, so a later bare auth.<ext> token reads the
+  # credential by relative name (`cd ~/.codex && cat auth.json`). The boundary after
+  # `.codex` enforces directory identity, so a different dir whose name merely contains
+  # ".codex" (.codex-backup, .codexfoo) does NOT set the flag; the boundary after
+  # `auth` excludes author.py / authors.txt.
+  if [ "$cd_into_codex" = "1" ] \
+    && echo "$segment" | grep -qiE '(^|[[:space:]/"'\''=])auth\.[a-z]'; then
+    emit_block "Accessing the .codex/auth* credential file via Bash is blocked. This file holds local CLI auth tokens and must not be read, copied, or moved by automated commands."
+    exit 0
+  fi
+  if echo "$segment" | grep -qiE '\b(cd|pushd)\s+[^;|&]*\.codex(/|$|[[:space:]"'\''])'; then
+    cd_into_codex=1
+  fi
+
+  # 3b: exposure of the WHOLE .codex directory, which contains the credential.
+  # Triggered by either:
+  #   (i)  a glob or dir-self reference — .codex/* (any) or .codex/. at a boundary.
+  #        The shell expands these to every file incl auth.json, so ANY consuming
+  #        command (cat / grep / cp / tar / ...) exposes the credential; block
+  #        regardless of the verb. A single named dotfile (.codex/.config) is not
+  #        matched. OR
+  #   (ii) the .codex directory itself (optional trailing slash then a boundary)
+  #        targeted by a recursive flag (-R/-r/-a/--recursive/--archive) or a
+  #        recursive/bulk verb (tar/rsync/scp/zip/mv/find) — e.g.
+  #        `grep -R . ~/.codex/`, `tar ~/.codex`, `find ~/.codex -exec cat {} +`.
+  # A single named non-auth child file (.codex/config.toml) is NOT matched here;
+  # the credential file itself is covered by 3a. The verb list is best-effort:
+  # arbitrary readers/interpreters that walk the directory (awk, python, custom
+  # scripts) and runtime indirection are out of scope (see the header note).
+  if echo "$segment" | grep -qiE '\.codex/(\*|\.($|\s|["'\''<>()]))' \
+    || { echo "$segment" | grep -qiE '\.codex/?($|\s|["'\''<>()])' \
+      && { echo "$segment" | grep -qE '(\s-[a-zA-Z]*[rRa]|--recursive|--archive)' \
+        || echo "$segment" | grep -qE '\b(tar|rsync|scp|zip|mv|find)\b'; }; }; then
+    emit_block "Reading, archiving, or transferring the whole .codex/ directory is blocked. It contains the local CLI auth credential, which must not be exposed, bundled, copied recursively, or sent off-host."
+    exit 0
+  fi
+
+  # 3c: force-adding the canonical auth.json into the repository. The `git ... add`
+  # match tolerates global options between `git` and `add` (e.g. `git -C . add`,
+  # `git -c k=v add`, `git --git-dir=... add`). The force flag matches a standalone
+  # -f, a bundled short-option group containing f (e.g. -Af), or --force. The
+  # filename, force flag, and `git add` must all be in this same segment.
+  if echo "$segment" | grep -qE '\bgit\s+((-[Cc]\s+\S+|--?[A-Za-z]\S*|[A-Za-z][A-Za-z0-9_.-]*=\S+)\s+)*add\b' \
+    && echo "$segment" | grep -qE '(^|\s)(-[a-zA-Z]*f[a-zA-Z]*|--force)($|\s|["'\''])' \
+    && echo "$segment" | grep -qiE '(^|[[:space:]/"'\''=])auth\.json([[:space:]"'\''<>()]|$)'; then
+    emit_block "Force-adding auth.json into the repository is blocked. This is the CLI auth credential file and must never be committed, even with --force."
+    exit 0
+  fi
+done < <(printf '%s\n' "$COMMAND" | sed -E 's/(&&|\|\||[;&|])/\n/g')
 
 # ─── Ask Escalation ──────────────────────────────────────────
 # These require user confirmation before proceeding.

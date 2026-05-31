@@ -89,6 +89,9 @@ shell-format-check:
 test-hooks:
 	@if command -v bats >/dev/null 2>&1; then \
 		bats scripts/claude/test-hooks.bats; \
+	elif [ "$$CI" = "true" ] || [ "$$TEST_HOOKS_REQUIRE_BATS" = "1" ]; then \
+		echo "ERROR: bats not found (required when CI=true or TEST_HOOKS_REQUIRE_BATS=1)"; \
+		exit 1; \
 	else \
 		echo "WARN: bats not found, skipping test-hooks"; \
 	fi
